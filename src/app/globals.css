@@ -278,24 +278,34 @@ body {
   box-shadow: var(--shadow-plate);
 }
 
-/* ── Motion: one load sequence. The board settles, then the chart fills in cell by cell. ── */
+/* ── Motion: the board settles, then the chart flips in cell by cell. ── */
 @keyframes board-in {
   from {
     opacity: 0;
     transform: translateY(-14px);
   }
 }
+/* Split-flap: each code drops from its hinge like a departure-board flap, overshooting a touch. */
 @keyframes cell-in {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(4px);
+    transform: perspective(240px) rotateX(-100deg);
+  }
+  60% {
+    opacity: 1;
+    transform: perspective(240px) rotateX(14deg);
+  }
+  100% {
+    transform: perspective(240px) rotateX(0deg);
   }
 }
 .board-in {
   animation: board-in 640ms var(--ease-out-expo) both;
 }
 .chart-cell {
-  animation: cell-in 260ms var(--ease-out-expo) both;
+  transform-origin: 50% 0;
+  backface-visibility: hidden;
+  animation: cell-in 520ms cubic-bezier(0.3, 0.7, 0.2, 1) both;
   animation-delay: 0ms;
 }
 @media (prefers-reduced-motion: reduce) {

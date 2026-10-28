@@ -75,7 +75,7 @@ export function LiveChart({ rows, slots, dayLabel }: { rows: ChartRow[]; slots: 
                 </th>
                 {r.cells.map((c, ci) => {
                   const isHeld = held?.row === ri && held?.col === ci;
-                  const style = { animationDelay: `${(ri * r.cells.length + ci) * 28}ms` };
+                  const style = { animationDelay: `${600 + ri * 90 + ci * 45}ms` };
                   return (
                     <td key={ci} className="px-3 py-3">
                       {c.kind === "open" ? (
