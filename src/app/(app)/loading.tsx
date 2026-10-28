@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="mb-8 h-10 w-80 max-w-full rounded bg-paper-2" />
       <div className="grid gap-4 md:grid-cols-2">
         {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="h-32 rounded-lg border border-rule bg-card" />
+          <div key={i} className="h-32 rounded-[22px] border border-rule bg-card" />
         ))}
       </div>
     </div>

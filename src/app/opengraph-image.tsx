@@ -1,15 +1,13 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Saajha: every lab on campus, on one chart";
+export const alt = "Saajha: borrow the lab next door";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 // Pull just the glyphs we draw from Google Fonts. If that fails, the card still renders in the default face.
-async function anek(family: "Anek Latin" | "Anek Devanagari", text: string): Promise<ArrayBuffer | null> {
+async function mona(text: string): Promise<ArrayBuffer | null> {
   try {
-    const css = await (
-      await fetch(`https://fonts.googleapis.com/css2?family=${family.replace(" ", "+")}:wdth,wght@75,800&text=${encodeURIComponent(text)}`)
-    ).text();
+    const css = await (await fetch(`https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@125,800&text=${encodeURIComponent(text)}`)).text();
     const url = css.match(/src: url\((.+?)\) format\('(opentype|truetype)'\)/)?.[1];
     return url ? await (await fetch(url)).arrayBuffer() : null;
   } catch {
@@ -17,43 +15,36 @@ async function anek(family: "Anek Latin" | "Anek Devanagari", text: string): Pro
   }
 }
 
-/** Share card: the station board, as on the landing page. */
-export default async function OpengraphImage() {
-  const headline = "Every lab on campus, on one chart.";
-  const [latin, deva] = await Promise.all([anek("Anek Latin", `SAAJHA IND ${headline} Saajha`), anek("Anek Devanagari", "साझा")]);
-  const fonts = [
-    ...(latin ? [{ name: "Anek", data: latin, weight: 800 as const }] : []),
-    ...(deva ? [{ name: "AnekDeva", data: deva, weight: 800 as const }] : []),
-  ];
+const TAGS = [
+  { name: "Prusa MK4 printer", tag: "Free after 2 pm", bg: "#d6e8fa", ink: "#1d4f80", r: -4 },
+  { name: "Zeiss microscope", tag: "You’re cleared", bg: "#dcebd7", ink: "#2c5a2a", r: 3 },
+  { name: "Sony A7 IV kit", tag: "6 people asking", bg: "#fbefc4", ink: "#6b4e00", r: 2 },
+];
 
+/** Share card: the headline and three shelf tags, as on the landing page. */
+export default async function OpengraphImage() {
+  const headline = "Borrow the lab next door.";
+  const font = await mona(`saajha ${headline} ${TAGS.map((t) => t.name + t.tag).join("")}`);
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#f6f6f3", padding: 56, fontFamily: "Anek" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            background: "#f2c230",
-            border: "6px solid #141414",
-            borderRadius: 10,
-            padding: "28px 40px",
-            boxShadow: "inset 0 0 0 8px #f2c230, inset 0 0 0 11px #141414",
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", color: "#141414" }}>
-            <div style={{ fontFamily: "AnekDeva", fontSize: 92, lineHeight: 1 }}>साझा</div>
-            <div style={{ fontSize: 168, lineHeight: 0.86, letterSpacing: -2 }}>SAAJHA</div>
-          </div>
-          <div style={{ fontSize: 72, color: "#141414", paddingBottom: 14 }}>IND</div>
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#ffffff", padding: 64, fontFamily: "Mona", color: "#1c1c1e" }}>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: 600 }}>
+          <div style={{ fontSize: 40, letterSpacing: -1 }}>saajha</div>
+          <div style={{ fontSize: 104, lineHeight: 0.92, letterSpacing: -5 }}>{headline}</div>
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "0 13%" }}>
-          <div style={{ width: 18, height: 34, background: "#2b2b28" }} />
-          <div style={{ width: 18, height: 34, background: "#2b2b28" }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 22, marginLeft: 40, paddingTop: 30 }}>
+          {TAGS.map((t) => (
+            <div
+              key={t.name}
+              style={{ display: "flex", flexDirection: "column", background: t.bg, color: t.ink, borderRadius: 28, padding: "22px 26px", width: 380, transform: `rotate(${t.r}deg)` }}
+            >
+              <div style={{ fontSize: 30 }}>{t.name}</div>
+              <div style={{ fontSize: 22, marginTop: 8 }}>{t.tag}</div>
+            </div>
+          ))}
         </div>
-        <div style={{ marginTop: 34, fontSize: 64, color: "#141414", lineHeight: 1, letterSpacing: -1 }}>{headline}</div>
       </div>
     ),
-    { ...size, fonts },
+    { ...size, fonts: font ? [{ name: "Mona", data: font, weight: 800 as const }] : [] },
   );
 }

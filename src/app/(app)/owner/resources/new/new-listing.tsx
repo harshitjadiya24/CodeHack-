@@ -20,7 +20,7 @@ export function NewListing({ badges, aiOn }: { badges: { id: string; name: strin
             : "AI drafting is off (no Gemini key). The form below works the same by hand."}
         </p>
         <form action={action} className="flex flex-wrap items-center gap-3">
-          <label className="flex cursor-pointer items-center gap-2 rounded-md border border-rule bg-paper-2 px-3 py-2 text-sm">
+          <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-rule bg-paper-2 px-3 py-2 text-sm">
             <Camera className="size-4" aria-hidden />
             <input type="file" name="photo" accept="image/*" capture="environment" className="text-sm" aria-label="Equipment photo" />
           </label>

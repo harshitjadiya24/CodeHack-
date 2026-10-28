@@ -150,7 +150,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
             key={s.key}
             href={{ pathname: "/resources", query: { ...(q && { q }), ...(category && { category }), ...(eligible && { eligible }), where: s.key } }}
             aria-current={scope === s.key ? "page" : undefined}
-            className={`inline-flex min-h-11 items-center rounded-md border px-4 text-[15px] transition-colors ${scope === s.key ? "border-ink bg-accent font-semibold text-accent-ink" : "border-rule bg-card hover:border-ink"}`}
+            className={`inline-flex min-h-11 items-center rounded-xl border px-4 text-[15px] transition-colors ${scope === s.key ? "border-ink bg-accent font-semibold text-accent-ink" : "border-rule bg-card hover:border-subtle"}`}
           >
             {s.label}
           </Link>
@@ -173,7 +173,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
             <option key={c}>{c}</option>
           ))}
         </select>
-        <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-rule bg-card px-3 text-[15px]">
+        <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-rule bg-card px-3 text-[15px]">
           <input type="checkbox" name="eligible" value="1" defaultChecked={!!eligible} className="size-4 accent-[var(--ink)]" />
           Only what I can use
         </label>
@@ -191,7 +191,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
           {shown.map((r) => (
             <li key={r.id}>
               <Link href={`/resources/${r.id}`} className="group block h-full">
-                <Card className="flex h-full gap-4 p-5 transition-colors duration-150 group-hover:border-ink">
+                <Card className="flex h-full gap-4 p-5 transition-colors duration-150 group-hover:border-subtle">
                   <ResourceIcon category={r.category} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-start justify-between gap-2">

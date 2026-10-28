@@ -52,7 +52,7 @@ export function DecisionReceiptCard({ receipt }: { receipt: DecisionReceipt }) {
         )}
 
         {receipt.draw && (
-          <div className="rounded-md bg-saffron-soft p-3 text-sm">
+          <div className="rounded-xl bg-saffron-soft p-3 text-sm">
             <p className="font-medium text-saffron">Fair Draw{receipt.draw.rank ? ` · rank ${receipt.draw.rank} of ${receipt.draw.entrants}` : " · pending"}</p>
             <p className="mt-1 break-all">
               Commit <Mono className="text-ink">{receipt.draw.commit.slice(0, 24)}…</Mono>

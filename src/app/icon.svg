@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="2" y="2" width="60" height="60" rx="8" fill="#f2c230" stroke="#141414" stroke-width="4"/>
-  <rect x="9" y="9" width="46" height="46" rx="3" fill="none" stroke="#141414" stroke-width="2"/>
-  <text x="32" y="44" text-anchor="middle" font-family="Anek Devanagari, Noto Sans Devanagari, sans-serif" font-weight="800" font-size="30" fill="#141414">सा</text>
+  <rect x="2" y="12" width="40" height="40" rx="12" fill="#d6e8fa" transform="rotate(-8 22 32)"/>
+  <rect x="22" y="12" width="40" height="40" rx="12" fill="#fbefc4" transform="rotate(6 42 32)"/>
+  <text x="33" y="45" text-anchor="middle" font-family="Mona Sans, system-ui, sans-serif" font-weight="900" font-size="34" fill="#1c1c1e">s</text>
 </svg>

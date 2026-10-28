@@ -9,7 +9,7 @@ import { CancelForm, DecisionForm } from "@/components/action-forms";
 import { ConfirmCheckInForm, ReportIncidentForm, VerifyReturnForm } from "@/components/handover-forms";
 import { ConditionRecord } from "@/components/condition-record";
 import { DisputeForm, ExtendForm } from "@/components/booking-extras";
-import { Ticket } from "@/components/board/ticket";
+import { Ticket } from "@/components/common-room/ticket";
 import { campusParts } from "@/lib/domain/time";
 import { signedHandoverPhotos } from "@/lib/services/handovers";
 import { OWNER_ROLES, STAFF_ROLES, requireUser } from "@/lib/auth";
@@ -64,7 +64,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
     <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
       <div className="space-y-6">
         {isNew && (
-          <div role="status" className="rounded-lg border border-accent bg-accent-soft p-4 text-sm text-accent">
+          <div role="status" className="rounded-[22px] border border-accent bg-accent-soft p-4 text-sm text-accent">
             Request recorded. Below is exactly what happened and why. You will be notified of every change.
           </div>
         )}
@@ -95,7 +95,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
             <h2 className="mb-3 font-bold">Incidents</h2>
             <ul className="space-y-3">
               {incidents.map((i) => (
-                <li key={i.id} className="rounded-md border border-rule p-3 text-sm">
+                <li key={i.id} className="rounded-xl border border-rule p-3 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
                     <Pill tone="danger">{i.type}</Pill>
                     <Pill tone={i.severity === "high" ? "danger" : i.severity === "medium" ? "warn" : "neutral"}>{i.severity}</Pill>
@@ -142,7 +142,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
         <Card className="space-y-3 p-5">
           <h2 className="font-bold">Next step</h2>
           {awaitingAttendant && (
-            <p className="rounded-md bg-info-soft p-3 text-sm text-info">Condition recorded. Waiting for a lab attendant to confirm in person.</p>
+            <p className="rounded-xl bg-info-soft p-3 text-sm text-info">Condition recorded. Waiting for a lab attendant to confirm in person.</p>
           )}
           {awaitingAttendant && isAttendant && <ConfirmCheckInForm bookingId={b.id} />}
           {b.status === "returned" && canManage && <VerifyReturnForm bookingId={b.id} flagged={!!returned?.ai_flag} />}

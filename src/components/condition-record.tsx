@@ -55,7 +55,7 @@ export function ConditionRecord({ handovers, slots }: { handovers: Handover[]; s
         <Column h={after} title="After (return)" />
       </div>
       {after?.ai_summary && (
-        <div className={`mt-4 flex gap-2 rounded-md p-3 text-sm ${after.ai_flag ? "bg-warn-soft text-warn" : "bg-ok-soft text-ok"}`}>
+        <div className={`mt-4 flex gap-2 rounded-xl p-3 text-sm ${after.ai_flag ? "bg-warn-soft text-warn" : "bg-ok-soft text-ok"}`}>
           {after.ai_flag ? <AlertTriangle className="size-4 shrink-0" aria-hidden /> : <CheckCircle2 className="size-4 shrink-0" aria-hidden />}
           <div>
             <p className="font-medium">Automated comparison · advisory only</p>

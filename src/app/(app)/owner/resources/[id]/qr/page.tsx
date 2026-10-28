@@ -22,7 +22,7 @@ export default async function QrTagPage({ params, searchParams }: { params: Prom
   return (
     <div className="mx-auto max-w-md">
       {isNew && (
-        <p role="status" className="mb-4 rounded-md bg-ok-soft p-3 text-sm text-ok print:hidden">
+        <p role="status" className="mb-4 rounded-xl bg-ok-soft p-3 text-sm text-ok print:hidden">
           Listed! Print this tag and stick it on the resource.
         </p>
       )}

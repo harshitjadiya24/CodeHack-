@@ -33,7 +33,7 @@ export default async function PassportVerifyPage({ params }: { params: Promise<{
         <ul className="mt-5 space-y-2">
           {(badges ?? []).length === 0 && <li className="text-sm text-subtle">No current badges.</li>}
           {(badges ?? []).map((b) => (
-            <li key={b.badge?.name} className="flex items-center justify-between gap-2 rounded-md bg-ok-soft px-3 py-2 text-sm text-ok">
+            <li key={b.badge?.name} className="flex items-center justify-between gap-2 rounded-xl bg-ok-soft px-3 py-2 text-sm text-ok">
               <span className="flex items-center gap-2">
                 <BadgeCheck className="size-4" aria-hidden /> {b.badge?.name}
               </span>

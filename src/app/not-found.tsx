@@ -1,23 +1,26 @@
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui";
+import { Wordmark } from "@/components/wordmark";
 
 export default function NotFound() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-[1240px] flex-col justify-center px-4 py-16 md:px-8">
-      <div className="board-plate board-in max-w-2xl px-7 py-7 sm:px-9">
-        <p className="font-deva text-5xl font-extrabold leading-none [font-stretch:80%]">गलत स्टॉप</p>
-        <p className="type-display mt-2">404</p>
+    <main className="mx-auto flex min-h-screen max-w-[1200px] flex-col justify-center px-4 py-16 md:px-8">
+      <Link href="/" aria-label="Saajha home" className="mb-12">
+        <Wordmark />
+      </Link>
+      <div className="flex flex-wrap items-end gap-4">
+        <p className="type-display rise-in text-[clamp(6rem,18vw,12rem)]">404</p>
+        <span className="tone-rose rise-in mb-6 rotate-[-4deg] rounded-full px-4 py-1.5 font-semibold [animation-delay:150ms]">Not on the shelf</span>
       </div>
-      <h1 className="type-h2 mt-12 max-w-[18ch]">This stop isn’t on the chart.</h1>
-      <p className="mt-5 max-w-[52ch] text-lg text-ink-2">
+      <h1 className="type-h2 mt-6 max-w-[18ch]">Nothing here, or not for you.</h1>
+      <p className="mt-5 max-w-[52ch] text-lg text-subtle">
         The link may be old, or the booking may belong to someone else. Saajha only shows a record to the people it concerns.
       </p>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/resources" className="inline-flex min-h-11 items-center rounded-md bg-accent px-5 font-semibold text-accent-ink transition-transform active:scale-[0.97]">
-          Browse equipment
-        </Link>
-        <Link href="/" className="inline-flex min-h-11 items-center rounded-md border border-rule bg-card px-5 font-semibold hover:border-ink">
+      <div className="mt-8 flex flex-wrap gap-2.5">
+        <ButtonLink href="/resources">Browse equipment</ButtonLink>
+        <ButtonLink href="/" variant="secondary">
           Back to the start
-        </Link>
+        </ButtonLink>
       </div>
     </main>
   );

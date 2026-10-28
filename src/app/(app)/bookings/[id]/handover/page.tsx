@@ -47,17 +47,17 @@ export default async function HandoverPage({ params, searchParams }: { params: P
       </p>
 
       {phase === "check_in" && DEMO_MODE && !realWindowOpen && (
-        <p role="note" className="mb-4 rounded-md border border-saffron/40 bg-saffron-soft p-3 text-sm text-saffron">
+        <p role="note" className="mb-4 rounded-xl border border-saffron/40 bg-saffron-soft p-3 text-sm text-saffron">
           Demo mode: check-in normally opens 30 minutes before the slot ({formatCampus(window.opens)}). It is unlocked early so judges can try the full flow, and the audit log records that.
         </p>
       )}
       {phase === "check_in" && b.resource.requires_supervision && (
-        <p className="mb-4 rounded-md bg-info-soft p-3 text-sm text-info">
+        <p className="mb-4 rounded-xl bg-info-soft p-3 text-sm text-info">
           Supervised resource: after you record the condition, a lab attendant confirms in person before your session starts.
         </p>
       )}
       {phase === "check_in" && b.resource.deposit_inr > 0 && (
-        <p className="mb-4 rounded-md bg-info-soft p-3 text-sm text-info">
+        <p className="mb-4 rounded-xl bg-info-soft p-3 text-sm text-info">
           A refundable deposit of ₹{b.resource.deposit_inr.toLocaleString("en-IN")} is collected at the counter.
         </p>
       )}

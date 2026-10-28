@@ -133,7 +133,7 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
           ref={el}
           role="region"
           aria-label="Map of places with open slots. The list beside it has the same information."
-          className="nearby-map relative z-0 h-[300px] overflow-hidden rounded-lg border-2 border-ink bg-paper-2 sm:h-[400px]"
+          className="nearby-map relative z-0 h-[300px] overflow-hidden rounded-[22px] border border-rule bg-paper-2 sm:h-[400px]"
         />
 
         <div>
@@ -146,11 +146,11 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
             </p>
           )}
           {shown.length === 0 ? (
-            <p className="rounded-lg border border-rule bg-card p-5 text-[15px] text-ink-2">
+            <p className="rounded-[22px] border border-rule bg-card p-5 text-[15px] text-ink-2">
               Nothing here has a free hour in the next week. Try a wider area, or request a slot and join the queue.
             </p>
           ) : (
-            <ol className="divide-y divide-rule overflow-hidden rounded-lg border border-rule bg-card">
+            <ol className="divide-y divide-rule overflow-hidden rounded-[22px] border border-rule bg-card">
               {shown.map((r) => (
                 <li key={r.id}>
                   <Link

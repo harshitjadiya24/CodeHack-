@@ -103,7 +103,7 @@ export function InstitutionForm() {
       </fieldset>
 
       {state.error && (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2.5 text-[15px] text-danger">
+        <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2.5 text-[15px] text-danger">
           {state.error}
         </p>
       )}

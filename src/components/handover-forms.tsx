@@ -40,11 +40,11 @@ export function VerifyReturnForm({ bookingId, flagged }: { bookingId: string; fl
     <form action={action} className="space-y-3">
       <input type="hidden" name="bookingId" value={bookingId} />
       <div className="flex gap-2" role="radiogroup" aria-label="Condition outcome">
-        <label className="flex-1 cursor-pointer rounded-md border border-rule p-2 text-center text-sm has-[:checked]:border-ok has-[:checked]:bg-ok-soft">
+        <label className="flex-1 cursor-pointer rounded-xl border border-rule p-2 text-center text-sm has-[:checked]:border-ok has-[:checked]:bg-ok-soft">
           <input type="radio" name="outcome" value="ok" checked={!issue} onChange={() => setIssue(false)} className="sr-only" />
           Condition OK
         </label>
-        <label className="flex-1 cursor-pointer rounded-md border border-rule p-2 text-center text-sm has-[:checked]:border-danger has-[:checked]:bg-danger-soft">
+        <label className="flex-1 cursor-pointer rounded-xl border border-rule p-2 text-center text-sm has-[:checked]:border-danger has-[:checked]:bg-danger-soft">
           <input type="radio" name="outcome" value="issue" checked={issue} onChange={() => setIssue(true)} className="sr-only" />
           Report an issue
         </label>

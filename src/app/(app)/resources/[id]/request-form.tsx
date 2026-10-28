@@ -38,7 +38,7 @@ export function RequestForm({ resourceId, maxHours, minDate, openWeekdays }: { r
       </Field>
 
       {state.error && (
-        <div role="alert" className="rounded-md bg-danger-soft p-3 text-sm text-danger">
+        <div role="alert" className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
           <p className="font-medium">{state.error}</p>
           {state.reasons && (
             <ul className="mt-1 list-disc space-y-0.5 pl-5">

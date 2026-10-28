@@ -29,13 +29,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       </PageHeader>
 
       {org?.status === "pending" && (
-        <p role="status" className="mb-6 rounded-lg border border-rule bg-warn-soft px-5 py-3 text-[15px] text-warn">
+        <p role="status" className="mb-6 rounded-[22px] border border-rule bg-warn-soft px-5 py-3 text-[15px] text-warn">
           <b>Pending review.</b> Your institute works for your own campus now. Other campuses will see it once the Saajha team confirms it; registering
           with an email on your institute’s domain verifies it straight away.
         </p>
       )}
       {welcome && (
-        <section aria-labelledby="setup-title" className="mb-10 rounded-lg border-2 border-ink bg-card">
+        <section aria-labelledby="setup-title" className="mb-10 rounded-[22px] border border-rule bg-card">
           <h2 id="setup-title" className="chart-code bg-board px-5 py-3 text-[15px] text-board-ink">
             {org?.name} is on Saajha. Four things to do next
           </h2>

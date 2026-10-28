@@ -22,7 +22,7 @@ export function DatePickerCard({ name, minDate, openWeekdays }: { name: string; 
   const [month, setMonth] = useState<Date>(firstOpen);
 
   return (
-    <Card className="gap-3 rounded-lg border-border bg-card py-4 shadow-none">
+    <Card className="gap-3 rounded-[22px] border-border bg-card py-4 shadow-none">
       <input type="hidden" name={name} value={selected ? iso(selected) : ""} required />
       <CardHeader className="px-4">
         <CardTitle className="text-sm">Pick a day</CardTitle>
@@ -32,7 +32,7 @@ export function DatePickerCard({ name, minDate, openWeekdays }: { name: string; 
             type="button"
             size="sm"
             variant="outline"
-            className="h-8 rounded-md px-3 text-[13px]"
+            className="h-8 rounded-xl px-3 text-[13px]"
             onClick={() => {
               setMonth(firstOpen);
               setSelected(firstOpen);

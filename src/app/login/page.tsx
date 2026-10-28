@@ -6,6 +6,7 @@ import { getCurrentUser, homeFor } from "@/lib/auth";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, ROLE_LABEL } from "@/lib/demo";
 import { LoginForm } from "./login-form";
 import { loginAsDemo } from "./actions";
+import { Wordmark } from "@/components/wordmark";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -18,15 +19,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="mx-auto grid min-h-screen max-w-[1240px] gap-12 px-4 py-12 md:grid-cols-[1fr_1.2fr] md:px-8">
       <section className="flex flex-col justify-center">
         <Link href="/" className="mb-12 flex items-center gap-2.5 text-xl font-extrabold text-ink">
-          <span aria-hidden className="board-chip grid size-8 place-items-center rounded-[4px] font-deva text-[17px]">
-            सा
-          </span>
-          Saajha
+          <Wordmark />
         </Link>
         <h1 className="type-h2">Sign in to your campus</h1>
         <p className="mb-8 mt-3 text-ink-2">For students, staff and admin offices of every institute on Saajha.</p>
         {created && (
-          <p role="status" className="mb-4 rounded-md bg-ok-soft px-3 py-2.5 text-[15px] text-ok">
+          <p role="status" className="mb-4 rounded-xl bg-ok-soft px-3 py-2.5 text-[15px] text-ok">
             Account created. Sign in with your email and password.
           </p>
         )}
@@ -58,7 +56,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                 <input type="hidden" name="email" value={a.email} />
                 <button
                   type="submit"
-                  className="w-full rounded-lg border border-rule bg-card p-4 text-left transition-[border-color,transform] duration-150 hover:border-ink active:scale-[0.99]"
+                  className="w-full rounded-[22px] border border-rule bg-card p-4 text-left transition-[border-color,transform] duration-150 hover:border-subtle active:scale-[0.99]"
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span className="font-bold text-ink">{a.name}</span>

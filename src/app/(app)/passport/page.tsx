@@ -29,8 +29,8 @@ export default async function PassportPage({ searchParams }: { searchParams: Pro
     <>
       <PageHeader eyebrow="Your verified skills" title="Trust Passport" />
       {welcome && (
-        <div role="status" className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border-2 border-ink bg-board-soft px-5 py-4">
-          <span className="board-chip chart-code rounded-[4px] px-2 py-0.5 text-sm">Welcome</span>
+        <div role="status" className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] border border-rule bg-board-soft px-5 py-4">
+          <span className="board-chip chart-code rounded-full px-2 py-0.5 text-sm">Welcome</span>
           <p className="flex-1 text-[15px] text-ink">
             Your account is ready, {user.full_name.split(" ")[0]}. Next, add your training below. The admin office will verify your roll number; until then you can browse everything.
           </p>
@@ -77,13 +77,13 @@ export default async function PassportPage({ searchParams }: { searchParams: Pro
         </ul>
 
         <aside className="space-y-4">
-          <figure className="overflow-hidden rounded-lg border-2 border-ink bg-card text-center">
+          <figure className="overflow-hidden rounded-[22px] border border-rule bg-card text-center">
             <figcaption className="chart-code flex justify-between bg-board px-4 py-3 text-[15px] text-board-ink">
               <span>Lab pass</span>
               <span className="tab">{user.roll_no}</span>
             </figcaption>
             <div className="p-5">
-              <div className="mx-auto w-44 rounded-md bg-white p-2" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+              <div className="mx-auto w-44 rounded-xl bg-white p-2" dangerouslySetInnerHTML={{ __html: qrSvg }} />
               <p className="type-h3 mt-4">{user.full_name}</p>
               <p className="mt-2 text-sm text-subtle">An attendant scans this to see your current badges. Nothing else about you is shown.</p>
             </div>

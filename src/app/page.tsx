@@ -1,79 +1,92 @@
 import Link from "next/link";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { getCurrentUser, homeFor } from "@/lib/auth";
 import { campusInsights } from "@/lib/services/insights";
-import { bookingChart, CHART_SLOTS } from "@/lib/services/chart";
+import { shelfItems } from "@/lib/services/shelf";
 import { institutionCount } from "@/lib/services/institutions";
 import { INSTITUTE_KINDS } from "@/lib/india";
-import { StationBoard } from "@/components/board/station-board";
-import { LiveChart } from "@/components/board/live-chart";
-import { DrawBoard } from "@/components/board/draw-board";
-import { Ticket } from "@/components/board/ticket";
+import { Shelf } from "@/components/common-room/shelf";
+import { DrawHat } from "@/components/common-room/draw-hat";
+import { Ticket } from "@/components/common-room/ticket";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Wordmark } from "@/components/wordmark";
 import { ButtonLink } from "@/components/ui";
-import { RouteLine } from "@/components/board/route-line";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { SplitHeading } from "@/components/motion/split-heading";
 import { CountUp, PrintedHash, Reveal } from "@/components/motion/primitives";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 const DEMO_ORG = "11111111-0000-0000-0000-000000000001";
 
-const STOPS = [
-  { name: "Find", text: "Search the chart by room, time or what you’re making." },
-  { name: "Check your pass", text: "Your training and year decide what unlocks. You’re told why." },
-  { name: "Request", text: "Pick a slot and say what it’s for." },
-  { name: "Draw", text: "Too many asks for one hour? A seeded draw anyone can re-run.", mark: true },
-  { name: "Approve", text: "The lab owner decides, with a reason you can read." },
-  { name: "Hand over", text: "Three photos at pick-up. Condition agreed on both sides." },
-  { name: "Return", text: "Photos again. Damage goes to a fair review, not a fight." },
+const STEPS = [
+  { name: "Find it", text: "Browse by department, room or what you’re making." },
+  { name: "Check you’re cleared", text: "Your training decides. If you’re not, you’re told why." },
+  { name: "Ask for a slot", text: "Pick a time and say what it’s for." },
+  { name: "Fair turns", text: "Too popular? Names go in the hat." },
+  { name: "Owner says yes", text: "With a note you can read." },
+  { name: "Pick it up", text: "Three photos with the attendant." },
+  { name: "Bring it back", text: "Photos again. Any damage gets a fair look." },
 ];
 
 const ROLES = [
-  { role: "Students", gets: "See what you can use today and what’s missing. Request, check in by QR, extend, return, and contest anything unfair.", demo: "Aarav or Meera" },
-  { role: "Lab owners", gets: "List equipment in minutes, set training rules, decide requests with priority shown, verify condition on return.", demo: "Dr. Priya Nair" },
-  { role: "Attendants and managers", gets: "Confirm supervised pick-ups in person, verify training, and decide incidents after reading both sides.", demo: "Ravi, Prof. Sharma" },
-  { role: "The institution", gets: "Utilisation, idle capacity and fairness from real records, exported as evidence for accreditation.", demo: "IQAC Office" },
+  { role: "Students", tone: "tone-sky", gets: "See what you can use today and what’s missing. Ask, pick up by QR, extend, return, and contest anything unfair.", demo: "Aarav or Meera" },
+  { role: "Lab owners", tone: "tone-sage", gets: "List equipment in minutes, set training rules, decide requests with priority shown, check condition on return.", demo: "Dr. Priya Nair" },
+  { role: "Attendants and managers", tone: "tone-butter", gets: "Confirm supervised pick-ups in person, verify training, decide incidents after reading both sides.", demo: "Ravi, Prof. Sharma" },
+  { role: "The institution", tone: "tone-rose", gets: "Use, idle capacity and fairness from real records, exported as evidence for accreditation.", demo: "IQAC Office" },
 ];
 
+const DEPT_TONES = ["tone-sky", "tone-sage", "tone-butter", "tone-rose"];
+
 export default async function Landing() {
-  const [user, ins, chart, reach] = await Promise.all([getCurrentUser(), campusInsights(DEMO_ORG), bookingChart(DEMO_ORG), institutionCount()]);
+  const [user, ins, shelf, reach] = await Promise.all([getCurrentUser(), campusInsights(DEMO_ORG), shelfItems(DEMO_ORG), institutionCount()]);
   const home = user ? homeFor(user.role) : null;
   const cta = home ?? "/login";
 
   const figures = [
-    { value: ins.totals.value, kind: "lakh", label: "worth of equipment time lent in six weeks, at market rent" },
-    { value: ins.totals.hours, kind: "int", label: "hours of idle labs put to use" },
-    { value: ins.totals.uniqueUsers, kind: "int", suffix: `/${ins.totals.borrowers}`, label: "registered students served at least once" },
-    { value: ins.fairness.gini, kind: "fixed2", label: "usage spread (Gini). Lower means no one hogs a machine" },
+    { value: ins.totals.value, kind: "lakh", label: "of equipment time lent in six weeks, at market rent" },
+    { value: ins.totals.hours, kind: "int", suffix: " hrs", label: "of idle labs put to use" },
+    { value: ins.totals.uniqueUsers, kind: "int", suffix: `/${ins.totals.borrowers}`, label: "students got a turn" },
+    { value: ins.fairness.gini, kind: "fixed2", label: "fairness spread (Gini). Lower means nobody hogs a machine" },
   ] as const;
+
+  // Departments on the demo campus, busiest first, with what each one lends.
+  const depts = [
+    ...ins.perResource
+      .reduce((m, r) => {
+        const name = r.dept?.name ?? "Shared spaces";
+        const d = m.get(name) ?? { name, items: [] as string[], hours: 0 };
+        d.items.push(r.name);
+        d.hours += r.hours;
+        return m.set(name, d);
+      }, new Map<string, { name: string; items: string[]; hours: number }>())
+      .values(),
+  ].sort((a, b) => b.hours - a.hours || b.items.length - a.items.length);
+  const [lead, ...rest] = depts;
 
   return (
     <div className="min-h-screen">
       <SmoothScroll />
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-card focus:px-4 focus:py-2">
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b border-rule bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between px-4 md:px-8">
-          <Link href="/" className="flex items-center gap-2.5 text-xl font-extrabold">
-            <span aria-hidden className="board-chip grid size-8 place-items-center rounded-[4px] font-deva text-[17px]">
-              सा
-            </span>
-            Saajha
+      <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur">
+        <div className="mx-auto flex h-[76px] max-w-[1200px] items-center justify-between px-4 md:px-8">
+          <Link href="/" aria-label="Saajha home">
+            <Wordmark />
           </Link>
-          <nav aria-label="Main" className="flex items-center gap-2 text-[15px]">
-            <a href="#chart" className="hidden px-3 py-2 text-subtle hover:text-ink md:block">
-              The chart
+          <nav aria-label="Main" className="flex items-center gap-1.5 text-[15px] sm:gap-2">
+            <a href="#shelf" className="hidden px-3 py-2 text-subtle transition-colors hover:text-ink lg:block">
+              What’s on the shelf
             </a>
-            <a href="#route" className="hidden px-3 py-2 text-subtle hover:text-ink md:block">
+            <a href="#how" className="hidden px-3 py-2 text-subtle transition-colors hover:text-ink md:block">
               How it works
             </a>
-            <a href="#draw" className="hidden px-3 py-2 text-subtle hover:text-ink md:block">
-              The draw
+            <a href="#draw" className="hidden px-3 py-2 text-subtle transition-colors hover:text-ink md:block">
+              Fair turns
             </a>
-            <a href="#institutes" className="hidden px-3 py-2 text-subtle hover:text-ink lg:block">
+            <a href="#institutes" className="hidden px-3 py-2 text-subtle transition-colors hover:text-ink xl:block">
               For institutes
             </a>
             <ThemeToggle />
@@ -87,84 +100,132 @@ export default async function Landing() {
         </div>
       </header>
 
-      <main id="main">
-        <div className="mx-auto max-w-[1240px] px-4 pt-8 md:px-8 md:pt-10">
-          <StationBoard campus="Shared campus labs, all of India" code="IND" line={`${reach.institutes} institutes, ${reach.states} ${reach.states === 1 ? "state" : "states"} so far`} />
-
-          <div className="mt-12 grid items-end gap-8 md:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-            <SplitHeading as="h1" immediate className="type-h1 max-w-[13ch]">
-              Every lab on campus, on one chart.
+      <main id="main" className="mx-auto max-w-[1200px] px-4 md:px-8">
+        <div className="grid items-center gap-10 pt-6 md:pt-12 lg:grid-cols-2">
+          <div>
+            <SplitHeading as="h1" immediate className="type-display max-w-[11ch]">
+              Borrow the lab next door.
             </SplitHeading>
-            <div>
-              <p className="max-w-[46ch] text-lg text-ink-2">
-                In colleges across India, the 3D printer, the microscope and the studio camera sit idle most of the week. Saajha shows which
-                ones you’re cleared for, books you a slot, and runs a fair draw when too many people want the same hour.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <ButtonLink href={cta}>{home ? "Open Saajha" : "Find a slot"}</ButtonLink>
-                <ButtonLink href="#draw" variant="secondary">
-                  How the draw works
-                </ButtonLink>
-              </div>
+            <p className="mt-6 max-w-[40ch] text-[19px] text-subtle">
+              Your college already owns a 3D printer, a microscope and a camera kit. Most days nobody touches them. Saajha shows you which ones you’re
+              cleared for and books you in.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-2.5">
+              <ButtonLink href={cta}>{home ? "Open Saajha" : "Browse equipment"}</ButtonLink>
+              <ButtonLink href="/institutions/new" variant="secondary">
+                Bring your campus
+              </ButtonLink>
             </div>
           </div>
-
-          <section id="chart" aria-label="Booking chart" className="mt-12 scroll-mt-24">
-            <LiveChart rows={chart.rows} slots={CHART_SLOTS} dayLabel={chart.dayLabel} campus={chart.campus} />
-          </section>
-
-          <section aria-label="Figures from the demo campus" className="mt-24 border-t-2 border-ink">
-            <dl className="grid grid-cols-2 gap-x-6 lg:grid-cols-4">
-              {figures.map((f) => (
-                <div key={f.label} className="pt-6">
-                  <dd className="readout text-[clamp(2.75rem,5vw,4.25rem)]">
-                    <CountUp value={f.value} kind={f.kind} suffix={"suffix" in f ? f.suffix : ""} />
-                  </dd>
-                  <dt className="mt-2 max-w-[24ch] text-[15px] text-subtle">{f.label}</dt>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-6 text-sm text-subtle">
-              Counted from the demo campus database. {ins.totals.idleResources} of {ins.perResource.length} resources are still under 10% used.
-            </p>
-          </section>
+          <div>
+            <Shelf items={shelf} />
+            <p className="mt-3 text-center text-sm text-subtle">Live from the demo campus. Pick one up.</p>
+          </div>
         </div>
 
-        <section id="route" aria-labelledby="route-title" className="mx-auto max-w-[1240px] scroll-mt-24 px-4 pt-28 md:px-8 md:pt-36">
-          <p className="text-[15px] font-semibold text-subtle">From request to return</p>
-          <SplitHeading id="route-title" className="type-h2 mt-2 max-w-[18ch]">
-            Seven stops, every one on record.
-          </SplitHeading>
-          <RouteLine stops={STOPS} />
+        <section aria-label="Figures from the demo campus" className="mt-16 border-t border-rule md:mt-[72px]">
+          <dl className="grid grid-cols-2 gap-x-6 lg:grid-cols-4">
+            {figures.map((f) => (
+              <div key={f.label} className="flex flex-col py-6">
+                <dt className="mt-2 max-w-[24ch] text-sm text-subtle">{f.label}</dt>
+                <dd className="readout order-first text-[clamp(2.125rem,3.6vw,3rem)]">
+                  <CountUp value={f.value} kind={f.kind} suffix={"suffix" in f ? f.suffix : ""} />
+                </dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
-        <section id="draw" aria-labelledby="draw-title" className="band-ink mt-28 scroll-mt-16 md:mt-36">
-          <div className="mx-auto grid max-w-[1240px] gap-12 px-4 py-20 md:px-8 md:py-28 lg:grid-cols-[0.85fr_1.15fr]">
-            <div>
-              <p className="text-[15px] font-semibold text-subtle">When a slot is full</p>
-              <SplitHeading id="draw-title" className="type-h2 mt-2">
-            Six people, one camera. The draw decides.
+        <section id="shelf" aria-labelledby="shelf-title" className="scroll-mt-24 pt-24 md:pt-32">
+          <SplitHeading id="shelf-title" className="type-h2 max-w-[16ch]">
+            {`${depts.length} departments, one shelf.`}
           </SplitHeading>
-              <p className="mt-5 max-w-[44ch] text-ink-2">
-                Everyone who asked before the cut-off is entered. People who’ve had less time this month get more weight. The seed is locked
-                before anyone asks, so the result can be checked later by anyone, including the people who lost.
-              </p>
+          <p className="mt-4 max-w-[52ch] text-lg text-subtle">Each department keeps its own rules. You only see what your year and training already unlock.</p>
+          <Reveal className="mt-11 grid gap-3.5 md:auto-rows-[200px] md:grid-cols-[1.3fr_1fr_1fr]">
+            {lead && (
+              <div className="tone-sky flex min-h-[220px] flex-col justify-between rounded-[26px] p-6 md:row-span-2">
+                <h3 className="type-h3">{lead.name}</h3>
+                <ul className="grid gap-1.5 text-[15px]">
+                  {lead.items.slice(0, 5).map((i) => (
+                    <li key={i}>{i}</li>
+                  ))}
+                </ul>
+                <p className="text-sm">{Math.round(lead.hours)} hours lent in six weeks.</p>
+              </div>
+            )}
+            {rest.slice(0, 4).map((d, i) => (
+              <div
+                key={d.name}
+                className={cn("flex min-h-[160px] flex-col justify-between rounded-[26px] p-6", i === 3 ? "border border-rule bg-card" : DEPT_TONES[(i + 1) % 4])}
+              >
+                <h3 className="type-h3">{d.name}</h3>
+                <p className={cn("text-sm", i === 3 && "text-subtle")}>
+                  {d.items.slice(0, 3).join(", ")}
+                  {d.items.length > 3 && `, and ${d.items.length - 3} more`}
+                </p>
+              </div>
+            ))}
+          </Reveal>
+        </section>
+
+        <section id="how" aria-labelledby="how-title" className="scroll-mt-24 pt-24 md:pt-32">
+          <SplitHeading id="how-title" className="type-h2 max-w-[16ch]">
+            From “can I?” to “all yours”.
+          </SplitHeading>
+          <ol className="mt-11 grid grid-cols-2 gap-2.5 md:grid-cols-4 lg:grid-cols-7">
+            {STEPS.map((s, i) => (
+              <li key={s.name} className={cn("list-none", i % 2 === 1 && "lg:mt-9")}>
+                <Reveal delay={i * 0.06} className="h-full rounded-[20px] border border-rule bg-card p-4 sm:min-h-[190px]">
+                  <span aria-hidden className="tab grid size-8 place-items-center rounded-full bg-ink text-sm font-extrabold text-paper">
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-3.5 text-lg font-extrabold leading-tight tracking-[-0.02em] [font-stretch:112%]">{s.name}</h3>
+                  <p className="mt-1.5 text-[14px] leading-snug text-subtle">{s.text}</p>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section id="draw" aria-labelledby="draw-title" className="scroll-mt-24 pt-24 md:pt-32">
+          <SplitHeading id="draw-title" className="type-h2 max-w-[16ch]">
+            Popular slot? Names go in the hat.
+          </SplitHeading>
+          <div className="mt-11 grid gap-5 lg:grid-cols-2">
+            <div className="band-ink min-h-[360px] rounded-[32px] p-6 sm:p-8">
+              <DrawHat slot="Sony A7 IV kit, Thursday 9 am" />
             </div>
-            <DrawBoard />
+            <div className="rounded-[32px] border border-rule bg-card p-6 sm:p-8">
+              <h3 className="type-h3">Why it’s fair</h3>
+              <ol className="mt-5 grid list-decimal gap-4 pl-5 text-subtle marker:font-bold marker:text-ink">
+                <li>
+                  <b className="text-ink">Everyone who asked in time gets in.</b> Asking first doesn’t win.
+                </li>
+                <li>
+                  <b className="text-ink">If you’ve had less, you count a bit more.</b> Weight goes up when you’ve used fewer hours this month.
+                </li>
+                <li>
+                  <b className="text-ink">The coin is sealed in advance.</b> Anyone can re-run the draw later and get the same name, including the people who
+                  didn’t win.
+                </li>
+              </ol>
+            </div>
           </div>
         </section>
 
-        <section aria-labelledby="app-title" className="mx-auto max-w-[1240px] px-4 pt-28 md:px-8 md:pt-36">
-          <p className="text-[15px] font-semibold text-subtle">Inside the app</p>
-          <SplitHeading id="app-title" className="type-h2 mt-2 max-w-[18ch]">
-            Your booking reads like a ticket.
+        <section aria-labelledby="app-title" className="pt-24 md:pt-32">
+          <SplitHeading id="app-title" className="type-h2 max-w-[16ch]">
+            The app, from your side.
           </SplitHeading>
-          <Reveal className="mt-12 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-            <div className="rounded-lg border border-rule bg-card p-5 sm:p-7">
-              <h3 className="type-h3 text-[1.75rem]">Sony A7 IV camera kit</h3>
-              <p className="mt-1 text-[15px] text-subtle">Media Lab M-03, owner Prof. Iyer, ₹1,800 a day at market rent</p>
+          <Reveal className="mt-11 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="rounded-[28px] border border-rule bg-card p-6 sm:p-7">
+              <p className="text-sm text-subtle">Media Lab M-03, Prof. Iyer</p>
+              <h3 className="mt-1.5 text-[28px] font-[850] leading-none tracking-[-0.035em] [font-stretch:115%]">Sony A7 IV camera kit</h3>
+              <p className="tone-sage mt-5 flex items-center gap-3 rounded-2xl px-4 py-3.5 font-semibold">
+                <Check className="size-5 shrink-0" strokeWidth={2.5} aria-hidden /> You’re cleared: camera handling done 20 Sep
+              </p>
               <Ticket
-                className="mt-6"
+                className="mt-5"
                 status="Confirmed"
                 code="SJ-4827"
                 rows={[
@@ -176,22 +237,24 @@ export default async function Landing() {
                 stub={{ left: <span className="font-mono">record <PrintedHash>9f2c8e0b41d7</PrintedHash>, linked to 18 before it</span>, right: "Show at the desk" }}
               />
             </div>
-            <div className="rounded-lg border border-rule bg-card p-5 sm:p-7">
-              <h3 className="type-h3 text-[1.75rem]">Your pass</h3>
-              <p className="mt-1 text-[15px] text-subtle">What you’re cleared for</p>
-              <ul className="mt-5 space-y-3 text-[15px]">
-                <li className="flex gap-3">
-                  <Check className="mt-0.5 size-[18px] shrink-0 text-ok" strokeWidth={2.5} aria-label="Done" />Printer safety, done 12 Aug
-                </li>
-                <li className="flex gap-3">
-                  <Check className="mt-0.5 size-[18px] shrink-0 text-ok" strokeWidth={2.5} aria-label="Done" />Bio lab induction, done 3 Sep
-                </li>
-                <li className="flex gap-3">
-                  <Check className="mt-0.5 size-[18px] shrink-0 text-ok" strokeWidth={2.5} aria-label="Done" />Camera handling, done 20 Sep
-                </li>
-                <li className="flex gap-3">
-                  <X className="mt-0.5 size-[18px] shrink-0 text-danger" strokeWidth={2.5} aria-label="Missing" />Electronics bench needs 3rd year
-                </li>
+            <div className="rounded-[28px] border border-rule bg-card p-6 sm:p-7">
+              <h3 className="type-h3 text-[22px]">What happened</h3>
+              <ul className="mt-5 grid gap-4">
+                {[
+                  { who: "MS", tone: "tone-butter", text: "You won the draw for Thursday", at: "Today, 09:01" },
+                  { who: "PI", tone: "tone-sky", text: "Prof. Iyer approved: “Have fun at the fest.”", at: "Today, 09:20" },
+                  { who: "AT", tone: "tone-sage", text: "Picked up with 3 photos, all clean", at: "Today, 11:04" },
+                ].map((e) => (
+                  <li key={e.text} className="grid grid-cols-[36px_1fr] gap-3 text-[15px]">
+                    <span aria-hidden className={cn("grid size-9 place-items-center rounded-full text-[13px] font-extrabold", e.tone)}>
+                      {e.who}
+                    </span>
+                    <span>
+                      {e.text}
+                      <span className="block text-[13px] text-subtle">{e.at}</span>
+                    </span>
+                  </li>
+                ))}
               </ul>
               <p className="mt-6 border-t border-rule pt-4 text-[15px] text-subtle">
                 This month <b className="text-ink">9 of 20 hours</b> used. Your draw weight is 1.3×.
@@ -200,45 +263,41 @@ export default async function Landing() {
           </Reveal>
         </section>
 
-        <section id="institutes" aria-labelledby="institutes-title" className="mx-auto max-w-[1240px] scroll-mt-24 px-4 pt-28 md:px-8 md:pt-36">
-          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
+        <section id="institutes" aria-labelledby="institutes-title" className="scroll-mt-24 pt-24 md:pt-32">
+          <div className="grid gap-10 rounded-[32px] border border-rule bg-card p-6 sm:p-10 lg:grid-cols-2 lg:gap-16">
             <div>
-              <p className="text-[15px] font-semibold text-subtle">For institutes</p>
-              <SplitHeading id="institutes-title" className="type-h2 mt-2 max-w-[16ch]">
-                Any campus in India can open its labs.
+              <SplitHeading id="institutes-title" className="type-h2 max-w-[14ch]">
+                Bring your whole campus.
               </SplitHeading>
-              <p className="mt-5 max-w-[46ch] text-ink-2">
-                Register in a few minutes. Your departments, starter training and a fair-use policy are set up for your type of institute. An
-                email on your own domain verifies you straight away.
+              <p className="mt-4 max-w-[46ch] text-lg text-subtle">
+                Any college in India can join in a few minutes. Departments, starter training and a fair-use policy come set up for your kind of institute.
+                An email on your own domain verifies you straight away.
               </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <ButtonLink href="/institutions/new" variant="board">
-                  Register your institute
-                </ButtonLink>
+              <div className="mt-7 flex flex-wrap gap-2.5">
+                <ButtonLink href="/institutions/new">Register your institute</ButtonLink>
                 <ButtonLink href="/signup" variant="secondary">
                   Join as a student
                 </ButtonLink>
               </div>
             </div>
             <div>
-              <dl className="grid grid-cols-2 border-t-2 border-ink">
-                <div className="pt-5">
-                  <dd className="readout text-[clamp(2.75rem,5vw,4.25rem)]">
+              <dl className="grid grid-cols-2 gap-6">
+                <div className="flex flex-col">
+                  <dt className="mt-2 text-sm text-subtle">institutes on Saajha</dt>
+                  <dd className="readout order-first text-[clamp(2.75rem,5vw,4rem)]">
                     <CountUp value={reach.institutes} kind="int" />
                   </dd>
-                  <dt className="mt-2 text-[15px] text-subtle">institutes on Saajha</dt>
                 </div>
-                <div className="pt-5">
-                  <dd className="readout text-[clamp(2.75rem,5vw,4.25rem)]">
+                <div className="flex flex-col">
+                  <dt className="mt-2 text-sm text-subtle">states and union territories</dt>
+                  <dd className="readout order-first text-[clamp(2.75rem,5vw,4rem)]">
                     <CountUp value={reach.states} kind="int" />
                   </dd>
-                  <dt className="mt-2 text-[15px] text-subtle">states and union territories</dt>
                 </div>
               </dl>
-              <p className="mt-8 text-[15px] font-semibold">Built for</p>
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {Object.values(INSTITUTE_KINDS).map((k) => (
-                  <li key={k} className="rounded-[4px] border border-rule bg-card px-3 py-1.5 text-[15px]">
+              <ul className="mt-8 flex flex-wrap gap-2" aria-label="Kinds of institutes">
+                {Object.values(INSTITUTE_KINDS).map((k, i) => (
+                  <li key={k} className={cn("rounded-full px-3.5 py-1.5 text-[15px] font-medium", DEPT_TONES[i % 4])}>
                     {k}
                   </li>
                 ))}
@@ -247,23 +306,23 @@ export default async function Landing() {
           </div>
         </section>
 
-        <section aria-labelledby="roles-title" className="mx-auto max-w-[1240px] px-4 pt-28 md:px-8 md:pt-36">
-          <SplitHeading id="roles-title" className="type-h2 max-w-[20ch]">
+        <section aria-labelledby="roles-title" className="pt-24 md:pt-32">
+          <SplitHeading id="roles-title" className="type-h2 max-w-[18ch]">
             Everyone who touches the equipment.
           </SplitHeading>
-          <dl className="mt-10 border-t-2 border-ink">
+          <dl className="mt-10">
             {ROLES.map((r) => (
-              <div key={r.role} className="grid gap-2 border-b border-rule py-6 md:grid-cols-[0.8fr_1.6fr_0.6fr] md:gap-8">
-                <dt className="type-h3">{r.role}</dt>
+              <div key={r.role} className="grid gap-2 border-t border-rule py-6 md:grid-cols-[0.8fr_1.6fr_0.6fr] md:items-baseline md:gap-8">
+                <dt>
+                  <span className={cn("inline-block rounded-full px-3.5 py-1 text-lg font-extrabold tracking-[-0.02em] [font-stretch:112%]", r.tone)}>{r.role}</span>
+                </dt>
                 <dd className="text-ink-2">{r.gets}</dd>
                 <dd className="text-[15px] text-subtle md:text-right">Try as {r.demo}</dd>
               </div>
             ))}
           </dl>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <ButtonLink href={cta} variant="board">
-              {home ? "Open Saajha" : "Open the demo"}
-            </ButtonLink>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <ButtonLink href={cta}>{home ? "Open Saajha" : "Open the demo"}</ButtonLink>
             {!home && (
               <ButtonLink href="/signup" variant="secondary">
                 Create your account
@@ -274,15 +333,17 @@ export default async function Landing() {
         </section>
       </main>
 
-      <footer className="mt-28 border-t border-rule md:mt-36">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 px-4 py-8 text-sm text-subtle md:px-8">
-          <span>Saajha, built for “Unlock Underused Equipment and Spaces”. Demo data is fictional.</span>
+      <footer className="mt-32 border-t border-rule">
+        <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-4 pb-12 pt-8 text-sm text-subtle md:px-8">
+          <span>
+            <Wordmark className="mr-2 text-base text-ink" /> built for “Unlock Underused Equipment and Spaces”. Demo data is fictional.
+          </span>
           <span className="flex gap-5">
             <Link href="/privacy" className="hover:text-ink">
               Privacy
             </Link>
             <Link href="/audit/verify" className="hover:text-ink">
-              Verify the record
+              Check the record
             </Link>
           </span>
         </div>

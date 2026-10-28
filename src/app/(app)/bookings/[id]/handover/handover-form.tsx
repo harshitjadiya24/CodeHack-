@@ -63,7 +63,7 @@ export function HandoverForm({
           {slots.map((slot, i) => (
             <label
               key={slot}
-              className="relative flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-rule bg-paper-2 text-center text-sm hover:border-accent"
+              className="relative flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[22px] border-2 border-dashed border-rule bg-paper-2 text-center text-sm hover:border-accent"
             >
               {previews[i] ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -94,7 +94,7 @@ export function HandoverForm({
 
       <fieldset>
         <legend className="mb-2 font-medium">2. Condition checklist</legend>
-        <ul className="divide-y divide-rule rounded-lg border border-rule bg-card">
+        <ul className="divide-y divide-rule rounded-[22px] border border-rule bg-card">
           {items.map((item, i) => (
             <li key={item} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
               <span>
@@ -119,7 +119,7 @@ export function HandoverForm({
       </Field>
 
       {state.error && (
-        <p role="alert" className="rounded-md bg-danger-soft p-3 text-sm text-danger">
+        <p role="alert" className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
           {state.error}
         </p>
       )}

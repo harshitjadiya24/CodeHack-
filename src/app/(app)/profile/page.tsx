@@ -32,7 +32,7 @@ export default async function ProfilePage() {
   return (
     <>
       <PageHeader eyebrow={org?.name} title={user.full_name}>
-        <a href="/profile/export" className="rounded-md border border-rule bg-card px-4 py-2 text-sm">
+        <a href="/profile/export" className="rounded-xl border border-rule bg-card px-4 py-2 text-sm">
           Download my data (JSON)
         </a>
       </PageHeader>

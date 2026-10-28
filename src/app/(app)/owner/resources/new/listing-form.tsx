@@ -68,7 +68,7 @@ export function ListingForm({ badges, draft, resourceId }: { badges: { id: strin
           <legend className="mb-2 text-sm font-medium">Required Trust Passport badges</legend>
           <div className="flex flex-wrap gap-2">
             {badges.map((b) => (
-              <label key={b.id} className="flex cursor-pointer items-center gap-2 rounded-md border border-rule px-3 py-1.5 text-sm has-[:checked]:border-accent has-[:checked]:bg-accent-soft">
+              <label key={b.id} className="flex cursor-pointer items-center gap-2 rounded-xl border border-rule px-3 py-1.5 text-sm has-[:checked]:border-accent has-[:checked]:bg-accent-soft">
                 <input type="checkbox" name="badgeIds" value={b.id} defaultChecked={draft?.badgeIds?.includes(b.id)} className="accent-[var(--accent)]" /> {b.name}
               </label>
             ))}
@@ -113,7 +113,7 @@ export function ListingForm({ badges, draft, resourceId }: { badges: { id: strin
       </Card>
 
       {state.error && (
-        <p role="alert" className="rounded-md bg-danger-soft p-3 text-sm text-danger">
+        <p role="alert" className="rounded-xl bg-danger-soft p-3 text-sm text-danger">
           {state.error}
         </p>
       )}

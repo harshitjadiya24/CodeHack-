@@ -41,7 +41,7 @@ export function SignupForm({ campuses }: { campuses: Campus[] }) {
         <input name="fullName" autoComplete="name" required defaultValue={v.fullName} aria-invalid={!!e.fullName} aria-describedby={errorId("fullName")} className={inputClass} />
       </Field>
 
-      <fieldset className="space-y-3 rounded-lg border border-rule p-4">
+      <fieldset className="space-y-3 rounded-[22px] border border-rule p-4">
         <legend className="px-1 text-[15px] font-semibold text-ink">Your institute</legend>
         <div className="grid gap-3 sm:grid-cols-[0.8fr_1.2fr]">
           <label className="block">
@@ -108,7 +108,7 @@ export function SignupForm({ campuses }: { campuses: Campus[] }) {
           <legend className="text-[15px] font-semibold text-ink">I am a</legend>
           <div className="mt-1.5 grid grid-cols-2 gap-2">
             {(["student", "researcher"] as const).map((r) => (
-              <label key={r} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-rule bg-card px-3 text-[15px] has-[:checked]:border-ink has-[:checked]:font-semibold">
+              <label key={r} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-rule bg-card px-3 text-[15px] has-[:checked]:border-sky-ink has-[:checked]:font-semibold">
                 <input type="radio" name="role" value={r} defaultChecked={(v.role ?? "student") === r} className="size-4 accent-[var(--ink)]" />
                 {r === "student" ? "Student" : "Researcher"}
               </label>
@@ -150,7 +150,7 @@ export function SignupForm({ campuses }: { campuses: Campus[] }) {
       {e.consent && <p className="-mt-3 text-sm text-danger">{e.consent}</p>}
 
       {state.error && (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2.5 text-[15px] text-danger">
+        <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2.5 text-[15px] text-danger">
           {state.error}
         </p>
       )}

@@ -38,7 +38,7 @@ export function ThemeToggle() {
       onClick={cycle}
       aria-label={`${LABEL[mode]}. Switch to ${NEXT[mode]}.`}
       title={LABEL[mode]}
-      className="grid size-11 place-items-center rounded-md border border-rule bg-card text-ink transition-[border-color,transform] duration-150 hover:border-ink active:scale-[0.97]"
+      className="grid size-11 place-items-center rounded-full border border-rule bg-card text-ink transition-[border-color,transform] duration-150 hover:border-subtle active:scale-[0.97]"
     >
       <Icon className="size-[18px]" aria-hidden />
     </button>
