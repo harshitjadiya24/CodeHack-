@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1700 716" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="workflow-title workflow-desc" id="workflow-root">
+<title id="workflow-title">LabShare master workflow</title>
+<desc id="workflow-desc">Swimlane of a lab resource moving from owner listing through student discovery, eligibility, fairness checks, owner approval or waitlist, check-in, return, condition verification and incident review, all recorded in an append-only audit log.</desc>
+<defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #workflow-root { --color-paper:#f5f5f5; --color-ink:#2d3142; --color-muted:#4f5d75; --font-sans:'Geist', system-ui, sans-serif; --font-serif:'Instrument Serif', serif; --font-mono:'Geist Mono', ui-monospace, monospace; }
+      #workflow-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #workflow-root .scroll { overflow-x:auto; }</style>
+<pattern id="workflow-dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.9" fill="#2d3142" fill-opacity="0.10"/></pattern>
+<marker id="workflow-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+<marker id="workflow-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#f5f5f5"/><rect width="100%" height="100%" fill="url(#workflow-dots)" opacity="0.55"/>
+<line x1="40" y1="80" x2="1660" y2="80" stroke="#2d3142" stroke-width="1" stroke-opacity="0.22"/>
+<line x1="40" y1="200" x2="1660" y2="200" stroke="#2d3142" stroke-width="1" stroke-opacity="0.10"/>
+<line x1="40" y1="320" x2="1660" y2="320" stroke="#2d3142" stroke-width="1" stroke-opacity="0.10"/>
+<line x1="40" y1="440" x2="1660" y2="440" stroke="#2d3142" stroke-width="1" stroke-opacity="0.10"/>
+<line x1="40" y1="560" x2="1660" y2="560" stroke="#2d3142" stroke-width="1" stroke-opacity="0.22"/>
+<line x1="152" y1="80" x2="152" y2="560" stroke="#2d3142" stroke-width="1" stroke-opacity="0.22"/>
+<text x="56" y="144" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.18em">STUDENT</text>
+<text x="56" y="264" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.18em">SYSTEM</text>
+<text x="56" y="384" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.18em">OWNER</text>
+<text x="56" y="504" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.18em">MANAGER</text>
+<path d="M228,352 V148 Q228,140 236,140 H312" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M380,168 V252 Q380,260 388,260 H464" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M552,232 V148 Q552,140 560,140 H616" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M512,288 V464" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#workflow-arrow)"/>
+<path d="M552,472 V296" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#workflow-arrow)"/>
+<path d="M684,168 V252 Q684,260 692,260 H768" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M896,260 H920" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M836,288 V372 Q836,380 844,380 H920" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M988,288 V344" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#workflow-arrow)"/>
+<path d="M1048,380 H1132 Q1140,380 1140,372 V176" fill="none" stroke="#bf4520" stroke-width="1.4" marker-end="url(#workflow-arrow-accent)"/>
+<path d="M1200,140 H1224" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M1292,232 V176" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#workflow-arrow)"/>
+<path d="M1352,140 H1436 Q1444,140 1444,148 V344" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M1272,288 V492 Q1272,500 1280,500 H1376" fill="none" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#workflow-arrow)"/>
+<path d="M1444,408 V464" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M1504,380 H1568 Q1576,380 1576,372 V296" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<path d="M1504,500 H1608 Q1616,500 1616,492 V296" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<rect x="236" y="254" width="64" height="12" rx="2" fill="#f5f5f5"/>
+<text x="268.0" y="263" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">PUBLISHED</text>
+<rect x="480" y="180" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="510.0" y="189" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">ELIGIBLE</text>
+<rect x="432" y="374" width="72" height="12" rx="2" fill="#f5f5f5"/>
+<text x="468.0" y="383" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">MISSING CERT</text>
+<rect x="560" y="374" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="590.0" y="383" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">VERIFIED</text>
+<rect x="764" y="330" width="64" height="12" rx="2" fill="#f5f5f5"/>
+<text x="796.0" y="339" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">SLOT FREE</text>
+<rect x="996" y="310" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1026.0" y="319" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">PROMOTED</text>
+<rect x="1148" y="326" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1178.0" y="335" fill="#bf4520" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">APPROVED</text>
+<rect x="1300" y="198" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1330.0" y="207" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">REMINDER</text>
+<rect x="1452" y="254" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1482.0" y="263" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">RETURNED</text>
+<rect x="1280" y="446" width="72" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1316.0" y="455" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">LATE RETURN</text>
+<rect x="1452" y="430" width="48" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1476.0" y="439" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">DAMAGE</text>
+<rect x="1508" y="326" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1538.0" y="335" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">ALL GOOD</text>
+<rect x="1624" y="446" width="60" height="12" rx="2" fill="#f5f5f5"/>
+<text x="1654.0" y="455" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">RESOLVED</text>
+<rect x="168" y="352" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="168" y="352" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="176" y="359" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="186.0" y="368" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">01</text>
+<text x="178" y="386" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">List resource</text>
+<text x="178" y="399" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">rules · slots · credits</text>
+<rect x="320" y="112" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="320" y="112" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="328" y="119" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="338.0" y="128" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">02</text>
+<text x="330" y="146" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Discover</text>
+<text x="330" y="159" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">search · AI match</text>
+<rect x="472" y="232" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="472" y="232" width="120" height="56" rx="6" fill="#ececec" stroke="#2d3142" stroke-width="1"/>
+<rect x="480" y="239" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="490.0" y="248" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">03</text>
+<text x="482" y="266" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Eligibility check</text>
+<text x="482" y="279" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">training · deposit</text>
+<rect x="472" y="472" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="472" y="472" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="480" y="479" width="26" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="493.0" y="488" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">03b</text>
+<text x="482" y="506" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Verify certificate</text>
+<text x="482" y="519" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">human review</text>
+<rect x="624" y="112" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="624" y="112" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="632" y="119" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="642.0" y="128" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">04</text>
+<text x="634" y="146" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Request slot</text>
+<text x="634" y="159" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">time · purpose</text>
+<rect x="776" y="232" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="776" y="232" width="120" height="56" rx="6" fill="#ececec" stroke="#2d3142" stroke-width="1"/>
+<rect x="784" y="239" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="794.0" y="248" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">05</text>
+<text x="786" y="266" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Fairness check</text>
+<text x="786" y="279" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">credits · conflicts</text>
+<rect x="928" y="232" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="928" y="232" width="120" height="56" rx="6" fill="#ececec" stroke="#2d3142" stroke-width="1"/>
+<rect x="936" y="239" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="946.0" y="248" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">06</text>
+<text x="938" y="266" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Waitlist #n</text>
+<text x="938" y="279" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">reason shown</text>
+<rect x="928" y="352" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="928" y="352" width="120" height="56" rx="6" fill="#bf4520" stroke="#bf4520" stroke-width="1" fill-opacity="0.08"/>
+<rect x="936" y="359" width="20" height="12" rx="2" fill="none" stroke="#bf4520" stroke-width="0.8"/>
+<text x="946.0" y="368" fill="#bf4520" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">07</text>
+<text x="938" y="386" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Review &amp; decide</text>
+<text x="938" y="399" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">approve · reject</text>
+<rect x="1080" y="112" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="1080" y="112" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="1088" y="119" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1098.0" y="128" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">08</text>
+<text x="1090" y="146" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Check-in</text>
+<text x="1090" y="159" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">before photos</text>
+<rect x="1232" y="112" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="1232" y="112" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="1240" y="119" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1250.0" y="128" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">09</text>
+<text x="1242" y="146" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Return</text>
+<text x="1242" y="159" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">after photos</text>
+<rect x="1232" y="232" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="1232" y="232" width="120" height="56" rx="6" fill="#ececec" stroke="#2d3142" stroke-width="1"/>
+<rect x="1240" y="239" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1250.0" y="248" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">10</text>
+<text x="1242" y="266" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Overdue watch</text>
+<text x="1242" y="279" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">reminders · cron</text>
+<rect x="1384" y="352" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="1384" y="352" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="1392" y="359" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1402.0" y="368" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">11</text>
+<text x="1394" y="386" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Verify condition</text>
+<text x="1394" y="399" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">AI compare · advisory</text>
+<rect x="1384" y="472" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="1384" y="472" width="120" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="1392" y="479" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1402.0" y="488" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">12</text>
+<text x="1394" y="506" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Incident review</text>
+<text x="1394" y="519" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">human decides penalty</text>
+<rect x="1536" y="232" width="120" height="56" rx="6" fill="#f5f5f5"/>
+<rect x="1536" y="232" width="120" height="56" rx="6" fill="#ececec" stroke="#2d3142" stroke-width="1"/>
+<rect x="1544" y="239" width="20" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.35"/>
+<text x="1554.0" y="248" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">13</text>
+<text x="1546" y="266" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Booking closed</text>
+<text x="1546" y="279" fill="#4f5d75" font-size="7.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0">full history for both</text>
+<rect x="168" y="576" width="1488" height="44" rx="6" fill="#bf4520" stroke="#bf4520" stroke-width="1" fill-opacity="0.08"/>
+<text x="184" y="595" fill="#bf4520" font-size="8.5" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.14em">14 · AUDIT LOG · APPEND-ONLY</text>
+<text x="184" y="610" fill="#2d3142" font-size="10.5" font-family="'Geist', sans-serif">Every step above writes who · what · when · why. Nobody can edit or delete it.</text>
+<text x="1640" y="604" fill="#4f5d75" font-size="10" font-family="'Geist', sans-serif" text-anchor="end">Visible to student · owner · manager · admin</text>
+<text x="56" y="602" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.18em">RECORD</text>
+<line x1="40" y1="644" x2="1660" y2="644" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.10"/>
+<text x="40" y="662" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="start" letter-spacing="0.18em">LEGEND</text>
+<rect x="40" y="676" width="14" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<text x="60" y="684" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Human action</text>
+<rect x="160" y="676" width="14" height="10" rx="2" fill="#ececec" stroke="#2d3142" stroke-width="1"/>
+<text x="180" y="684" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Automated system step</text>
+<rect x="320" y="676" width="14" height="10" rx="2" fill="#bf4520" stroke="#bf4520" stroke-width="1" fill-opacity="0.08"/>
+<text x="340" y="684" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Human decision / record</text>
+<line x1="496" y1="681" x2="524" y2="681" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#workflow-arrow)"/>
+<text x="532" y="684" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Main flow</text>
+<line x1="608" y1="681" x2="636" y2="681" stroke="#4f5d75" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#workflow-arrow)"/>
+<text x="644" y="684" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Conditional path</text>
+<line x1="744" y1="681" x2="772" y2="681" stroke="#bf4520" stroke-width="1.2" marker-end="url(#workflow-arrow-accent)"/>
+<text x="780" y="684" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Approval handoff</text>
+<text x="1660" y="684" fill="#4f5d75" font-size="9" font-family="'Instrument Serif', serif" font-style="italic" text-anchor="end">AI only advises. Approvals, penalties and verifications stay with a person.</text>
+</svg>
