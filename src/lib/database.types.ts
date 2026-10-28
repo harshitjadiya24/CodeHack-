@@ -193,6 +193,14 @@ export type Database = {
           { foreignKeyName: "draw_windows_resource_id_fkey"; columns: ["resource_id"]; isOneToOne: false; referencedRelation: "resources"; referencedColumns: ["id"] },
         ]
       }
+      draw_secrets: {
+        Row: { draw_id: string; seed: string }
+        Insert: { draw_id: string; seed: string }
+        Update: { draw_id?: string; seed?: string }
+        Relationships: [
+          { foreignKeyName: "draw_secrets_draw_id_fkey"; columns: ["draw_id"]; isOneToOne: true; referencedRelation: "draw_windows"; referencedColumns: ["id"] },
+        ]
+      }
       fairness_config: {
         Row: {
           cooldown_hours: number

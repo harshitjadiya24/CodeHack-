@@ -1,0 +1,124 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ButtonLink, Card, Pill } from "@/components/ui";
+import { ResourceIcon } from "@/components/resource-icon";
+import { DecisionReceiptCard } from "@/components/decision-receipt";
+import { AuditTimeline } from "@/components/audit-timeline";
+import { CancelForm, DecisionForm } from "@/components/action-forms";
+import { OWNER_ROLES, STAFF_ROLES, requireUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { BOOKING_STATUS } from "@/lib/status";
+import { formatCampus } from "@/lib/domain/time";
+import type { DecisionReceipt } from "@/lib/domain/receipt";
+
+export const metadata: Metadata = { title: "Booking" };
+
+const CANCELLABLE = ["requested", "in_draw", "waitlisted", "approved"];
+
+export default async function BookingPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ new?: string }> }) {
+  const { id } = await params;
+  const { new: isNew } = await searchParams;
+  if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  // RLS decides visibility: requester, resource owner, attendants and staff of that campus.
+  const { data: b } = await supabase
+    .from("bookings")
+    .select("*, resource:resources(id, name, category, location, owner_id, requires_supervision), requester:profiles!bookings_user_id_fkey(full_name, roll_no)")
+    .eq("id", id)
+    .maybeSingle();
+  if (!b?.resource) notFound();
+
+  const { data: timeline } = await supabase
+    .from("audit_log")
+    .select("id, action, reason, created_at, hash, actor:profiles!audit_log_actor_id_fkey(full_name)")
+    .eq("entity_id", id)
+    .order("id");
+
+  const isRequester = b.user_id === user.id;
+  const canManage = STAFF_ROLES.includes(user.role) || (OWNER_ROLES.includes(user.role) && b.resource.owner_id === user.id);
+  const status = BOOKING_STATUS[b.status];
+  const receipt = b.decision_receipt as DecisionReceipt | null;
+  const startsSoon = new Date(b.starts_at).getTime() - Date.now() < 24 * 3_600_000;
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+      <div className="space-y-6">
+        {isNew && (
+          <div role="status" className="rounded-lg border border-accent bg-accent-soft p-4 text-sm text-accent">
+            Request recorded. Below is exactly what happened and why. You will be notified of every change.
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-start gap-4">
+          <ResourceIcon category={b.resource.category} />
+          <div className="flex-1">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Booking · {b.id.slice(0, 8)}</p>
+            <h1 className="font-display text-3xl leading-tight">
+              <Link href={`/resources/${b.resource.id}`} className="hover:underline">
+                {b.resource.name}
+              </Link>
+            </h1>
+            <p className="text-sm text-muted">
+              {formatCampus(b.starts_at, { weekday: "long" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} · {b.resource.location}
+            </p>
+          </div>
+          <Pill tone={status.tone} className="text-sm">
+            {status.label}
+            {b.status === "waitlisted" && b.waitlist_position ? ` #${b.waitlist_position}` : ""}
+          </Pill>
+        </div>
+
+        {receipt && <DecisionReceiptCard receipt={receipt} />}
+
+        <Card className="p-5">
+          <h2 className="mb-1 font-medium">Purpose</h2>
+          <p className="text-sm text-ink-2">{b.purpose}</p>
+          {b.deadline_note && <p className="mt-2 text-sm text-ink-2">Deadline: {b.deadline_note}</p>}
+          {!isRequester && (
+            <p className="mt-2 text-sm text-muted">
+              Requested by {b.requester?.full_name} {b.requester?.roll_no ? `(${b.requester.roll_no})` : ""}
+            </p>
+          )}
+        </Card>
+      </div>
+
+      <aside className="space-y-4">
+        <Card className="space-y-3 p-5">
+          <h2 className="font-medium">Next step</h2>
+          {b.status === "approved" && isRequester && (
+            <>
+              <p className="text-sm text-ink-2">
+                {startsSoon ? "Your slot is close. Scan the QR tag on the resource, or start check-in here." : "Check-in opens on the day of your slot."}
+              </p>
+              <ButtonLink href={`/bookings/${b.id}/handover?phase=check_in`} className="w-full">
+                Start check-in
+              </ButtonLink>
+            </>
+          )}
+          {["checked_in", "overdue"].includes(b.status) && isRequester && (
+            <ButtonLink href={`/bookings/${b.id}/handover?phase=return`} className="w-full">
+              Return and record condition
+            </ButtonLink>
+          )}
+          {["requested", "in_draw"].includes(b.status) && canManage && <DecisionForm bookingId={b.id} />}
+          {CANCELLABLE.includes(b.status) && (isRequester || canManage) && <CancelForm bookingId={b.id} needsReason={!isRequester} />}
+          {["closed", "cancelled", "rejected"].includes(b.status) && <p className="text-sm text-muted">This booking is finished. Its record stays in the audit chain.</p>}
+          <ButtonLink href={`/bookings/${b.id}/receipt`} variant="ghost" className="w-full">
+            Download record (PDF)
+          </ButtonLink>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="mb-4 font-medium">History</h2>
+          <AuditTimeline entries={timeline ?? []} />
+          <Link href="/audit/verify" className="mt-4 inline-block text-sm text-accent underline">
+            Verify the audit chain
+          </Link>
+        </Card>
+      </aside>
+    </div>
+  );
+}
