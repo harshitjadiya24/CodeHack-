@@ -6,14 +6,17 @@ import { ResourceIcon } from "@/components/resource-icon";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { Sparkles } from "lucide-react";
+import { matchResources } from "@/lib/ai";
+import { CopilotResults } from "@/components/copilot-results";
 
 export const metadata: Metadata = { title: "Discover" };
 
-type Search = { q?: string; category?: string; eligible?: string };
+type Search = { q?: string; category?: string; eligible?: string; ask?: string };
 
 export default async function ResourcesPage({ searchParams }: { searchParams: Promise<Search> }) {
   const user = await requireUser();
-  const { q = "", category = "", eligible = "" } = await searchParams;
+  const { q = "", category = "", eligible = "", ask = "" } = await searchParams;
   const supabase = await createClient();
 
   const [{ data: resources }, { data: myBadges }] = await Promise.all([
@@ -51,6 +54,9 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
     return { ...r, required, missing, canUse: sameOrg && missing.length === 0, hours: hoursByResource.get(r.id) ?? 0 };
   });
 
+  const copilot = ask.trim() ? await matchResources(ask.trim(), all) : null;
+  const info = new Map(all.map((r) => [r.id, { id: r.id, name: r.name, canUse: r.canUse, missing: r.missing, partner: r.org_id !== user.org_id }]));
+
   const categories = [...new Set(all.map((r) => r.category))].sort();
   const needle = q.trim().toLowerCase();
   const shown = all.filter(
@@ -66,6 +72,23 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader eyebrow={`${all.length} resources · ${new Set(all.map((r) => r.location.split(",")[0])).size} buildings`} title="Discover what your campus can lend" />
+
+      <form className="mb-4 flex gap-2" aria-label="Ask Saajha Copilot">
+        <label className="sr-only" htmlFor="ask">Describe what you need</label>
+        <div className="relative flex-1">
+          <Sparkles className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-accent" aria-hidden />
+          <input
+            id="ask"
+            name="ask"
+            defaultValue={ask}
+            className={`${inputClass} pl-9`}
+            placeholder="Describe your task: “I need to test a 12V motor driver circuit next week”"
+          />
+        </div>
+        <button className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-ink">Ask Copilot</button>
+      </form>
+
+      {copilot && <CopilotResults ask={ask} result={copilot} info={info} />}
 
       <form className="mb-8 grid gap-3 md:grid-cols-[1fr_220px_auto_auto]" role="search">
         <label className="sr-only" htmlFor="q">Search</label>

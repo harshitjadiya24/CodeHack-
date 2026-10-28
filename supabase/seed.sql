@@ -177,13 +177,39 @@ select r.id,
   '33333333-0000-0000-0000-000000000004', s.start_at - interval '1 day', s.start_at - interval '2 days'
 from public.resources r
 cross join lateral (
-  select date_trunc('day', now()) - make_interval(days => 1 + floor(random() * 42)::int) + make_interval(hours => 9 + floor(random() * 6)::int) as start_at,
+  -- Midnight on the campus (IST) clock, so history lands inside 09:00–18:00 opening hours.
+  select (date_trunc('day', now() at time zone 'Asia/Kolkata') at time zone 'Asia/Kolkata')
+           - make_interval(days => 1 + floor(random() * 42)::int) + make_interval(hours => 9 + floor(random() * 6)::int) as start_at,
          1 + floor(random() * 3)::int as hrs
   from generate_series(1, case
     when r.demand = 'high' then 18
     when r.category in ('Rooms', 'Media') then 6
     else 2 end)
 ) s;
+
+-- Twelve more fictional students (random passwords, no demo login) so fairness metrics
+-- describe a real cohort: a few heavy users and a long tail.
+with names(n, full_name, roll) as (values
+  (1,'Ishaan Rao','NIT23ME012'),(2,'Ananya Kulkarni','NIT23EC044'),(3,'Rohan Das','NIT22CS077'),(4,'Sneha Pillai','NIT24CS008'),
+  (5,'Vikram Joshi','NIT23ME031'),(6,'Fatima Sheikh','NIT22EC090'),(7,'Arjun Nambiar','NIT24EC015'),(8,'Diya Kapoor','NIT23CS052'),
+  (9,'Harsh Vardhan','NIT22ME066'),(10,'Nikita Bose','NIT24ME003'),(11,'Siddharth Menon','NIT23CS019'),(12,'Tanvi Shah','NIT22CS101')
+), ins as (
+  insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
+  select '00000000-0000-0000-0000-000000000000', ('66666666-0000-0000-0000-' || lpad(n::text, 12, '0'))::uuid, 'authenticated', 'authenticated',
+    'cohort' || n || '@northfield.demo', extensions.crypt(encode(extensions.gen_random_bytes(16), 'hex'), extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}'::jsonb, jsonb_build_object('full_name', full_name), now(), now(), '', '', '', ''
+  from names returning id
+)
+insert into public.profiles (id, org_id, dept_id, full_name, roll_no, role, verified)
+select ('66666666-0000-0000-0000-' || lpad(n::text, 12, '0'))::uuid, '11111111-0000-0000-0000-000000000001',
+  (array['22222222-0000-0000-0000-000000000002','22222222-0000-0000-0000-000000000003','22222222-0000-0000-0000-000000000004'])[1 + n % 3]::uuid,
+  full_name, roll, 'student', true
+from names;
+
+select setseed(0.17);
+update public.bookings
+set user_id = ('66666666-0000-0000-0000-' || lpad((1 + floor(power(random(), 2.2) * 12))::int::text, 12, '0'))::uuid
+where status = 'closed' and random() < 0.6;
 
 -- One historical damage incident, resolved by a human.
 insert into public.incidents (resource_id, reported_by, type, severity, description, status, decision, strike_applied, decided_by, decided_at, created_at)

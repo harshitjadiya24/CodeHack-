@@ -6,6 +6,9 @@ import { ResourceIcon } from "@/components/resource-icon";
 import { DecisionReceiptCard } from "@/components/decision-receipt";
 import { AuditTimeline } from "@/components/audit-timeline";
 import { CancelForm, DecisionForm } from "@/components/action-forms";
+import { ConfirmCheckInForm, ReportIncidentForm, VerifyReturnForm } from "@/components/handover-forms";
+import { ConditionRecord } from "@/components/condition-record";
+import { signedHandoverPhotos } from "@/lib/services/handovers";
 import { OWNER_ROLES, STAFF_ROLES, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { BOOKING_STATUS } from "@/lib/status";
@@ -26,19 +29,28 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   // RLS decides visibility: requester, resource owner, attendants and staff of that campus.
   const { data: b } = await supabase
     .from("bookings")
-    .select("*, resource:resources(id, name, category, location, owner_id, requires_supervision), requester:profiles!bookings_user_id_fkey(full_name, roll_no)")
+    .select("*, resource:resources(id, name, category, location, owner_id, requires_supervision, photo_slots), requester:profiles!bookings_user_id_fkey(full_name, roll_no)")
     .eq("id", id)
     .maybeSingle();
   if (!b?.resource) notFound();
 
-  const { data: timeline } = await supabase
-    .from("audit_log")
-    .select("id, action, reason, created_at, hash, actor:profiles!audit_log_actor_id_fkey(full_name)")
-    .eq("entity_id", id)
-    .order("id");
+  // The RLS read above already proved this user may see the booking, so signing photo URLs is safe.
+  const [{ data: timeline }, { data: incidents }, handovers] = await Promise.all([
+    supabase
+      .from("audit_log")
+      .select("id, action, reason, created_at, hash, actor:profiles!audit_log_actor_id_fkey(full_name)")
+      .eq("entity_id", id)
+      .order("id"),
+    supabase.from("incidents").select("id, type, severity, status, description, decision").eq("booking_id", id).order("created_at"),
+    signedHandoverPhotos(id),
+  ]);
 
   const isRequester = b.user_id === user.id;
   const canManage = STAFF_ROLES.includes(user.role) || (OWNER_ROLES.includes(user.role) && b.resource.owner_id === user.id);
+  const checkIn = handovers.find((h) => h.phase === "check_in");
+  const returned = handovers.find((h) => h.phase === "return");
+  const awaitingAttendant = b.status === "approved" && b.resource.requires_supervision && !!checkIn && !checkIn.attendant_confirmed_at;
+  const isAttendant = ["attendant", ...STAFF_ROLES].includes(user.role);
   const status = BOOKING_STATUS[b.status];
   const receipt = b.decision_receipt as DecisionReceipt | null;
   const startsSoon = new Date(b.starts_at).getTime() - Date.now() < 24 * 3_600_000;
@@ -71,6 +83,27 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
           </Pill>
         </div>
 
+        <ConditionRecord handovers={handovers} slots={(b.resource.photo_slots as string[]) ?? []} />
+
+        {!!incidents?.length && (
+          <Card className="p-5">
+            <h2 className="mb-3 font-medium">Incidents</h2>
+            <ul className="space-y-3">
+              {incidents.map((i) => (
+                <li key={i.id} className="rounded-md border border-rule p-3 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Pill tone="danger">{i.type}</Pill>
+                    <Pill tone={i.severity === "high" ? "danger" : i.severity === "medium" ? "warn" : "neutral"}>{i.severity}</Pill>
+                    <Pill tone={i.status === "resolved" ? "ok" : "info"}>{i.status === "resolved" ? "Decided" : "Awaiting manager"}</Pill>
+                  </div>
+                  <p className="mt-2 text-ink-2">{i.description}</p>
+                  {i.decision && <p className="mt-1 text-ink">Decision: {i.decision}</p>}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+
         {receipt && <DecisionReceiptCard receipt={receipt} />}
 
         <Card className="p-5">
@@ -88,7 +121,13 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
       <aside className="space-y-4">
         <Card className="space-y-3 p-5">
           <h2 className="font-medium">Next step</h2>
-          {b.status === "approved" && isRequester && (
+          {awaitingAttendant && (
+            <p className="rounded-md bg-info-soft p-3 text-sm text-info">Condition recorded. Waiting for a lab attendant to confirm in person.</p>
+          )}
+          {awaitingAttendant && isAttendant && <ConfirmCheckInForm bookingId={b.id} />}
+          {b.status === "returned" && canManage && <VerifyReturnForm bookingId={b.id} flagged={!!returned?.ai_flag} />}
+          {b.status === "returned" && !canManage && <p className="text-sm text-ink-2">Returned. The owner is verifying the condition.</p>}
+          {b.status === "approved" && isRequester && !checkIn && (
             <>
               <p className="text-sm text-ink-2">
                 {startsSoon ? "Your slot is close. Scan the QR tag on the resource, or start check-in here." : "Check-in opens on the day of your slot."}
@@ -104,10 +143,13 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
             </ButtonLink>
           )}
           {["requested", "in_draw"].includes(b.status) && canManage && <DecisionForm bookingId={b.id} />}
-          {CANCELLABLE.includes(b.status) && (isRequester || canManage) && <CancelForm bookingId={b.id} needsReason={!isRequester} />}
+          {CANCELLABLE.includes(b.status) && !checkIn && (isRequester || canManage) && <CancelForm bookingId={b.id} needsReason={!isRequester} />}
+          {["approved", "checked_in", "overdue", "returned", "closed"].includes(b.status) && (isRequester || canManage || isAttendant) && (
+            <ReportIncidentForm bookingId={b.id} />
+          )}
           {["closed", "cancelled", "rejected"].includes(b.status) && <p className="text-sm text-muted">This booking is finished. Its record stays in the audit chain.</p>}
           <ButtonLink href={`/bookings/${b.id}/receipt`} variant="ghost" className="w-full">
-            Download record (PDF)
+            Printable record (PDF)
           </ButtonLink>
         </Card>
 
