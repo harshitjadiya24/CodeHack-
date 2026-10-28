@@ -71,8 +71,8 @@ export default async function RegisterInstitutionPage() {
           ))}
         </ol>
         <div className="mt-10 rounded-[22px] border border-rule bg-card p-5 text-[15px] text-ink-2">
-          <b className="text-ink">How we stop impersonation.</b> If your email is on your institute’s own domain, it’s verified straight away. Otherwise it
-          works for your own campus but shows as pending review until the Saajha team confirms it, and isn’t offered to other campuses.
+          <b className="text-ink">How we stop impersonation.</b> Every new institute starts as pending review. It works for your own campus straight away,
+          but isn’t shown to other campuses until the Saajha team has checked it against your website and AISHE code.
         </div>
       </aside>
     </main>

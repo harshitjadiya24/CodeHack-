@@ -565,6 +565,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      rate_limit_hit: {
+        Args: { p_key: string; p_max: number; p_window_seconds: number }
+        Returns: boolean
+      }
       apply_booking_transition: {
         Args: {
           p_actor: string

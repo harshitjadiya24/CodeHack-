@@ -30,8 +30,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
       {org?.status === "pending" && (
         <p role="status" className="mb-6 rounded-[22px] border border-rule bg-warn-soft px-5 py-3 text-[15px] text-warn">
-          <b>Pending review.</b> Your institute works for your own campus now. Other campuses will see it once the Saajha team confirms it; registering
-          with an email on your institute’s domain verifies it straight away.
+          <b>Pending review.</b> Your institute works for your own campus now. Other campuses will see it once the Saajha team has checked it is real.
         </p>
       )}
       {welcome && (

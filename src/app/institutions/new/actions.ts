@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { allow, clientIp, RATE_LIMITED } from "@/lib/rate-limit";
 import { institutionSchema, registerInstitution, type InstitutionInput } from "@/lib/services/institutions";
 
 export type InstitutionState = {
@@ -24,6 +25,8 @@ export async function registerInstitutionAction(_prev: InstitutionState, formDat
     for (const issue of parsed.error.issues) fieldErrors[issue.path[0] as keyof InstitutionInput] ??= issue.message;
     return { fieldErrors, values };
   }
+
+  if (!(await allow("institution", await clientIp()))) return { error: RATE_LIMITED, values };
 
   const result = await registerInstitution(parsed.data);
   if (!result.ok) return result.field ? { fieldErrors: { [result.field]: result.error }, values } : { error: result.error, values };

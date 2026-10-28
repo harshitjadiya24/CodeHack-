@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo";
 import { homeFor, type Role } from "@/lib/auth";
+import { allow, clientIp, RATE_LIMITED } from "@/lib/rate-limit";
 
 export type LoginState = { error?: string };
 
@@ -30,6 +31,8 @@ async function signIn(email: string, password: string, next?: string): Promise<L
 export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
   const parsed = credentials.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  // Demo buttons skip this: judges in one hall share an IP and click them a lot.
+  if (!(await allow("login-ip", await clientIp())) || !(await allow("login-email", parsed.data.email))) return { error: RATE_LIMITED };
   return signIn(parsed.data.email, parsed.data.password, parsed.data.next);
 }
 

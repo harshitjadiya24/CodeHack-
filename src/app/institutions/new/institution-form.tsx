@@ -53,7 +53,7 @@ export function InstitutionForm() {
           </Field>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Website" hint="We use its domain to check your email." error={e.website}>
+          <Field label="Website" hint="Helps us confirm the institute is real." error={e.website}>
             <input name="website" required defaultValue={v.website} aria-invalid={!!e.website} className={inputClass} inputMode="url" placeholder="gcoea.ac.in" spellCheck={false} />
           </Field>
           <Field label="AISHE code (optional)" hint="From aishe.gov.in, like C-12345." error={e.aisheCode}>
@@ -72,7 +72,7 @@ export function InstitutionForm() {
             <input name="designation" required defaultValue={v.designation} aria-invalid={!!e.designation} className={inputClass} placeholder="Registrar, Dean R&D, Lab In-charge" />
           </Field>
         </div>
-        <Field label="Official email" hint="An email on the institute’s domain verifies the institute straight away." error={e.email}>
+        <Field label="Official email" hint="Use your email on the institute’s domain if you have one. It makes the review quicker." error={e.email}>
           <input name="email" type="email" required defaultValue={v.email} aria-invalid={!!e.email} className={inputClass} autoComplete="email" />
         </Field>
         <Field label="Password" hint="At least 8 characters, with a letter and a number." error={e.password}>

@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Saajha
 
-## Getting Started
+**Borrow the lab next door.** Saajha opens idle campus equipment and spaces to the students who need them. It shows what you're cleared to use and books you a slot. When too many people want the same hour, a fair draw that anyone can re-check decides.
 
-First, run the development server:
+Built for the problem statement **"Unlock Underused Equipment and Spaces"**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+![Landing page](docs/screens/landing.png)
+
+## The problem
+
+Indian colleges already own 3D printers, oscilloscopes, microscopes, camera kits and seminar rooms. Most of them sit idle for most of the week. Students who could use them don't know they exist, aren't sure they're allowed, or lose out to whoever asks first. Lab owners say no because they can't tell who is trained or who broke something.
+
+Saajha fixes the trust problem, not just the booking:
+
+| Worry | What Saajha does |
+|---|---|
+| "Am I allowed to use this?" | A **Trust Passport** of verified training badges. Every resource lists what it needs, and you're told exactly what's missing. |
+| "Someone always grabs it first" | Popular slots go to a **Fair Draw**: seeded, weighted towards people who've had less time, sealed before anyone asks, and re-runnable by anyone. |
+| "Who broke it?" | **Photo handovers** at pick-up and return, with condition agreed on both sides and a fair review for damage. |
+| "Why was I rejected?" | Every decision comes with a **receipt** that lists the rules applied and the priority breakdown. |
+| "Is any of this real?" | A **hash-chained audit log**, verifiable from the app, plus utilisation and fairness (Gini) reports for IQAC/NAAC. |
+
+## Try it in 60 seconds
+
+Open `/login` and use any demo account (password for all: `Saajha@2026`), or click a role card.
+
+1. **Meera** (student, full passport): go to **Discover**. See the map of closest open slots, open a resource and request a slot.
+2. **Aarav** (student, missing a badge): the same resource tells him exactly which training he lacks.
+3. **Dr. Priya Nair** (lab owner): decide requests with the priority score shown, or run a Fair Draw on a contested slot.
+4. **Ravi** (attendant): confirm a supervised pick-up with photos.
+5. **IQAC Office** (admin): campus insights, fairness, the accreditation report, and a check that the audit chain is intact.
+
+Every demo account is at the fictional *Northfield Institute of Technology, Pune*. Zoya is at the partner campus, Riverside.
+
+| | |
+|---|---|
+| ![Discover with map](docs/screens/discover-map.png) | ![Booking with decision receipt](docs/screens/booking.png) |
+| ![Trust Passport](docs/screens/passport.png) | ![Campus insights](docs/screens/insights.png) |
+
+## For any institute in India
+
+Any college can register at `/institutions/new` in a few minutes:
+
+- Choose the institute type, and its departments, starter training badges and fair-use policy are set up for it.
+- New institutes work for their own campus straight away.
+- An institute stays **pending review** and isn't shown to other campuses until it has been checked.
+- Students sign up at `/signup`, pick their institute and roll number, and can browse at once. The admin office verifies them before they can borrow.
+- **Discover** can widen from *My campus* to *My city* or *My state*, and shows verified institutes nearby on the map.
+
+## How it's built
+
+- **Next.js 15** (App Router, server actions, TypeScript strict) and **Tailwind CSS v4**.
+- **Supabase** (Postgres, Auth, Storage, Realtime). Row-level security on every table. State changes go through SQL functions, so the rules hold even if the UI is bypassed.
+- **Domain logic is pure and unit-tested**, in [`src/lib/domain`](src/lib/domain):
+  - eligibility
+  - fairness and priority
+  - the Fair Draw (commit and reveal)
+  - condition comparison
+  - utilisation and Gini
+  - next open slot and distance
+- **Maps:** Leaflet with OpenStreetMap tiles, and geocoding from Nominatim. All free, no API keys.
+- **AI (optional):** Gemini matches a free-text task ("I need to test a 12V motor driver") to resources. Without a key it falls back to keyword matching, and AI output is never a decision.
+- **Design:** "Common Room". Mona Sans plus four pastel tags with fixed meaning: sage means cleared, butter means popular, rose means a problem, sky means information. Light and dark themes, reduced motion respected, built mobile-first.
+- **Motion:** Motion (Framer), GSAP SplitText, and Lenis smooth scroll.
+
+![How a booking flows](docs/workflow.png)
+
+### Project layout
+
+```
+src/app/            routes: landing, auth, sign-up, institutes, (app) for signed-in pages
+src/lib/domain/     pure rules and their tests
+src/lib/services/   server-side use cases (bookings, handovers, governance, insights…)
+src/components/     UI: ui.tsx primitives, common-room/, motion/, ui-kit/
+supabase/           migrations (schema, RLS, state machine, audit chain…) and seed.sql
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run it locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+cp .env.example .env.local   # fill in the values below
+npm run dev                  # http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Needed | What it is |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | yes | Publishable (anon) key |
+| `SUPABASE_SECRET_KEY` | yes | Secret key, server only |
+| `GEMINI_API_KEY` | no | Turns on AI matching in Discover |
+| `NEXT_PUBLIC_DEMO_MODE` | no | `1` lets check-in happen at any time, for demos |
 
-## Learn More
+**Database:** apply `supabase/migrations/*` in order, then run `supabase/seed.sql` for the demo campus (with the Supabase CLI: `supabase db reset`).
 
-To learn more about Next.js, take a look at the following resources:
+**Checks** (the same ones CI runs on every push):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run typecheck && npm run lint && npm test && npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Security and privacy
 
-## Deploy on Vercel
+- **Abuse limits:** sign-up, sign-in and institute registration are rate-limited per IP (and per email for sign-in). The counts are kept in Postgres, so they hold across server instances.
+- **New institutes:** start pending and are hidden from other campuses until checked.
+- **Students:** can't borrow until the admin office has checked their roll number.
+- **Public pages** (the landing page and the share image) show counts and initials only, never names.
+- **Your data:** people can download everything Saajha holds about them from their profile.
+- **The audit log** can only be appended to, and anyone can check that it hasn't been tampered with.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## What's next
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- A review console for pending institutes.
+- Cross-campus endorsements, so you can borrow from a partner college.
+- Hindi and regional languages.
+- Install as an app, with the passport QR working offline.
+- WhatsApp and email reminders.
+- Calendar export.
+- Deposits over UPI.

@@ -271,7 +271,7 @@ export default async function Landing() {
               </SplitHeading>
               <p className="mt-4 max-w-[46ch] text-lg text-subtle">
                 Any college in India can join in a few minutes. Departments, starter training and a fair-use policy come set up for your kind of institute.
-                An email on your own domain verifies you straight away.
+                Your own campus can start right away; other campuses see you once we’ve checked you’re real.
               </p>
               <div className="mt-7 flex flex-wrap gap-2.5">
                 <ButtonLink href="/institutions/new">Register your institute</ButtonLink>

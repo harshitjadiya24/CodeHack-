@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { allow, clientIp, RATE_LIMITED } from "@/lib/rate-limit";
 import { registerAccount, signupSchema, type SignupInput } from "@/lib/services/accounts";
 
 export type SignupState = {
@@ -27,6 +28,8 @@ export async function signup(_prev: SignupState, formData: FormData): Promise<Si
     }
     return { fieldErrors, values };
   }
+
+  if (!(await allow("signup", await clientIp()))) return { error: RATE_LIMITED, values };
 
   const result = await registerAccount(parsed.data);
   if (!result.ok) return result.field ? { fieldErrors: { [result.field]: result.error }, values } : { error: result.error, values };

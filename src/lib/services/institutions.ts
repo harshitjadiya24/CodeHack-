@@ -7,8 +7,9 @@ import { geocodeInstitute } from "@/lib/geocode";
 import { INDIAN_STATES, INSTITUTE_KINDS, departmentTemplate, starterBadges, type InstituteKind } from "@/lib/india";
 
 // Any institute in India can join Saajha. The person registering becomes its admin office.
-// Trust: if their email is on the institute's own web domain the institute is "domain verified" at once;
-// otherwise it works for its own campus but stays "pending review" (and isn't offered to other campuses).
+// Trust: every new institute starts "pending review". It works for its own campus straight away, but isn't
+// offered to other campuses until someone has checked it is real. Typing an email on the institute's domain
+// proves nothing without an inbox check, so it is only recorded as a hint for the reviewer.
 
 const kinds = Object.keys(INSTITUTE_KINDS) as [InstituteKind, ...InstituteKind[]];
 
@@ -42,7 +43,7 @@ export const institutionSchema = z.object({
 });
 
 export type InstitutionInput = z.infer<typeof institutionSchema>;
-export type InstitutionResult = { ok: true; email: string; domainVerified: boolean } | { ok: false; error: string; field?: keyof InstitutionInput };
+export type InstitutionResult = { ok: true; email: string } | { ok: false; error: string; field?: keyof InstitutionInput };
 
 function onDomain(email: string, site: string) {
   const domain = email.split("@")[1] ?? "";
@@ -69,7 +70,7 @@ export async function registerInstitution(input: InstitutionInput): Promise<Inst
   const { data: sameName } = await db.from("organizations").select("id").ilike("name", input.name).ilike("city", input.city).maybeSingle();
   if (sameName) return { ok: false, error: "This institute is already on Saajha. Students can sign up and pick it from the list.", field: "name" };
 
-  const domainVerified = onDomain(input.email, input.website);
+  const domainMatch = onDomain(input.email, input.website);
   const point = await geocodeInstitute(input.name, input.city, input.state);
 
   const { data: created, error } = await db.auth.admin.createUser({
@@ -102,8 +103,8 @@ export async function registerInstitution(input: InstitutionInput): Promise<Inst
       city: input.city,
       aishe_code: aishe,
       website: input.website,
-      email_domain: domainVerified ? input.email.split("@")[1] : null,
-      status: domainVerified ? "domain_verified" : "pending",
+      email_domain: null,
+      status: "pending",
       created_by: userId,
       lat: point?.lat ?? null,
       lng: point?.lng ?? null,
@@ -134,10 +135,10 @@ export async function registerInstitution(input: InstitutionInput): Promise<Inst
     entity: "organization",
     entityId: org.id,
     reason: `${input.adminName}, ${input.designation}`,
-    payload: { kind: input.kind, state: input.state, city: input.city, aishe, website: input.website, domainVerified },
+    payload: { kind: input.kind, state: input.state, city: input.city, aishe, website: input.website, domainMatch },
   });
 
-  return { ok: true, email: input.email, domainVerified };
+  return { ok: true, email: input.email };
 }
 
 export async function institutionCount() {
