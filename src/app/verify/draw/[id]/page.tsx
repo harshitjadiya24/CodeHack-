@@ -27,7 +27,7 @@ export default async function DrawVerifyPage({ params }: { params: Promise<{ id:
       <Link href="/" className="font-display text-2xl">
         Saajha
       </Link>
-      <p className="mt-8 font-mono text-xs uppercase tracking-[0.18em] text-saffron">Fair Draw · public verification</p>
+      <p className="mt-8 text-sm text-saffron">Fair Draw · public verification</p>
       <h1 className="font-display text-4xl leading-tight">{draw.resource?.name}</h1>
       <p className="text-muted">
         Slot {formatCampus(draw.slot_start, { weekday: "short" })} – {formatCampus(draw.slot_end, { day: undefined, month: undefined })}

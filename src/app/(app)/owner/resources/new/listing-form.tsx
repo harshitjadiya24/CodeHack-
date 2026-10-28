@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Button, Card, Field, inputClass } from "@/components/ui";
-import { createListingAction, type ListingState } from "../actions";
+import { createListingAction, updateListingAction, type ListingState } from "../actions";
 
 export type ListingDraft = Partial<{
   name: string;
@@ -11,12 +11,24 @@ export type ListingDraft = Partial<{
   rules: string;
   checklist: string;
   photoSlots: string;
+  kind: string;
+  location: string;
+  demand: string;
+  maxHours: number;
+  creditRate: number;
+  depositInr: number;
+  rentalValue: number;
+  requiresSupervision: boolean;
+  autoApprove: boolean;
+  badgeIds: string[];
 }>;
 
-export function ListingForm({ badges, draft }: { badges: { id: string; name: string }[]; draft?: ListingDraft }) {
-  const [state, action, pending] = useActionState<ListingState, FormData>(createListingAction, {});
+/** One form for listing and for editing; `resourceId` switches it to edit mode. */
+export function ListingForm({ badges, draft, resourceId }: { badges: { id: string; name: string }[]; draft?: ListingDraft; resourceId?: string }) {
+  const [state, action, pending] = useActionState<ListingState, FormData>(resourceId ? updateListingAction : createListingAction, {});
   return (
     <form action={action} className="space-y-6">
+      {resourceId && <input type="hidden" name="resourceId" value={resourceId} />}
       <Card className="grid gap-4 p-5 md:grid-cols-2">
         <Field label="Name">
           <input name="name" required defaultValue={draft?.name} className={inputClass} placeholder="Bambu Lab X1 Carbon" />
@@ -30,13 +42,13 @@ export function ListingForm({ badges, draft }: { badges: { id: string; name: str
           </datalist>
         </Field>
         <Field label="Type">
-          <select name="kind" className={inputClass}>
+          <select name="kind" defaultValue={draft?.kind} className={inputClass}>
             <option value="equipment">Equipment</option>
             <option value="space">Space</option>
           </select>
         </Field>
         <Field label="Location">
-          <input name="location" required className={inputClass} placeholder="Central Makerspace, Bay 4" />
+          <input name="location" required defaultValue={draft?.location} className={inputClass} placeholder="Central Makerspace, Bay 4" />
         </Field>
         <div className="md:col-span-2">
           <Field label="Description">
@@ -57,35 +69,35 @@ export function ListingForm({ badges, draft }: { badges: { id: string; name: str
           <div className="flex flex-wrap gap-2">
             {badges.map((b) => (
               <label key={b.id} className="flex cursor-pointer items-center gap-2 rounded-md border border-rule px-3 py-1.5 text-sm has-[:checked]:border-accent has-[:checked]:bg-accent-soft">
-                <input type="checkbox" name="badgeIds" value={b.id} className="accent-[var(--accent)]" /> {b.name}
+                <input type="checkbox" name="badgeIds" value={b.id} defaultChecked={draft?.badgeIds?.includes(b.id)} className="accent-[var(--accent)]" /> {b.name}
               </label>
             ))}
           </div>
         </fieldset>
         <Field label="Demand" hint="High demand turns on Fair Draw, cooldowns and per-person caps.">
-          <select name="demand" className={inputClass}>
+          <select name="demand" defaultValue={draft?.demand} className={inputClass}>
             <option value="normal">Normal</option>
             <option value="high">High</option>
           </select>
         </Field>
         <Field label="Max hours per booking">
-          <input name="maxHours" type="number" min={1} max={8} defaultValue={4} className={inputClass} />
+          <input name="maxHours" type="number" min={1} max={8} defaultValue={draft?.maxHours ?? 4} className={inputClass} />
         </Field>
         <Field label="Credits per hour">
-          <input name="creditRate" type="number" min={0} max={10} defaultValue={1} className={inputClass} />
+          <input name="creditRate" type="number" min={0} max={10} defaultValue={draft?.creditRate ?? 1} className={inputClass} />
         </Field>
         <Field label="Refundable deposit (₹)">
-          <input name="depositInr" type="number" min={0} defaultValue={0} className={inputClass} />
+          <input name="depositInr" type="number" min={0} defaultValue={draft?.depositInr ?? 0} className={inputClass} />
         </Field>
         <Field label="Market rental value (₹/hour)" hint="Used to report the value your campus unlocks.">
-          <input name="rentalValue" type="number" min={0} defaultValue={300} className={inputClass} />
+          <input name="rentalValue" type="number" min={0} defaultValue={draft?.rentalValue ?? 300} className={inputClass} />
         </Field>
         <div className="space-y-2 self-end text-sm">
           <label className="flex items-center gap-2">
-            <input type="checkbox" name="requiresSupervision" className="accent-[var(--accent)]" /> Attendant must supervise check-in
+            <input type="checkbox" name="requiresSupervision" defaultChecked={draft?.requiresSupervision} className="accent-[var(--accent)]" /> Attendant must supervise check-in
           </label>
           <label className="flex items-center gap-2">
-            <input type="checkbox" name="autoApprove" className="accent-[var(--accent)]" /> Approve instantly when eligible and uncontested
+            <input type="checkbox" name="autoApprove" defaultChecked={draft?.autoApprove} className="accent-[var(--accent)]" /> Approve instantly when eligible and uncontested
           </label>
         </div>
       </Card>
@@ -106,7 +118,7 @@ export function ListingForm({ badges, draft }: { badges: { id: string; name: str
         </p>
       )}
       <Button disabled={pending} className="w-full py-3 text-base">
-        {pending ? "Publishing…" : "Publish listing"}
+        {pending ? "Saving…" : resourceId ? "Save changes" : "Publish listing"}
       </Button>
     </form>
   );

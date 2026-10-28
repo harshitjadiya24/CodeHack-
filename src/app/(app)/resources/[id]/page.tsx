@@ -62,7 +62,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         <div className="flex gap-4">
           <ResourceIcon category={r.category} className="size-16" />
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">{r.category} · {r.kind}</p>
+            <p className="text-sm text-muted">{r.category} · {r.kind}</p>
             <h1 className="font-display text-4xl leading-tight">{r.name}</h1>
             <p className="mt-1 flex items-center gap-1 text-sm text-muted">
               <MapPin className="size-4" aria-hidden /> {r.location} · Owner: {owner?.full_name}
@@ -174,6 +174,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
           <Card className="p-5">
             <h2 className="mb-2 font-medium">Owner tools</h2>
             <div className="grid gap-2">
+              <ButtonLink href={`/owner/resources/${r.id}/edit`} variant="secondary">Edit conditions / maintenance</ButtonLink>
               <ButtonLink href={`/owner/resources/${r.id}/qr`} variant="secondary">Print QR tag</ButtonLink>
               <ButtonLink href="/owner" variant="secondary">Review requests</ButtonLink>
             </div>

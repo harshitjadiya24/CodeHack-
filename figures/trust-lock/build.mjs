@@ -343,5 +343,5 @@ const body = k.plateHtml({
 mkdirSync(OUT, { recursive: true });
 const file = theme === "light" ? "trust-lock.html" : "trust-lock-dark.html";
 const page = k.pageHtml({ title: "Trust lock · Saajha", theme, body, script: kitScript() + live });
-writeFileSync(join(OUT, file), page.replace("</style>", `body{background:transparent!important}.iso-page{margin:16px auto}[data-part^="pin-"][data-lit] .iso-top{fill:var(--anatomy-lit-top)}[data-part^="pin-"][data-lit] .iso-edge{stroke:var(--anatomy-lit)}</style>`));
+writeFileSync(join(OUT, file), page.replace("</style>", `${theme === "light" ? "html{color-scheme:light}" : ""}body{background:transparent!important}.iso-page{margin:16px auto}[data-part^="pin-"][data-lit] .iso-top{fill:var(--anatomy-lit-top)}[data-part^="pin-"][data-lit] .iso-edge{stroke:var(--anatomy-lit)}</style>`));
 console.log("wrote", join("public/figures", file));

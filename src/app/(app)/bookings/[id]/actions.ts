@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
-import { cancelBooking, decideBooking, runFairDraw } from "@/lib/services/bookings";
+import { cancelBooking, decideBooking, requestExtension, runFairDraw } from "@/lib/services/bookings";
+import { campusInstant } from "@/lib/domain/time";
 
 export type ActionState = { ok?: boolean; error?: string; message?: string };
 
@@ -38,4 +39,14 @@ export async function runDrawAction(_prev: ActionState, formData: FormData): Pro
   const result = await runFairDraw(user, id.parse(formData.get("drawId")));
   revalidatePath("/owner");
   return result.ok ? { ok: true, message: result.message } : { error: result.error };
+}
+
+export async function extendAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requireUser();
+  const bookingId = id.parse(formData.get("bookingId"));
+  const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).parse(formData.get("date"));
+  const to = z.string().regex(/^\d{2}:\d{2}$/).parse(formData.get("to"));
+  const result = await requestExtension(user, bookingId, campusInstant(date, to));
+  revalidatePath(`/bookings/${bookingId}`);
+  return result.ok ? { ok: true, message: result.message } : { error: [result.error, ...(result.reasons ?? [])].join(" ") };
 }

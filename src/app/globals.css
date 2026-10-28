@@ -1,55 +1,65 @@
 @import "tailwindcss";
 
-/* Saajha tokens. Paper and ink, one trust accent (teal), one fairness highlight (saffron). */
 :root {
-  --paper: #f7f4ee;
-  --paper-2: #efeae0;
-  --card: #fffdf9;
-  --ink: #1d1b16;
-  --ink-2: #4a463d;
-  --muted: #6f6a5e;
-  --rule: #e2dccf;
-  --accent: #0e6b5c;
+  /* Blueprint: engineering-drawing blue for structure, cool white paper, signal orange for actions. */
+  --blueprint: #0b2e6f;
+  --blueprint-2: #123c8c;
+  --blueprint-line: rgba(255, 255, 255, 0.09);
+  --paper: #f6f8fc;
+  --paper-2: #eaf0f9;
+  --card: #ffffff;
+  --ink: #0b1730;
+  --ink-2: #33415c;
+  --muted: #56667f;
+  --rule: #dce4f0;
+  --accent: #c2410c;
   --accent-ink: #ffffff;
-  --accent-soft: #dcefe9;
-  --saffron: #b85c00;
-  --saffron-soft: #fbead3;
-  --danger: #b42318;
-  --danger-soft: #fde4e1;
-  --warn: #8a5a00;
-  --warn-soft: #fff1cc;
-  --ok: #1f7a3a;
-  --ok-soft: #dff3e4;
-  --info: #2f4f9e;
-  --info-soft: #e3e9f8;
+  --accent-soft: #ffede3;
+  --signal: #ff5a1f;
+  --saffron: #1d4ed8;
+  --saffron-soft: #e3ebfd;
+  --danger: #b91c1c;
+  --danger-soft: #fde7e7;
+  --warn: #a16207;
+  --warn-soft: #fef3c7;
+  --ok: #0e7a52;
+  --ok-soft: #dcf5ea;
+  --info: #1d4ed8;
+  --info-soft: #e3ebfd;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #15140f;
-    --paper-2: #1d1c16;
-    --card: #1f1e18;
-    --ink: #f2eee4;
-    --ink-2: #d2ccbe;
-    --muted: #a39d8f;
-    --rule: #34322a;
-    --accent: #4fc2a9;
-    --accent-ink: #0b1f1a;
-    --accent-soft: #163a33;
-    --saffron: #f0a24a;
-    --saffron-soft: #3a2a14;
-    --danger: #f2877c;
-    --danger-soft: #3a1b18;
-    --warn: #f0c35a;
-    --warn-soft: #3a2f12;
-    --ok: #7fd49a;
-    --ok-soft: #173a22;
-    --info: #9db4ef;
-    --info-soft: #1c2640;
+    --blueprint: #0a2559;
+    --blueprint-2: #103272;
+    --paper: #071229;
+    --paper-2: #0d1c3a;
+    --card: #0c1a36;
+    --ink: #e8eef8;
+    --ink-2: #c0cde3;
+    --muted: #93a5c4;
+    --rule: #1c2f55;
+    --accent: #ff7a45;
+    --accent-ink: #1a0a02;
+    --accent-soft: #3a1a0c;
+    --signal: #ff7a45;
+    --saffron: #8fb0ff;
+    --saffron-soft: #172c5c;
+    --danger: #f8908a;
+    --danger-soft: #3a1717;
+    --warn: #f5c451;
+    --warn-soft: #3a2f10;
+    --ok: #6ee0a8;
+    --ok-soft: #0f3527;
+    --info: #8fb0ff;
+    --info-soft: #172c5c;
   }
 }
 
 @theme inline {
+  --color-blueprint: var(--blueprint);
+  --color-blueprint-2: var(--blueprint-2);
+  --color-signal: var(--signal);
   --color-paper: var(--paper);
   --color-paper-2: var(--paper-2);
   --color-card: var(--card);
@@ -72,7 +82,7 @@
   --color-info-soft: var(--info-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-instrument-serif);
+  --font-display: var(--font-bricolage);
 }
 
 body {
@@ -91,4 +101,19 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.font-display {
+  letter-spacing: -0.02em;
+}
+
+/* Blueprint grid: a fine 24px mesh with a heavier line every fourth cell, as on a drawing sheet. */
+.blueprint-grid {
+  background-color: var(--blueprint);
+  background-image:
+    linear-gradient(var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
 }

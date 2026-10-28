@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-const instrumentSerif = Instrument_Serif({ variable: "--font-instrument-serif", subsets: ["latin"], weight: "400" });
+const bricolage = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: { default: "Saajha — share campus resources with trust", template: "%s · Saajha" },
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} antialiased`}>
         {children}
         <Toaster position="top-center" richColors closeButton />
       </body>

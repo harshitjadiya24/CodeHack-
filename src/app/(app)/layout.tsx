@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { LiveBell } from "@/components/live-bell";
 import { requireUser, type Role } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { ROLE_LABEL } from "@/lib/demo";
@@ -34,6 +34,7 @@ const NAV: Record<Role, { href: string; label: string }[]> = {
   ],
   admin: [
     { href: "/admin", label: "Insights" },
+    { href: "/admin/people", label: "People" },
     { href: "/manager", label: "Review desk" },
     { href: "/audit", label: "Audit log" },
     { href: "/resources", label: "Catalogue" },
@@ -53,9 +54,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:px-3 focus:py-2">
         Skip to content
       </a>
-      <header className="border-b border-rule bg-card/80 backdrop-blur">
+      <header className="blueprint-grid text-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 md:px-8">
-          <Link href="/" className="font-display text-2xl leading-none text-ink">
+          <Link href="/" className="font-display text-2xl font-semibold leading-none text-white">
             Saajha
           </Link>
           <nav aria-label="Main" className="order-3 flex w-full gap-1 overflow-x-auto md:order-none md:w-auto">
@@ -66,24 +67,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            <Link
-              href="/notifications"
-              className="relative rounded-md p-2 text-ink-2 hover:bg-paper-2"
-              aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
-            >
-              <Bell className="size-5" aria-hidden />
-              {!!unread && (
-                <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-saffron px-1 text-[10px] font-semibold text-white">
-                  {unread}
-                </span>
-              )}
+            <LiveBell userId={user.id} initial={unread ?? 0} />
+            <Link href="/profile" className="hidden rounded-md px-2 py-1 text-right text-sm leading-tight hover:bg-white/10 sm:block">
+              <span className="block font-medium text-white">{user.full_name}</span>
+              <span className="block text-xs text-white/65">{ROLE_LABEL[user.role]}</span>
             </Link>
-            <div className="hidden text-right text-sm leading-tight sm:block">
-              <p className="font-medium text-ink">{user.full_name}</p>
-              <p className="text-xs text-muted">{ROLE_LABEL[user.role]}</p>
-            </div>
             <form action={logout}>
-              <button className="rounded-md px-2 py-1 text-sm text-muted hover:bg-paper-2 hover:text-ink">Sign out</button>
+              <button className="rounded-md px-2 py-1 text-sm text-white/70 hover:bg-white/10 hover:text-white">Sign out</button>
             </form>
           </div>
         </div>

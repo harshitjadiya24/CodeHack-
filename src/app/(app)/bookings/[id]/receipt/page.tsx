@@ -35,7 +35,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
       <header className="border-b border-rule pb-4">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Saajha booking record · {b.id}</p>
+        <p className="text-sm text-muted">Saajha booking record · {b.id}</p>
         <h1 className="font-display text-3xl">{b.resource.name}</h1>
         <p className="text-ink-2">
           {b.requester?.full_name} ({b.requester?.roll_no}) · {formatCampus(b.starts_at, { weekday: "long", year: "numeric" })} –{" "}

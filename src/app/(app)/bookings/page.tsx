@@ -48,7 +48,7 @@ export default async function BookingsPage() {
       </PageHeader>
 
       <section aria-labelledby="live" className="mb-10">
-        <h2 id="live" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+        <h2 id="live" className="mb-3 text-base font-semibold text-ink">
           Active and upcoming
         </h2>
         {live.length ? <ul className="space-y-2">{live.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title="Nothing upcoming">Browse the catalogue to request something.</EmptyState>}
@@ -56,7 +56,7 @@ export default async function BookingsPage() {
 
       {past.length > 0 && (
         <section aria-labelledby="past">
-          <h2 id="past" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+          <h2 id="past" className="mb-3 text-base font-semibold text-ink">
             History
           </h2>
           <ul className="space-y-2">{past.map((b) => <Row key={b.id} b={b} />)}</ul>

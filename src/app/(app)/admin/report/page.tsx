@@ -21,7 +21,7 @@ export default async function ReportPage() {
         </div>
       </div>
       <header className="border-b border-rule pb-4">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Infrastructure and learning resources · utilisation evidence</p>
+        <p className="text-sm text-muted">Infrastructure and learning resources · utilisation evidence</p>
         <h1 className="font-display text-4xl">Shared Facilities Utilisation Report</h1>
         <p className="text-muted">
           Northfield Institute of Technology · last {ins.weeks} weeks · generated {formatCampus(new Date(), { year: "numeric" })} from the Saajha audit chain

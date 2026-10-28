@@ -29,7 +29,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
       <section aria-labelledby="demo-heading" className="flex flex-col justify-center">
         <div className="mb-4">
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-saffron">For judges</p>
+          <p className="text-sm text-saffron">For judges</p>
           <h2 id="demo-heading" className="font-display text-3xl">
             Try any role in one click
           </h2>

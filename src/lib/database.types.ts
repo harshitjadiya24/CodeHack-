@@ -291,6 +291,8 @@ export type Database = {
       incidents: {
         Row: {
           ai_summary: string | null
+          borrower_response: string | null
+          disputed_at: string | null
           booking_id: string | null
           created_at: string
           decided_at: string | null
@@ -308,6 +310,8 @@ export type Database = {
         }
         Insert: {
           ai_summary?: string | null
+          borrower_response?: string | null
+          disputed_at?: string | null
           booking_id?: string | null
           created_at?: string
           decided_at?: string | null
@@ -325,6 +329,8 @@ export type Database = {
         }
         Update: {
           ai_summary?: string | null
+          borrower_response?: string | null
+          disputed_at?: string | null
           booking_id?: string | null
           created_at?: string
           decided_at?: string | null
@@ -557,6 +563,10 @@ export type Database = {
           p_reason?: string
           p_to: Database["public"]["Enums"]["booking_status"]
         }
+        Returns: Database["public"]["Tables"]["bookings"]["Row"]
+      }
+      extend_booking: {
+        Args: { p_booking: string; p_new_end: string; p_actor: string; p_reason: string }
         Returns: Database["public"]["Tables"]["bookings"]["Row"]
       }
       booking_transition_allowed: {

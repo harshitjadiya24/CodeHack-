@@ -50,7 +50,7 @@ export default async function OwnerQueuePage() {
 
       {drawRows && drawRows.length > 0 && (
         <section aria-labelledby="draws" className="mb-10">
-          <h2 id="draws" className="mb-3 text-sm font-medium uppercase tracking-wide text-saffron">
+          <h2 id="draws" className="mb-3 text-base font-semibold text-saffron">
             Fair Draws ready
           </h2>
           <div className="space-y-4">
@@ -114,7 +114,7 @@ export default async function OwnerQueuePage() {
       )}
 
       <section aria-labelledby="pending" className="mb-10">
-        <h2 id="pending" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+        <h2 id="pending" className="mb-3 text-base font-semibold text-ink">
           Awaiting your decision ({pending.length})
         </h2>
         {pending.length === 0 ? (
@@ -164,7 +164,7 @@ export default async function OwnerQueuePage() {
       </section>
 
       <section aria-labelledby="upcoming">
-        <h2 id="upcoming" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+        <h2 id="upcoming" className="mb-3 text-base font-semibold text-ink">
           Approved and in use
         </h2>
         {upcoming.length === 0 ? (

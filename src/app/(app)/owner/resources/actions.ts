@@ -2,7 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { OWNER_ROLES, requireUser } from "@/lib/auth";
-import { createResource, listingSchema } from "@/lib/services/resources";
+import { createResource, listingSchema, setResourceStatus, updateResource } from "@/lib/services/resources";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { aiEnabled, draftListingFromPhoto } from "@/lib/ai";
 
 export type DraftState = {
@@ -49,4 +51,34 @@ export async function createListingAction(_prev: ListingState, formData: FormDat
   const result = await createResource(user, parsed.data);
   if (!result.ok) return { error: result.error };
   redirect(`/owner/resources/${result.bookingId}/qr?new=1`);
+}
+
+export async function updateListingAction(_prev: ListingState, formData: FormData): Promise<ListingState> {
+  const user = await requireUser();
+  const resourceId = z.guid().parse(formData.get("resourceId"));
+  const parsed = listingSchema.safeParse({
+    ...Object.fromEntries(formData),
+    requiresSupervision: formData.get("requiresSupervision") === "on",
+    autoApprove: formData.get("autoApprove") === "on",
+    badgeIds: formData.getAll("badgeIds"),
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return { error: `${issue.path.join(".")}: ${issue.message}` };
+  }
+  const result = await updateResource(user, resourceId, parsed.data);
+  if (!result.ok) return { error: result.error };
+  redirect(`/resources/${resourceId}`);
+}
+
+export type StatusState = { ok?: boolean; error?: string; message?: string };
+
+export async function setStatusAction(_prev: StatusState, formData: FormData): Promise<StatusState> {
+  const user = await requireUser();
+  const resourceId = z.guid().parse(formData.get("resourceId"));
+  const status = z.enum(["active", "maintenance"]).parse(formData.get("status"));
+  const result = await setResourceStatus(user, resourceId, status, String(formData.get("reason") ?? ""));
+  revalidatePath(`/owner/resources/${resourceId}/edit`);
+  revalidatePath(`/resources/${resourceId}`);
+  return result.ok ? { ok: true, message: result.message } : { error: result.error };
 }

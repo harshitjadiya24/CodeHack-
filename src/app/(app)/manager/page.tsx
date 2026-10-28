@@ -48,7 +48,7 @@ export default async function ManagerPage() {
       </p>
 
       <section aria-labelledby="badges" className="mb-10">
-        <h2 id="badges" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+        <h2 id="badges" className="mb-3 text-base font-semibold text-ink">
           Trust Passport requests ({myBadges.length})
         </h2>
         {myBadges.length === 0 ? (
@@ -82,7 +82,7 @@ export default async function ManagerPage() {
       </section>
 
       <section aria-labelledby="incidents" className="mb-10">
-        <h2 id="incidents" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+        <h2 id="incidents" className="mb-3 text-base font-semibold text-ink">
           Incidents awaiting a decision ({myIncidents.length})
         </h2>
         {myIncidents.length === 0 ? (
@@ -102,6 +102,9 @@ export default async function ManagerPage() {
                     Reported by {i.reporter?.full_name ?? "Saajha (automatic rule)"} · {formatCampus(i.created_at)}
                     {i.booking?.user && ` · Borrower: ${i.booking.user.full_name} (${i.booking.user.strikes} strike${i.booking.user.strikes === 1 ? "" : "s"})`}
                   </p>
+                  {i.borrower_response && (
+                    <p className="mt-2 rounded border border-info/40 bg-info-soft p-2 text-sm text-info">Borrower’s side (contested): “{i.borrower_response}”</p>
+                  )}
                   {i.ai_summary && <p className="mt-2 rounded bg-accent-soft p-2 text-sm text-accent">AI summary (advisory): {i.ai_summary}</p>}
                   {i.proposed_action && <p className="mt-2 text-sm text-info">Suggested by rules (advisory): {i.proposed_action}</p>}
                   {i.booking && (
@@ -119,7 +122,7 @@ export default async function ManagerPage() {
 
       {!!recent?.length && (
         <section aria-labelledby="recent">
-          <h2 id="recent" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+          <h2 id="recent" className="mb-3 text-base font-semibold text-ink">
             Recent decisions
           </h2>
           <Card className="divide-y divide-rule">

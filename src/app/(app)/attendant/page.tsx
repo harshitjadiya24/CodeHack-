@@ -31,7 +31,7 @@ export default async function AttendantPage() {
       <PageHeader eyebrow="Lab floor" title="Handovers" />
 
       <section aria-labelledby="waiting" className="mb-10">
-        <h2 id="waiting" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+        <h2 id="waiting" className="mb-3 text-base font-semibold text-ink">
           Supervised check-ins waiting for you ({waiting.length})
         </h2>
         {waiting.length === 0 ? (
@@ -57,7 +57,7 @@ export default async function AttendantPage() {
       </section>
 
       <section aria-labelledby="live">
-        <h2 id="live" className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">
+        <h2 id="live" className="mb-3 text-base font-semibold text-ink">
           In use right now
         </h2>
         {live.length === 0 ? (

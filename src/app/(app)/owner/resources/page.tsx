@@ -59,6 +59,9 @@ export default async function OwnerResourcesPage() {
                 <span className="block text-xs text-muted">value unlocked</span>
               </span>
               {util < 10 && <Pill tone="warn">Mostly idle</Pill>}
+              <ButtonLink href={`/owner/resources/${r.id}/edit`} variant="ghost" className="px-3 py-1.5">
+                Edit
+              </ButtonLink>
               <ButtonLink href={`/owner/resources/${r.id}/qr`} variant="secondary" className="px-3 py-1.5">
                 QR tag
               </ButtonLink>

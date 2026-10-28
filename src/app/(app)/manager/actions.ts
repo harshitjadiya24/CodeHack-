@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
-import { decideBadge, decideIncident, requestBadge } from "@/lib/services/governance";
+import { decideBadge, decideIncident, disputeIncident, requestBadge, setUserVerified } from "@/lib/services/governance";
 
 export type GovState = { ok?: boolean; error?: string; message?: string };
 
@@ -38,5 +38,26 @@ export async function requestBadgeAction(_prev: GovState, formData: FormData): P
     evidence: evidence instanceof File ? evidence : null,
   });
   revalidatePath("/passport");
+  return result.ok ? { ok: true, message: result.message } : { error: result.error };
+}
+
+export async function disputeAction(_prev: GovState, formData: FormData): Promise<GovState> {
+  const user = await requireUser();
+  const result = await disputeIncident(user, {
+    incidentId: z.guid().parse(formData.get("incidentId")),
+    response: String(formData.get("response") ?? ""),
+  });
+  revalidatePath("/manager");
+  return result.ok ? { ok: true, message: result.message } : { error: result.error };
+}
+
+export async function verifyUserAction(_prev: GovState, formData: FormData): Promise<GovState> {
+  const user = await requireUser();
+  const result = await setUserVerified(user, {
+    userId: z.guid().parse(formData.get("userId")),
+    verified: formData.get("verified") === "true",
+    reason: String(formData.get("reason") ?? ""),
+  });
+  revalidatePath("/admin/people");
   return result.ok ? { ok: true, message: result.message } : { error: result.error };
 }

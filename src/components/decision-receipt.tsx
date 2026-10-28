@@ -9,7 +9,7 @@ export function DecisionReceiptCard({ receipt }: { receipt: DecisionReceipt }) {
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-rule bg-paper-2 px-5 py-3">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Decision receipt</p>
+        <p className="text-sm text-muted">Decision receipt</p>
         <h2 className="font-display text-2xl">{receipt.headline}</h2>
       </div>
       <div className="space-y-5 p-5">

@@ -8,6 +8,8 @@ import { AuditTimeline } from "@/components/audit-timeline";
 import { CancelForm, DecisionForm } from "@/components/action-forms";
 import { ConfirmCheckInForm, ReportIncidentForm, VerifyReturnForm } from "@/components/handover-forms";
 import { ConditionRecord } from "@/components/condition-record";
+import { DisputeForm, ExtendForm } from "@/components/booking-extras";
+import { campusParts } from "@/lib/domain/time";
 import { signedHandoverPhotos } from "@/lib/services/handovers";
 import { OWNER_ROLES, STAFF_ROLES, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -41,7 +43,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
       .select("id, action, reason, created_at, hash, actor:profiles!audit_log_actor_id_fkey(full_name)")
       .eq("entity_id", id)
       .order("id"),
-    supabase.from("incidents").select("id, type, severity, status, description, decision").eq("booking_id", id).order("created_at"),
+    supabase.from("incidents").select("id, type, severity, status, description, decision, borrower_response").eq("booking_id", id).order("created_at"),
     signedHandoverPhotos(id),
   ]);
 
@@ -54,6 +56,8 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   const status = BOOKING_STATUS[b.status];
   const receipt = b.decision_receipt as DecisionReceipt | null;
   const startsSoon = new Date(b.starts_at).getTime() - Date.now() < 24 * 3_600_000;
+  const endParts = campusParts(new Date(b.ends_at));
+  const endDate = `${endParts.year}-${String(endParts.month + 1).padStart(2, "0")}-${String(endParts.day).padStart(2, "0")}`;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
@@ -67,7 +71,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
         <div className="flex flex-wrap items-start gap-4">
           <ResourceIcon category={b.resource.category} />
           <div className="flex-1">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Booking · {b.id.slice(0, 8)}</p>
+            <p className="text-sm text-muted">Booking · {b.id.slice(0, 8)}</p>
             <h1 className="font-display text-3xl leading-tight">
               <Link href={`/resources/${b.resource.id}`} className="hover:underline">
                 {b.resource.name}
@@ -97,7 +101,9 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
                     <Pill tone={i.status === "resolved" ? "ok" : "info"}>{i.status === "resolved" ? "Decided" : "Awaiting manager"}</Pill>
                   </div>
                   <p className="mt-2 text-ink-2">{i.description}</p>
+                  {i.borrower_response && <p className="mt-1 text-ink-2">Borrower’s response: “{i.borrower_response}”</p>}
                   {i.decision && <p className="mt-1 text-ink">Decision: {i.decision}</p>}
+                  {isRequester && i.status !== "resolved" && !i.borrower_response && <DisputeForm incidentId={i.id} />}
                 </li>
               ))}
             </ul>
@@ -136,6 +142,9 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
                 Start check-in
               </ButtonLink>
             </>
+          )}
+          {["approved", "checked_in"].includes(b.status) && isRequester && (
+            <ExtendForm bookingId={b.id} date={endDate} endHour={Math.floor(endParts.minutes / 60)} />
           )}
           {["checked_in", "overdue"].includes(b.status) && isRequester && (
             <ButtonLink href={`/bookings/${b.id}/handover?phase=return`} className="w-full">

@@ -405,6 +405,45 @@ export async function runFairDraw(actor: CurrentUser, drawId: string): Promise<S
   return { ok: true, message: `Draw complete: ${results.length} entrants ranked.` };
 }
 
+// ── Extensions ────────────────────────────────────────────────────────────────
+export async function requestExtension(user: CurrentUser, bookingId: string, newEnd: Date): Promise<ServiceResult> {
+  const db = createAdminClient();
+  const { data: b } = await db.from("bookings").select("*").eq("id", bookingId).single();
+  if (!b) return { ok: false, error: "Booking not found." };
+  if (b.user_id !== user.id) return { ok: false, error: "Only the person who booked can ask for more time." };
+  if (!["approved", "checked_in"].includes(b.status)) return { ok: false, error: "Only approved or in-use bookings can be extended." };
+  if (newEnd.getTime() <= new Date(b.ends_at).getTime()) return { ok: false, error: "Pick an end time later than the current one." };
+
+  const ctx = await loadResourceContext(db, b.resource_id);
+  if (!ctx) return { ok: false, error: "Resource not found." };
+  // Same fair-use rules as a new request, applied to the whole extended slot (this booking excluded from history).
+  const history = (await bookingHistory(db, user.id)).filter((h) => !(h.startsAt === b.starts_at && h.resourceId === b.resource_id));
+  const slot = { resourceId: b.resource_id, startsAt: new Date(b.starts_at), endsAt: newEnd };
+  const violations = checkUsageRules({ config: ctx.config, resource: ctx.rules, slot, history }).filter((v) => v.rule !== "future");
+  if (violations.length) return { ok: false, error: "The extra time breaks a fair-use rule.", reasons: violations.map((v) => v.reason) };
+
+  // Extra time must not take anything someone else has asked for, even a pending request.
+  const extraFrom = b.ends_at;
+  const extraTo = newEnd.toISOString();
+  const others = (await overlapping(db, b.resource_id, extraFrom, extraTo, [...HOLDS_SLOT, ...PENDING, "waitlisted"])).filter((o) => o.id !== b.id);
+  if (others.length) {
+    return {
+      ok: false,
+      error: "Someone else has booked or requested that time.",
+      reasons: [`The next booking starts at ${formatCampus(others.map((o) => o.starts_at).sort()[0])}. Return on time so they get their turn.`],
+    };
+  }
+
+  const { error } = await db.rpc("extend_booking", {
+    p_booking: b.id,
+    p_new_end: extraTo,
+    p_actor: user.id,
+    p_reason: `Extended to ${formatCampus(extraTo, { day: undefined, month: undefined })}: slot free and within fair-use limits`,
+  });
+  if (error) return { ok: false, error: error.code === "23P01" ? "That time was just taken by another booking." : error.message };
+  return { ok: true, message: `Extended until ${formatCampus(extraTo, { day: undefined, month: undefined })}.` };
+}
+
 // ── Cancellation & waitlist promotion ─────────────────────────────────────────
 export async function cancelBooking(actor: CurrentUser, bookingId: string, reason: string): Promise<ServiceResult> {
   const db = createAdminClient();

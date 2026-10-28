@@ -81,6 +81,63 @@ export async function decideBadge(manager: CurrentUser, input: { userBadgeId: st
   return { ok: true, message: input.approve ? "Badge issued." : "Badge rejected with reason." };
 }
 
+// ── Identity verification ─────────────────────────────────────────────────────
+export async function setUserVerified(admin: CurrentUser, input: { userId: string; verified: boolean; reason: string }): Promise<ServiceResult> {
+  if (admin.role !== "admin") return { ok: false, error: "Only the admin office verifies identities." };
+  if (input.reason.trim().length < 5) return { ok: false, error: "Give a reason; it is recorded in the audit log." };
+  if (input.userId === admin.id) return { ok: false, error: "You cannot change your own verification." };
+  const db = createAdminClient();
+  const { data: p } = await db.from("profiles").select("id, org_id, full_name, verified").eq("id", input.userId).single();
+  if (!p || p.org_id !== admin.org_id) return { ok: false, error: "Person not found." };
+  if (p.verified === input.verified) return { ok: false, error: input.verified ? "Already verified." : "Already unverified." };
+  await db.from("profiles").update({ verified: input.verified }).eq("id", p.id);
+  await audit(db, {
+    orgId: admin.org_id,
+    actorId: admin.id,
+    action: input.verified ? "user.verified" : "user.unverified",
+    entity: "profile",
+    entityId: p.id,
+    reason: input.reason,
+  });
+  await notify(db, {
+    userId: p.id,
+    kind: input.verified ? "user.verified" : "user.unverified",
+    title: input.verified ? "Your campus identity is verified" : "Your verification was paused",
+    body: input.reason,
+    link: "/profile",
+  });
+  return { ok: true, message: `${p.full_name} ${input.verified ? "verified" : "unverified"}.` };
+}
+
+// ── Disputes: the borrower's side before any decision ─────────────────────────
+export async function disputeIncident(user: CurrentUser, input: { incidentId: string; response: string }): Promise<ServiceResult> {
+  if (input.response.trim().length < 15) return { ok: false, error: "Explain your side in a sentence or two (at least 15 characters)." };
+  const db = createAdminClient();
+  const { data: inc } = await db.from("incidents").select("*, booking:bookings(user_id), resource:resources(name, org_id)").eq("id", input.incidentId).single();
+  if (!inc?.booking || inc.booking.user_id !== user.id) return { ok: false, error: "Only the borrower on this booking can respond." };
+  if (inc.status === "resolved") return { ok: false, error: "This incident is already decided. Ask a manager to reopen it." };
+  if (inc.disputed_at) return { ok: false, error: "You have already responded." };
+
+  await db
+    .from("incidents")
+    .update({ borrower_response: input.response.trim(), disputed_at: new Date().toISOString(), status: "under_review" })
+    .eq("id", inc.id);
+  await audit(db, {
+    orgId: inc.resource?.org_id ?? null,
+    actorId: user.id,
+    action: "incident.disputed",
+    entity: "booking",
+    entityId: inc.booking_id,
+    reason: input.response.trim(),
+    payload: asJson({ incident_id: inc.id }),
+  });
+  const { data: managers } = await db.from("profiles").select("id").eq("org_id", user.org_id).eq("role", "manager");
+  for (const m of managers ?? []) {
+    await notify(db, { userId: m.id, kind: "incident.disputed", title: `Borrower contests an incident: ${inc.resource?.name}`, body: input.response.slice(0, 140), link: "/manager" });
+  }
+  return { ok: true, message: "Your response is with the manager. No decision is made without reading it." };
+}
+
 // ── Incidents: a person always decides ────────────────────────────────────────
 export async function decideIncident(
   manager: CurrentUser,

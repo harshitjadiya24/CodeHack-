@@ -55,8 +55,8 @@ export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; tit
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        {eyebrow && <p className="mb-1 font-mono text-xs uppercase tracking-[0.18em] text-muted">{eyebrow}</p>}
-        <h1 className="font-display text-4xl leading-tight text-ink">{title}</h1>
+        {eyebrow && <p className="mb-1 text-sm text-muted">{eyebrow}</p>}
+        <h1 className="font-display text-4xl font-semibold leading-tight tracking-[-0.02em] text-ink">{title}</h1>
       </div>
       {children && <div className="flex flex-wrap gap-2">{children}</div>}
     </div>

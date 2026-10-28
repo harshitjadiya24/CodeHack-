@@ -25,7 +25,7 @@ export default async function PassportVerifyPage({ params }: { params: Promise<{
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
       <p className="mb-2 text-center font-display text-2xl">Saajha</p>
       <Card className="p-6">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Trust Passport · live check</p>
+        <p className="text-sm text-muted">Trust Passport · live check</p>
         <h1 className="mt-1 font-display text-3xl">{p.full_name}</h1>
         <p className="text-sm text-muted">
           {p.roll_no} · {p.org?.name} · {p.verified ? "Identity verified" : "Identity NOT verified"}

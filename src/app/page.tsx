@@ -1,157 +1,144 @@
 import Link from "next/link";
-import { BadgeCheck, Dices, FileCheck2, Link2, QrCode, ScanEye } from "lucide-react";
-import { ButtonLink, Card } from "@/components/ui";
 import { getCurrentUser, homeFor } from "@/lib/auth";
+import { campusInsights } from "@/lib/services/insights";
+import { Hero } from "@/components/landing/hero";
+import { Journey } from "@/components/landing/journey";
+import { DrawDemo } from "@/components/landing/draw-demo";
+import { LiveNumbers } from "@/components/landing/live-numbers";
+import { SmoothScroll } from "@/components/landing/smooth-scroll";
 
-const PILLARS = [
-  {
-    icon: BadgeCheck,
-    title: "Trust Passport",
-    body: "Verified skill badges per equipment class. Eligibility is checked against them, and every gap comes with a way to close it.",
-  },
-  {
-    icon: Dices,
-    title: "Fair Draw",
-    body: "When people want the same slot on a scarce machine, a weighted lottery decides. The seed is committed in advance, so anyone can verify it.",
-  },
-  {
-    icon: QrCode,
-    title: "QR handover",
-    body: "Scan the tag on the device to check in. Guided photos and a checklist record its condition before and after, with attendant sign-off where needed.",
-  },
-  {
-    icon: Link2,
-    title: "Tamper-evident record",
-    body: "Every approval, rejection, return and incident is hash-chained. Edit one row and the chain breaks for everyone to see.",
-  },
-  {
-    icon: ScanEye,
-    title: "AI that advises",
-    body: "Smart matching, listing drafts and before/after comparison. A person makes every access, safety and penalty decision.",
-  },
-  {
-    icon: FileCheck2,
-    title: "Utilisation evidence",
-    body: "Idle hours, value unlocked and fairness metrics, exported in the shape accreditation reviews already ask for.",
-  },
-];
+const DEMO_ORG = "11111111-0000-0000-0000-000000000001";
 
-const STEPS = [
-  "Owner lists a resource and its rules",
-  "Student checks eligibility and requests",
-  "Fair-use rules and conflicts are checked",
-  "Owner approves, or a Fair Draw decides",
-  "Check-in with photos and a checklist",
-  "Return, verification and any incident",
-  "Both sides see the full, verifiable history",
+const ROLES = [
+  {
+    role: "Students and researchers",
+    gets: "See what they can use right now, what is missing and how to get it. Request, check in by QR, extend, return, and contest anything unfair.",
+    demo: "Aarav or Meera",
+  },
+  {
+    role: "Resource owners",
+    gets: "List equipment in minutes, set badges and rules, decide requests with priority shown, verify condition on return, pause for maintenance.",
+    demo: "Dr. Priya Nair",
+  },
+  {
+    role: "Managers and attendants",
+    gets: "Verify skill badges, confirm supervised check-ins in person, and decide incidents after reading both sides. No automatic penalties.",
+    demo: "Prof. Sharma, Ravi",
+  },
+  {
+    role: "The institution",
+    gets: "Utilisation, idle capacity and fairness measured from real records, exported as evidence for accreditation reviews.",
+    demo: "IQAC Office",
+  },
 ];
 
 export default async function Landing() {
-  const user = await getCurrentUser();
+  const [user, ins] = await Promise.all([getCurrentUser(), campusInsights(DEMO_ORG)]);
+  const home = user ? homeFor(user.role) : null;
 
   return (
     <div className="min-h-screen">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 md:px-8">
-        <span className="font-display text-2xl">Saajha</span>
-        {user ? (
-          <ButtonLink href={homeFor(user.role)}>Open Saajha</ButtonLink>
-        ) : (
-          <ButtonLink href="/login" variant="secondary">
-            Sign in
-          </ButtonLink>
-        )}
+      <SmoothScroll />
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-blueprint/95 text-white backdrop-blur supports-[backdrop-filter]:bg-blueprint/85">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
+          <Link href="/" className="font-display text-2xl font-semibold">
+            Saajha
+          </Link>
+          <nav aria-label="Main" className="flex items-center gap-1 text-sm">
+            <a href="#journey" className="hidden rounded-full px-3 py-2 text-white/75 hover:text-white sm:block">
+              How it works
+            </a>
+            <a href="#draw" className="hidden rounded-full px-3 py-2 text-white/75 hover:text-white sm:block">
+              Fair Draw
+            </a>
+            <Link href={home ?? "/login"} className="rounded-full bg-white px-4 py-2 font-medium text-blueprint hover:bg-white/90">
+              {home ? "Open Saajha" : "Sign in"}
+            </Link>
+          </nav>
+        </div>
       </header>
 
       <main>
-        <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 md:px-8 md:pt-20">
-          <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-saffron">साझा · shared</p>
-          <h1 className="max-w-4xl font-display text-5xl leading-[1.05] md:text-7xl">
-            Unlock idle labs. Share with trust. Prove it with data.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-ink-2">
-            Campus 3D printers, oscilloscopes, cameras and studios sit unused for most of the week while students who need them cannot get
-            access. Saajha lets institutions lend them safely: verified eligibility, fair allocation, documented handovers and a record nobody
-            can quietly change.
+        <Hero signedInHome={home} />
+
+        <section aria-label="Live figures from the demo campus" className="mx-auto max-w-6xl px-4 pb-20 md:px-8">
+          <LiveNumbers
+            stats={{
+              value: ins.totals.value,
+              hours: ins.totals.hours,
+              served: ins.totals.uniqueUsers,
+              borrowers: ins.totals.borrowers,
+              idle: ins.totals.idleResources,
+              gini: ins.fairness.gini,
+            }}
+          />
+          <p className="mt-3 text-sm text-muted">
+            Live from the demo campus database. {ins.totals.idleResources} of {ins.perResource.length} resources are still under 10% used: that is the
+            capacity Saajha exists to unlock.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <ButtonLink href="/login" className="px-6 py-3 text-base">
-              Try the live demo
-            </ButtonLink>
-            <ButtonLink href="#how" variant="secondary" className="px-6 py-3 text-base">
-              See how it works
-            </ButtonLink>
-          </div>
-          <p className="mt-3 text-sm text-muted">One-click demo accounts for every role. All data is fictional.</p>
         </section>
 
-        <section aria-labelledby="trust-lock" className="mx-auto max-w-6xl px-4 pb-16 md:px-8">
+        <Journey />
+
+        <section aria-labelledby="trust-lock" className="mx-auto max-w-6xl px-4 py-20 md:px-8">
           <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">How eligibility works</p>
-              <h2 id="trust-lock" className="mt-1 font-display text-4xl leading-tight">
+              <h2 id="trust-lock" className="font-display text-4xl font-semibold leading-tight md:text-5xl">
                 A lock, not a form
               </h2>
-              <p className="mt-3 text-ink-2">
-                Every verified badge on a student’s Trust Passport lifts one pin. Only when every pin the resource requires reaches the shear
-                line does the drawer open, and the moment is printed onto a receipt chained to everything before it.
+              <p className="mt-4 text-ink-2">
+                Every verified badge on a student’s Trust Passport lifts one pin. Only when every pin the resource requires reaches the shear line
+                does the drawer open, and the moment is printed onto a receipt chained to everything before it.
               </p>
-              <p className="mt-3 text-sm text-muted">Aarav is missing his 3D-printer induction, so his middle pin stays down. Meera’s passport opens it.</p>
+              <p className="mt-3 text-sm text-muted">Aarav is missing his 3D-printer induction, so his middle pin stays down. Click the figure to try Meera’s passport.</p>
             </div>
             <iframe
               src="/figures/trust-lock.html"
               title="Interactive figure: Trust Passport pins unlock a lab locker drawer"
               loading="lazy"
-              className="h-[640px] w-full rounded-lg border-0"
+              className="h-[640px] w-full rounded-2xl border-0"
             />
           </div>
         </section>
 
-        <section className="border-y border-rule bg-card">
-          <div className="mx-auto grid max-w-6xl gap-px bg-rule md:grid-cols-3">
-            {[
-              ["Is it free?", "Every booking tool answers this."],
-              ["Should this person get it, and is that fair?", "Saajha answers this, with reasons."],
-              ["Can we prove what happened?", "Saajha answers this too, with a verifiable chain."],
-            ].map(([q, a], i) => (
-              <div key={q} className={`bg-card px-6 py-8 ${i === 0 ? "text-muted" : ""}`}>
-                <p className={`font-display text-2xl ${i === 0 ? "" : "text-ink"}`}>{q}</p>
-                <p className="mt-1 text-sm">{a}</p>
+        <section id="draw" aria-label="Fair Draw demo" className="border-y border-rule bg-paper-2/60">
+          <div className="mx-auto max-w-6xl px-4 py-20 md:px-8">
+            <DrawDemo />
+          </div>
+        </section>
+
+        <section aria-labelledby="roles" className="mx-auto max-w-6xl px-4 py-20 md:px-8">
+          <h2 id="roles" className="max-w-2xl font-display text-4xl font-semibold leading-tight md:text-5xl">
+            Built for everyone who touches the equipment
+          </h2>
+          <dl className="mt-10 divide-y divide-rule border-y border-rule">
+            {ROLES.map((r) => (
+              <div key={r.role} className="grid gap-2 py-6 md:grid-cols-[0.8fr_1.6fr_0.6fr] md:gap-8">
+                <dt className="font-display text-2xl font-semibold">{r.role}</dt>
+                <dd className="text-ink-2">{r.gets}</dd>
+                <dd className="text-sm text-muted md:text-right">Try as {r.demo}</dd>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 py-16 md:px-8">
-          <h2 className="mb-8 font-display text-4xl">Built for trust, not just availability</h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            {PILLARS.map((p) => (
-              <Card key={p.title} className="p-6">
-                <p.icon className="mb-3 size-6 text-accent" aria-hidden />
-                <h3 className="font-medium">{p.title}</h3>
-                <p className="mt-1 text-sm text-ink-2">{p.body}</p>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section id="how" className="mx-auto max-w-6xl px-4 pb-20 md:px-8">
-          <h2 className="mb-8 font-display text-4xl">One journey, start to finish</h2>
-          <ol className="grid gap-3 md:grid-cols-7">
-            {STEPS.map((s, i) => (
-              <li key={s} className="rounded-lg border border-rule bg-card p-4">
-                <span className="font-mono text-xs text-saffron">{String(i + 1).padStart(2, "0")}</span>
-                <p className="mt-1 text-sm">{s}</p>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-6 text-sm text-muted">
-            Built for Northfield Institute of Technology (fictional) ·{" "}
-            <Link href="/login" className="text-accent underline">
-              open the demo
-            </Link>
-          </p>
+          </dl>
+          <Link href={home ?? "/login"} className="mt-10 inline-flex rounded-full bg-accent px-7 py-3.5 font-medium text-accent-ink hover:opacity-90">
+            {home ? "Open Saajha" : "Open the demo"}
+          </Link>
         </section>
       </main>
+
+      <footer className="border-t border-rule">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-sm text-muted md:px-8">
+          <span>Saajha · built for the “Unlock Underused Equipment and Spaces” challenge. Demo data is fictional.</span>
+          <span className="flex gap-4">
+            <Link href="/privacy" className="hover:text-ink">
+              Privacy
+            </Link>
+            <Link href="/audit/verify" className="hover:text-ink">
+              Verify the audit chain
+            </Link>
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
