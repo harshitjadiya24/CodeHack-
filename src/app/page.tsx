@@ -84,6 +84,28 @@ export default async function Landing() {
           <p className="mt-3 text-sm text-muted">One-click demo accounts for every role. All data is fictional.</p>
         </section>
 
+        <section aria-labelledby="trust-lock" className="mx-auto max-w-6xl px-4 pb-16 md:px-8">
+          <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">How eligibility works</p>
+              <h2 id="trust-lock" className="mt-1 font-display text-4xl leading-tight">
+                A lock, not a form
+              </h2>
+              <p className="mt-3 text-ink-2">
+                Every verified badge on a student’s Trust Passport lifts one pin. Only when every pin the resource requires reaches the shear
+                line does the drawer open, and the moment is printed onto a receipt chained to everything before it.
+              </p>
+              <p className="mt-3 text-sm text-muted">Aarav is missing his 3D-printer induction, so his middle pin stays down. Meera’s passport opens it.</p>
+            </div>
+            <iframe
+              src="/figures/trust-lock.html"
+              title="Interactive figure: Trust Passport pins unlock a lab locker drawer"
+              loading="lazy"
+              className="h-[640px] w-full rounded-lg border-0"
+            />
+          </div>
+        </section>
+
         <section className="border-y border-rule bg-card">
           <div className="mx-auto grid max-w-6xl gap-px bg-rule md:grid-cols-3">
             {[
