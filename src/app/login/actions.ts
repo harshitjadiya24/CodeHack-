@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo";
 import { homeFor, type Role } from "@/lib/auth";
 
-export type LoginState = { error?: string };
+export type LoginState = { error?: string; unconfirmedEmail?: string };
 
 const credentials = z.object({
   email: z.string().trim().email("Enter a valid email."),
@@ -22,6 +22,7 @@ function safeNext(next: string | undefined, role: Role): string {
 async function signIn(email: string, password: string, next?: string): Promise<LoginState> {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error?.code === "email_not_confirmed") return { error: "Confirm your email first. We sent you a 6-digit code when you signed up.", unconfirmedEmail: email };
   if (error || !data.user) return { error: "Email or password is incorrect." };
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
   redirect(safeNext(next, profile?.role ?? "student"));

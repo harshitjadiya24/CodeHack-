@@ -83,6 +83,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </header>
+      {!user.verified && ["student", "researcher"].includes(user.role) && (
+        <div role="status" className="border-b border-rule bg-board-soft">
+          <p className="mx-auto max-w-[1240px] px-4 py-2.5 text-[15px] text-ink md:px-8">
+            <b>Waiting for verification.</b> The admin office is checking your roll number. You can browse and add training now; requests unlock once you’re verified.
+          </p>
+        </div>
+      )}
       <main id="main" className="mx-auto max-w-[1240px] px-4 py-10 md:px-8 md:py-14">
         {children}
       </main>

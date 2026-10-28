@@ -11,7 +11,8 @@ import { siteOrigin } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Trust Passport" };
 
-export default async function PassportPage() {
+export default async function PassportPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
+  const { welcome } = await searchParams;
   const user = await requireUser();
   const supabase = await createClient();
   const [{ data: badges }, { data: mine }, { data: unlocks }] = await Promise.all([
@@ -27,6 +28,14 @@ export default async function PassportPage() {
   return (
     <>
       <PageHeader eyebrow="Your verified skills" title="Trust Passport" />
+      {welcome && (
+        <div role="status" className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border-2 border-ink bg-board-soft px-5 py-4">
+          <span className="board-chip chart-code rounded-[4px] px-2 py-0.5 text-sm">Welcome</span>
+          <p className="flex-1 text-[15px] text-ink">
+            Your account is ready, {user.full_name.split(" ")[0]}. Next, add your training below. The admin office will verify your roll number; until then you can browse everything.
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
         <ul className="grid gap-4 sm:grid-cols-2">

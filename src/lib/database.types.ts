@@ -201,6 +201,12 @@ export type Database = {
           { foreignKeyName: "draw_secrets_draw_id_fkey"; columns: ["draw_id"]; isOneToOne: true; referencedRelation: "draw_windows"; referencedColumns: ["id"] },
         ]
       }
+      email_codes: {
+        Row: { attempts: number; code_hash: string; email: string; expires_at: string; last_sent_at: string; user_id: string }
+        Insert: { attempts?: number; code_hash: string; email: string; expires_at: string; last_sent_at?: string; user_id: string }
+        Update: { attempts?: number; code_hash?: string; email?: string; expires_at?: string; last_sent_at?: string; user_id?: string }
+        Relationships: []
+      }
       fairness_config: {
         Row: {
           cooldown_hours: number

@@ -9,10 +9,10 @@ import { loginAsDemo } from "./actions";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; created?: string }> }) {
   const user = await getCurrentUser();
   if (user) redirect(homeFor(user.role));
-  const { next } = await searchParams;
+  const { next, created } = await searchParams;
 
   return (
     <main className="mx-auto grid min-h-screen max-w-[1240px] gap-12 px-4 py-12 md:grid-cols-[1fr_1.2fr] md:px-8">
@@ -25,9 +25,20 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </Link>
         <h1 className="type-h2">Sign in to your campus</h1>
         <p className="mb-8 mt-3 text-ink-2">Northfield Institute of Technology and Riverside College of Engineering</p>
+        {created && (
+          <p role="status" className="mb-4 rounded-md bg-ok-soft px-3 py-2.5 text-[15px] text-ok">
+            Account created. Sign in with your email and password.
+          </p>
+        )}
         <Card className="p-6">
           <LoginForm next={next} />
         </Card>
+        <p className="mt-6 text-[15px] text-subtle">
+          New to Saajha?{" "}
+          <Link href="/signup" className="font-semibold text-ink underline underline-offset-4">
+            Create an account
+          </Link>
+        </p>
       </section>
 
       <section aria-labelledby="demo-heading" className="flex flex-col justify-center">

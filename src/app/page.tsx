@@ -72,6 +72,11 @@ export default async function Landing() {
               The draw
             </a>
             <ThemeToggle />
+            {!home && (
+              <ButtonLink href="/signup" variant="secondary" className="hidden sm:inline-flex">
+                Create account
+              </ButtonLink>
+            )}
             <ButtonLink href={cta}>{home ? "Open Saajha" : "Sign in"}</ButtonLink>
           </nav>
         </div>
@@ -207,7 +212,12 @@ export default async function Landing() {
             <ButtonLink href={cta} variant="board">
               {home ? "Open Saajha" : "Open the demo"}
             </ButtonLink>
-            <span className="text-[15px] text-subtle">Demo accounts, no sign-up. Pick a person and you’re in.</span>
+            {!home && (
+              <ButtonLink href="/signup" variant="secondary">
+                Create your account
+              </ButtonLink>
+            )}
+            <span className="text-[15px] text-subtle">Judges can skip sign-up: demo accounts are one click away.</span>
           </div>
         </section>
       </main>

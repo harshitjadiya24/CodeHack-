@@ -32,6 +32,7 @@ export const ACTION_LABEL: Record<string, string> = {
   "incident.decided": "Incident decided",
   "incident.disputed": "Borrower contested the incident",
   "booking.extended": "Extended",
+  "user.registered": "Account created",
   "user.verified": "Identity verified",
   "user.unverified": "Identity verification paused",
   "resource.listed": "Resource listed",
