@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           Saajha
         </Link>
         <h1 className="type-h2">Sign in to your campus</h1>
-        <p className="mb-8 mt-3 text-ink-2">Northfield Institute of Technology and Riverside College of Engineering</p>
+        <p className="mb-8 mt-3 text-ink-2">For students, staff and admin offices of every institute on Saajha.</p>
         {created && (
           <p role="status" className="mb-4 rounded-md bg-ok-soft px-3 py-2.5 text-[15px] text-ok">
             Account created. Sign in with your email and password.

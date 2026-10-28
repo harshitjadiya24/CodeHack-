@@ -109,6 +109,40 @@ export async function setUserVerified(admin: CurrentUser, input: { userId: strin
   return { ok: true, message: `${p.full_name} ${input.verified ? "verified" : "unverified"}.` };
 }
 
+// ── Roles: an institute's admin office builds its own team ────────────────────
+const ROLE_NAMES: Record<string, string> = { student: "student", researcher: "researcher", owner: "lab owner", attendant: "lab attendant", manager: "manager", admin: "admin" };
+
+export async function setUserRole(admin: CurrentUser, input: { userId: string; role: string; reason: string }): Promise<ServiceResult> {
+  if (admin.role !== "admin") return { ok: false, error: "Only the admin office assigns roles." };
+  if (!(input.role in ROLE_NAMES)) return { ok: false, error: "Choose a role." };
+  if (input.reason.trim().length < 5) return { ok: false, error: "Give a reason; it is recorded in the audit log." };
+  if (input.userId === admin.id) return { ok: false, error: "You cannot change your own role." };
+  const db = createAdminClient();
+  const { data: p } = await db.from("profiles").select("id, org_id, full_name, role, verified").eq("id", input.userId).single();
+  if (!p || p.org_id !== admin.org_id) return { ok: false, error: "Person not found." };
+  if (p.role === input.role) return { ok: false, error: `${p.full_name} is already a ${ROLE_NAMES[input.role]}.` };
+  // Anyone who will hold keys, decide requests or judge incidents must be a verified person first.
+  if (!["student", "researcher"].includes(input.role) && !p.verified) return { ok: false, error: `Verify ${p.full_name}’s identity before giving them a staff role.` };
+  await db.from("profiles").update({ role: input.role as CurrentUser["role"] }).eq("id", p.id);
+  await audit(db, {
+    orgId: admin.org_id,
+    actorId: admin.id,
+    action: "user.role_changed",
+    entity: "profile",
+    entityId: p.id,
+    reason: input.reason,
+    payload: asJson({ from: p.role, to: input.role }),
+  });
+  await notify(db, {
+    userId: p.id,
+    kind: "user.role_changed",
+    title: `You are now a ${ROLE_NAMES[input.role]} on Saajha`,
+    body: input.reason,
+    link: "/",
+  });
+  return { ok: true, message: `${p.full_name} is now a ${ROLE_NAMES[input.role]}.` };
+}
+
 // ── Disputes: the borrower's side before any decision ─────────────────────────
 export async function disputeIncident(user: CurrentUser, input: { incidentId: string; response: string }): Promise<ServiceResult> {
   if (input.response.trim().length < 15) return { ok: false, error: "Explain your side in a sentence or two (at least 15 characters)." };

@@ -9,22 +9,52 @@ import { FairnessForm } from "./fairness-form";
 
 export const metadata: Metadata = { title: "Insights" };
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
   const user = await requirePageRole(["admin"]);
-  const [ins, { data: config }] = await Promise.all([
+  const { welcome } = await searchParams;
+  const [ins, { data: config }, { data: org }] = await Promise.all([
     campusInsights(user.org_id),
     createAdminClient().from("fairness_config").select("*").eq("org_id", user.org_id).single(),
+    createAdminClient().from("organizations").select("name, status, city, state").eq("id", user.org_id).single(),
   ]);
   const pct = (v: number) => `${Math.round(v * 100)}%`;
   const giniTone = ins.fairness.gini < 0.35 ? "ok" : ins.fairness.gini < 0.55 ? "warn" : "danger";
 
   return (
     <>
-      <PageHeader eyebrow={`Last ${ins.weeks} weeks · Northfield Institute of Technology`} title="Campus insights">
+      <PageHeader eyebrow={`Last ${ins.weeks} weeks · ${org?.name ?? "Your institute"}`} title="Campus insights">
         <ButtonLink href="/admin/report" variant="secondary">
           Accreditation report
         </ButtonLink>
       </PageHeader>
+
+      {org?.status === "pending" && (
+        <p role="status" className="mb-6 rounded-lg border border-rule bg-warn-soft px-5 py-3 text-[15px] text-warn">
+          <b>Pending review.</b> Your institute works for your own campus now. Other campuses will see it once the Saajha team confirms it; registering
+          with an email on your institute’s domain verifies it straight away.
+        </p>
+      )}
+      {welcome && (
+        <section aria-labelledby="setup-title" className="mb-10 rounded-lg border-2 border-ink bg-card">
+          <h2 id="setup-title" className="chart-code bg-board px-5 py-3 text-[15px] text-board-ink">
+            {org?.name} is on Saajha. Four things to do next
+          </h2>
+          <ol className="grid gap-px bg-rule sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["Share the sign-up link", "Students and lab in-charges join at /signup and pick your institute."],
+              ["Verify people", "Check roll numbers on the People page. Unverified accounts can browse but not book."],
+              ["Make lab in-charges owners", "On the People page, change their role to owner with a short reason."],
+              ["Owners list equipment", "Each listing sets its training, deposit and hours. Students see only what they’re cleared for."],
+            ].map(([t, d], i) => (
+              <li key={t} className="bg-card p-5">
+                <span className="readout text-3xl">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="mt-2 font-bold">{t}</h3>
+                <p className="mt-1 text-[15px] text-subtle">{d}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Value unlocked" value={inr(ins.totals.value)} note="Market rent of hours actually used" />

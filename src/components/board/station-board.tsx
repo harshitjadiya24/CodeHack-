@@ -18,14 +18,13 @@ function canRun3D() {
 }
 
 /**
- * The station board: the name in Hindi and English, the campus code, the day’s count. Saajha’s mark.
+ * The station board: the name in Hindi and English, a code and one line of status. Saajha’s mark.
  * The HTML board renders first (and stays for screen readers); on capable devices a 3D board takes its place.
  */
-export function StationBoard({ campus, code, openToday, when, className }: { campus: string; code: string; openToday: number; when: string; className?: string }) {
+export function StationBoard({ campus, code, line, className }: { campus: string; code: string; line: string; className?: string }) {
   const [use3D, setUse3D] = useState(false);
   const [ready, setReady] = useState(false);
   useEffect(() => setUse3D(canRun3D()), []);
-  const line = `${openToday} labs open ${when}`;
 
   return (
     <div className={cn("relative pb-10", className)}>

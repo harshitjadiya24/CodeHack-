@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 
 export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const path = usePathname();
-  const active = path === href || (href !== "/owner" && path.startsWith(`${href}/`));
+  // Section roots like /owner and /admin have their own sub-pages in the nav, so they match exactly.
+  const active = path === href || (!["/owner", "/admin"].includes(href) && path.startsWith(`${href}/`));
   return (
     <Link
       href={href}

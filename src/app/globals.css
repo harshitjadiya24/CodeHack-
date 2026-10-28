@@ -314,3 +314,65 @@ body {
     animation: none;
   }
 }
+
+/* Discover map pins: a chart cell on the map. Yellow when something there is free this week. */
+.map-pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--card);
+  color: var(--muted);
+  font: 800 16px/1 var(--font-anek), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 0 var(--ink);
+  transition: transform 160ms var(--ease-out-expo), background-color 160ms;
+}
+.map-pin.is-open {
+  background: var(--board);
+  color: var(--board-ink);
+}
+.map-pin.is-hover,
+.map-pin.is-selected {
+  transform: translateY(-3px) scale(1.08);
+}
+.map-pin.is-selected {
+  background: var(--ink);
+  color: var(--paper);
+}
+.map-you {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--card);
+  border-radius: 999px;
+  background: var(--info);
+  box-shadow: 0 0 0 2px var(--info);
+}
+.nearby-map .leaflet-container,
+.nearby-map.leaflet-container {
+  font-family: var(--font-anek), system-ui, sans-serif;
+  background: var(--paper-2);
+}
+.nearby-map .leaflet-control-attribution {
+  font-size: 11px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-pin {
+    transition: none;
+  }
+}
+/* Quieter streets so the pins lead; inverted for dark mode. */
+.nearby-map .leaflet-tile-pane {
+  filter: grayscale(0.85) contrast(0.95) brightness(1.03);
+}
+:root[data-theme="dark"] .nearby-map .leaflet-tile-pane {
+  filter: grayscale(1) invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .nearby-map .leaflet-tile-pane {
+    filter: grayscale(1) invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+  }
+}

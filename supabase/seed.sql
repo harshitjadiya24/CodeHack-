@@ -2,9 +2,9 @@
 -- Every demo account uses the password: Saajha@2026
 
 -- ── Organisations & departments ───────────────────────────────────────────────
-insert into public.organizations (id, name, slug, city) values
-  ('11111111-0000-0000-0000-000000000001', 'Northfield Institute of Technology', 'northfield', 'Pune'),
-  ('11111111-0000-0000-0000-000000000002', 'Riverside College of Engineering', 'riverside', 'Pune');
+insert into public.organizations (id, name, slug, city, state, kind, email_domain, status) values
+  ('11111111-0000-0000-0000-000000000001', 'Northfield Institute of Technology', 'northfield', 'Pune', 'Maharashtra', 'engineering', 'northfield.demo', 'active'),
+  ('11111111-0000-0000-0000-000000000002', 'Riverside College of Engineering', 'riverside', 'Pune', 'Maharashtra', 'engineering', 'riverside.demo', 'active');
 
 insert into public.departments (id, org_id, name, code) values
   ('22222222-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'Central Makerspace', 'MKS'),
@@ -12,6 +12,57 @@ insert into public.departments (id, org_id, name, code) values
   ('22222222-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'Computer Science', 'CSE'),
   ('22222222-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 'Media & Design Studio', 'MDS'),
   ('22222222-0000-0000-0000-000000000005', '11111111-0000-0000-0000-000000000002', 'Mechanical Engineering', 'ME');
+
+-- Every department a typical Indian engineering college has, on both campuses.
+-- Existing rows (same campus + code) are left alone.
+insert into public.departments (org_id, name, code)
+select o.id, d.name, d.code
+from public.organizations o
+cross join (values
+  ('Computer Science', 'CSE'),
+  ('Information Technology', 'IT'),
+  ('Artificial Intelligence & Data Science', 'AIDS'),
+  ('Artificial Intelligence & Machine Learning', 'AIML'),
+  ('Computer Science (Cyber Security)', 'CSCY'),
+  ('Computer Applications (MCA)', 'MCA'),
+  ('Electronics & Communication', 'ECE'),
+  ('Electrical & Electronics', 'EEE'),
+  ('Electrical Engineering', 'EE'),
+  ('Electronics & Instrumentation', 'EIE'),
+  ('Electronics & Telecommunication', 'ENTC'),
+  ('VLSI Design & Technology', 'VLSI'),
+  ('Mechanical Engineering', 'ME'),
+  ('Mechatronics', 'MCT'),
+  ('Robotics & Automation', 'RA'),
+  ('Automobile Engineering', 'AU'),
+  ('Aeronautical Engineering', 'AE'),
+  ('Aerospace Engineering', 'ASE'),
+  ('Production & Industrial Engineering', 'PIE'),
+  ('Civil Engineering', 'CE'),
+  ('Environmental Engineering', 'ENV'),
+  ('Architecture', 'ARCH'),
+  ('Chemical Engineering', 'CHE'),
+  ('Biotechnology', 'BT'),
+  ('Biomedical Engineering', 'BME'),
+  ('Metallurgical & Materials Engineering', 'MME'),
+  ('Mining Engineering', 'MN'),
+  ('Petroleum Engineering', 'PE'),
+  ('Textile Technology', 'TT'),
+  ('Agricultural Engineering', 'AGE'),
+  ('Food Technology', 'FT'),
+  ('Marine Engineering', 'MAR'),
+  ('Physics', 'PHY'),
+  ('Chemistry', 'CHEM'),
+  ('Mathematics', 'MATH'),
+  ('Humanities & Social Sciences', 'HSS'),
+  ('Management Studies (MBA)', 'MBA'),
+  ('Design', 'DES'),
+  ('Central Makerspace', 'MKS'),
+  ('Media & Design Studio', 'MDS'),
+  ('Central Library', 'LIB'),
+  ('Sports & Physical Education', 'SPE')
+) as d(name, code)
+on conflict (org_id, code) do nothing;
 
 insert into public.fairness_config (org_id) values
   ('11111111-0000-0000-0000-000000000001'),
@@ -221,3 +272,11 @@ values ('55555555-0000-0000-0000-000000000009', '33333333-0000-0000-0000-0000000
 insert into public.audit_log (org_id, actor_id, action, entity, entity_id, reason, payload) values
   ('11111111-0000-0000-0000-000000000001', '33333333-0000-0000-0000-000000000007', 'org.seeded', 'organization',
    '11111111-0000-0000-0000-000000000001', 'Demo environment created', '{"resources": 15, "users": 8}');
+
+-- Map points: each institute, and the demo campus's buildings.
+update public.organizations set lat = 18.5913, lng = 73.7389 where slug = 'northfield';
+update public.organizations set lat = 18.4575, lng = 73.8508 where slug = 'riverside';
+update public.resources r set lat = v.lat, lng = v.lng from (values
+  ('Central Makerspace', 18.5918, 73.7383), ('ECE Block', 18.5921, 73.7396), ('CSE Block', 18.5909, 73.7399),
+  ('Media & Design Studio', 18.5904, 73.7381), ('Library', 18.5913, 73.7389), ('Admin Block', 18.5911, 73.7375)) v(building, lat, lng)
+where split_part(r.location, ',', 1) = v.building and r.org_id = '11111111-0000-0000-0000-000000000001';

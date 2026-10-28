@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
-import { decideBadge, decideIncident, disputeIncident, requestBadge, setUserVerified } from "@/lib/services/governance";
+import { decideBadge, decideIncident, disputeIncident, requestBadge, setUserRole, setUserVerified } from "@/lib/services/governance";
 
 export type GovState = { ok?: boolean; error?: string; message?: string };
 
@@ -56,6 +56,17 @@ export async function verifyUserAction(_prev: GovState, formData: FormData): Pro
   const result = await setUserVerified(user, {
     userId: z.guid().parse(formData.get("userId")),
     verified: formData.get("verified") === "true",
+    reason: String(formData.get("reason") ?? ""),
+  });
+  revalidatePath("/admin/people");
+  return result.ok ? { ok: true, message: result.message } : { error: result.error };
+}
+
+export async function setRoleAction(_prev: GovState, formData: FormData): Promise<GovState> {
+  const user = await requireUser();
+  const result = await setUserRole(user, {
+    userId: z.guid().parse(formData.get("userId")),
+    role: String(formData.get("role") ?? ""),
     reason: String(formData.get("reason") ?? ""),
   });
   revalidatePath("/admin/people");

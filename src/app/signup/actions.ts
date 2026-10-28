@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { confirmCode, registerAccount, resendCode, sessionTokenFor, signupSchema, type SignupInput } from "@/lib/services/accounts";
+import { registerAccount, signupSchema, type SignupInput } from "@/lib/services/accounts";
 
 export type SignupState = {
   error?: string;
@@ -30,27 +30,8 @@ export async function signup(_prev: SignupState, formData: FormData): Promise<Si
 
   const result = await registerAccount(parsed.data);
   if (!result.ok) return result.field ? { fieldErrors: { [result.field]: result.error }, values } : { error: result.error, values };
-  redirect(`/signup/verify?email=${encodeURIComponent(result.email)}`);
-}
-
-export type CodeState = { error?: string; sent?: string };
-
-export async function verifyEmail(_prev: CodeState, formData: FormData): Promise<CodeState> {
-  const email = String(formData.get("email") ?? "");
-  const result = await confirmCode(email, String(formData.get("code") ?? ""));
-  if (!result.ok) return { error: result.error };
-
-  // Turn the confirmed email straight into a session, so nobody has to type their password again.
-  const token = await sessionTokenFor(result.email);
-  if (token) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({ type: "email", token_hash: token });
-    if (!error) redirect("/passport?welcome=1");
-  }
-  redirect(`/login?created=1`);
-}
-
-export async function sendNewCode(_prev: CodeState, formData: FormData): Promise<CodeState> {
-  const result = await resendCode(String(formData.get("email") ?? ""));
-  return result.ok ? { sent: "A new code is on its way. Check your inbox and spam folder." } : { error: result.error };
+  // Sign the new account straight in.
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email: result.email, password: parsed.data.password });
+  redirect(error ? "/login?created=1" : "/passport?welcome=1");
 }

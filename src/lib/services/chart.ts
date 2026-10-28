@@ -45,7 +45,7 @@ export async function bookingChart(orgId: string, limit = 5) {
 
   const { data: resources } = await db
     .from("resources")
-    .select("id, name, location, demand, windows:availability_windows(weekday, start_time, end_time), requirements:resource_requirements(badge:skill_badges(name))")
+    .select("id, name, location, demand, org:organizations(name), windows:availability_windows(weekday, start_time, end_time), requirements:resource_requirements(badge:skill_badges(name))")
     .eq("org_id", orgId)
     .eq("status", "active");
   const all = resources ?? [];
@@ -98,5 +98,6 @@ export async function bookingChart(orgId: string, limit = 5) {
   const openToday = all.filter((r) => r.windows.some((w) => w.weekday === p.weekday)).length;
   const ahead = Math.round((campusInstant(date, "00:00").getTime() - campusInstant(isoDate(campusParts(now)), "00:00").getTime()) / (24 * 3_600_000));
   const when = ahead === 0 ? "today" : ahead === 1 ? "tomorrow" : `on ${new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long" }).format(day)}`;
-  return { date, when, dayLabel: new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "long" }).format(day), rows, openToday, total: all.length };
+  const campus = all[0]?.org?.name ?? "";
+  return { date, when, campus, dayLabel: new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "long" }).format(day), rows, openToday, total: all.length };
 }

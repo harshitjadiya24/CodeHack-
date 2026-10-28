@@ -29,14 +29,17 @@ function label(c: ChartCell) {
 }
 
 /** The reservation chart for one campus day. OPEN cells can be held; holding leads into the real request flow. */
-export function LiveChart({ rows, slots, dayLabel }: { rows: ChartRow[]; slots: readonly { label: string }[]; dayLabel: string }) {
+export function LiveChart({ rows, slots, dayLabel, campus }: { rows: ChartRow[]; slots: readonly { label: string }[]; dayLabel: string; campus: string }) {
   const [held, setHeld] = useState<{ row: number; col: number } | null>(null);
   const heldRow = held ? rows[held.row] : null;
 
   return (
     <figure className="overflow-hidden rounded-lg border border-rule bg-card shadow-plate">
       <figcaption className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-rule px-4 py-3 sm:px-5">
-        <span className="font-display text-lg font-bold">Booking chart, {dayLabel}</span>
+        <span>
+          <span className="font-display block text-lg font-bold">Booking chart, {dayLabel}</span>
+          <span className="block text-sm text-subtle">{campus}, the demo campus</span>
+        </span>
         <span className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-subtle">
           <span>
             <b className="chart-code text-ok">CNF</b> confirmed

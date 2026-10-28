@@ -20,7 +20,7 @@ async function anek(family: "Anek Latin" | "Anek Devanagari", text: string): Pro
 /** Share card: the station board, as on the landing page. */
 export default async function OpengraphImage() {
   const headline = "Every lab on campus, on one chart.";
-  const [latin, deva] = await Promise.all([anek("Anek Latin", `SAAJHA NFIT ${headline} Saajha`), anek("Anek Devanagari", "साझा")]);
+  const [latin, deva] = await Promise.all([anek("Anek Latin", `SAAJHA IND ${headline} Saajha`), anek("Anek Devanagari", "साझा")]);
   const fonts = [
     ...(latin ? [{ name: "Anek", data: latin, weight: 800 as const }] : []),
     ...(deva ? [{ name: "AnekDeva", data: deva, weight: 800 as const }] : []),
@@ -45,7 +45,7 @@ export default async function OpengraphImage() {
             <div style={{ fontFamily: "AnekDeva", fontSize: 92, lineHeight: 1 }}>साझा</div>
             <div style={{ fontSize: 168, lineHeight: 0.86, letterSpacing: -2 }}>SAAJHA</div>
           </div>
-          <div style={{ fontSize: 72, color: "#141414", paddingBottom: 14 }}>NFIT</div>
+          <div style={{ fontSize: 72, color: "#141414", paddingBottom: 14 }}>IND</div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", padding: "0 13%" }}>
           <div style={{ width: 18, height: 34, background: "#2b2b28" }} />

@@ -3,6 +3,8 @@ import { Check, X } from "lucide-react";
 import { getCurrentUser, homeFor } from "@/lib/auth";
 import { campusInsights } from "@/lib/services/insights";
 import { bookingChart, CHART_SLOTS } from "@/lib/services/chart";
+import { institutionCount } from "@/lib/services/institutions";
+import { INSTITUTE_KINDS } from "@/lib/india";
 import { StationBoard } from "@/components/board/station-board";
 import { LiveChart } from "@/components/board/live-chart";
 import { DrawBoard } from "@/components/board/draw-board";
@@ -36,7 +38,7 @@ const ROLES = [
 ];
 
 export default async function Landing() {
-  const [user, ins, chart] = await Promise.all([getCurrentUser(), campusInsights(DEMO_ORG), bookingChart(DEMO_ORG)]);
+  const [user, ins, chart, reach] = await Promise.all([getCurrentUser(), campusInsights(DEMO_ORG), bookingChart(DEMO_ORG), institutionCount()]);
   const home = user ? homeFor(user.role) : null;
   const cta = home ?? "/login";
 
@@ -71,6 +73,9 @@ export default async function Landing() {
             <a href="#draw" className="hidden px-3 py-2 text-subtle hover:text-ink md:block">
               The draw
             </a>
+            <a href="#institutes" className="hidden px-3 py-2 text-subtle hover:text-ink lg:block">
+              For institutes
+            </a>
             <ThemeToggle />
             {!home && (
               <ButtonLink href="/signup" variant="secondary" className="hidden sm:inline-flex">
@@ -84,7 +89,7 @@ export default async function Landing() {
 
       <main id="main">
         <div className="mx-auto max-w-[1240px] px-4 pt-8 md:px-8 md:pt-10">
-          <StationBoard campus="Northfield Institute of Technology" code="NFIT" openToday={chart.openToday} when={chart.when} />
+          <StationBoard campus="Shared campus labs, all of India" code="IND" line={`${reach.institutes} institutes, ${reach.states} ${reach.states === 1 ? "state" : "states"} so far`} />
 
           <div className="mt-12 grid items-end gap-8 md:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
             <SplitHeading as="h1" immediate className="type-h1 max-w-[13ch]">
@@ -92,8 +97,8 @@ export default async function Landing() {
             </SplitHeading>
             <div>
               <p className="max-w-[46ch] text-lg text-ink-2">
-                The 3D printer, the microscope and the studio camera sit idle most of the week. Saajha shows which ones you’re cleared for, books
-                you a slot, and runs a fair draw when too many people want the same hour.
+                In colleges across India, the 3D printer, the microscope and the studio camera sit idle most of the week. Saajha shows which
+                ones you’re cleared for, books you a slot, and runs a fair draw when too many people want the same hour.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <ButtonLink href={cta}>{home ? "Open Saajha" : "Find a slot"}</ButtonLink>
@@ -105,7 +110,7 @@ export default async function Landing() {
           </div>
 
           <section id="chart" aria-label="Booking chart" className="mt-12 scroll-mt-24">
-            <LiveChart rows={chart.rows} slots={CHART_SLOTS} dayLabel={chart.dayLabel} />
+            <LiveChart rows={chart.rows} slots={CHART_SLOTS} dayLabel={chart.dayLabel} campus={chart.campus} />
           </section>
 
           <section aria-label="Figures from the demo campus" className="mt-24 border-t-2 border-ink">
@@ -193,6 +198,53 @@ export default async function Landing() {
               </p>
             </div>
           </Reveal>
+        </section>
+
+        <section id="institutes" aria-labelledby="institutes-title" className="mx-auto max-w-[1240px] scroll-mt-24 px-4 pt-28 md:px-8 md:pt-36">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
+            <div>
+              <p className="text-[15px] font-semibold text-subtle">For institutes</p>
+              <SplitHeading id="institutes-title" className="type-h2 mt-2 max-w-[16ch]">
+                Any campus in India can open its labs.
+              </SplitHeading>
+              <p className="mt-5 max-w-[46ch] text-ink-2">
+                Register in a few minutes. Your departments, starter training and a fair-use policy are set up for your type of institute. An
+                email on your own domain verifies you straight away.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <ButtonLink href="/institutions/new" variant="board">
+                  Register your institute
+                </ButtonLink>
+                <ButtonLink href="/signup" variant="secondary">
+                  Join as a student
+                </ButtonLink>
+              </div>
+            </div>
+            <div>
+              <dl className="grid grid-cols-2 border-t-2 border-ink">
+                <div className="pt-5">
+                  <dd className="readout text-[clamp(2.75rem,5vw,4.25rem)]">
+                    <CountUp value={reach.institutes} kind="int" />
+                  </dd>
+                  <dt className="mt-2 text-[15px] text-subtle">institutes on Saajha</dt>
+                </div>
+                <div className="pt-5">
+                  <dd className="readout text-[clamp(2.75rem,5vw,4.25rem)]">
+                    <CountUp value={reach.states} kind="int" />
+                  </dd>
+                  <dt className="mt-2 text-[15px] text-subtle">states and union territories</dt>
+                </div>
+              </dl>
+              <p className="mt-8 text-[15px] font-semibold">Built for</p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {Object.values(INSTITUTE_KINDS).map((k) => (
+                  <li key={k} className="rounded-[4px] border border-rule bg-card px-3 py-1.5 text-[15px]">
+                    {k}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </section>
 
         <section aria-labelledby="roles-title" className="mx-auto max-w-[1240px] px-4 pt-28 md:px-8 md:pt-36">

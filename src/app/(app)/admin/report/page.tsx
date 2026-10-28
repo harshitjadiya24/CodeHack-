@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requirePageRole } from "@/lib/auth";
 import { campusInsights } from "@/lib/services/insights";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCampus } from "@/lib/domain/time";
 import { inr } from "@/lib/utils";
 import { PrintButton } from "@/app/(app)/owner/resources/[id]/qr/print-button";
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: "Infrastructure utilisation report" }
 /** Print-ready evidence of how shared infrastructure is used, in the shape accreditation reviews ask for. */
 export default async function ReportPage() {
   const user = await requirePageRole(["admin", "manager"]);
-  const ins = await campusInsights(user.org_id);
+  const [ins, { data: org }] = await Promise.all([campusInsights(user.org_id), createAdminClient().from("organizations").select("name").eq("id", user.org_id).single()]);
   const pct = (v: number) => `${Math.round(v * 100)}%`;
 
   return (
@@ -24,7 +25,7 @@ export default async function ReportPage() {
         <p className="text-sm text-subtle">Infrastructure and learning resources · utilisation evidence</p>
         <h1 className="font-display text-4xl">Shared Facilities Utilisation Report</h1>
         <p className="text-subtle">
-          Northfield Institute of Technology · last {ins.weeks} weeks · generated {formatCampus(new Date(), { year: "numeric" })} from the Saajha audit chain
+          {org?.name} · last {ins.weeks} weeks · generated {formatCampus(new Date(), { year: "numeric" })} from the Saajha audit chain
         </p>
       </header>
 

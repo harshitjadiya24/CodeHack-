@@ -5,17 +5,26 @@ import { useActionState, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button, Field, inputClass } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { groupDepartments } from "@/lib/departments";
 import { signup, type SignupState } from "./actions";
 
-type Campus = { id: string; name: string; departments: { id: string; name: string }[] };
+type Campus = { id: string; name: string; city: string | null; state: string | null; verified: boolean; departments: { id: string; name: string; code: string }[] };
 
 export function SignupForm({ campuses }: { campuses: Campus[] }) {
   const [state, action, pending] = useActionState<SignupState, FormData>(signup, {});
   const v = state.values ?? {};
   const e = state.fieldErrors ?? {};
-  const [orgId, setOrgId] = useState(v.orgId ?? campuses[0]?.id ?? "");
+  const [orgId, setOrgId] = useState(v.orgId ?? "");
+  const [stateFilter, setStateFilter] = useState("");
+  const [query, setQuery] = useState("");
+  const states = [...new Set(campuses.map((c) => c.state).filter((x): x is string => !!x))].sort();
+  const needle = query.trim().toLowerCase();
+  const matches = campuses.filter(
+    (c) => (!stateFilter || c.state === stateFilter) && (!needle || `${c.name} ${c.city ?? ""}`.toLowerCase().includes(needle)),
+  );
+  const chosen = campuses.find((c) => c.id === orgId);
   const [showPassword, setShowPassword] = useState(false);
-  const departments = campuses.find((c) => c.id === orgId)?.departments ?? [];
+  const groups = groupDepartments(campuses.find((c) => c.id === orgId)?.departments ?? []);
   const errorId = (k: string) => (e[k as keyof typeof e] ? `${k}-error` : undefined);
 
   return (
@@ -32,25 +41,60 @@ export function SignupForm({ campuses }: { campuses: Campus[] }) {
         <input name="fullName" autoComplete="name" required defaultValue={v.fullName} aria-invalid={!!e.fullName} aria-describedby={errorId("fullName")} className={inputClass} />
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Campus" error={e.orgId}>
-          <select name="orgId" value={orgId} onChange={(ev) => setOrgId(ev.target.value)} className={inputClass} aria-invalid={!!e.orgId}>
-            {campuses.map((c) => (
+      <fieldset className="space-y-3 rounded-lg border border-rule p-4">
+        <legend className="px-1 text-[15px] font-semibold text-ink">Your institute</legend>
+        <div className="grid gap-3 sm:grid-cols-[0.8fr_1.2fr]">
+          <label className="block">
+            <span className="sr-only">State</span>
+            <select value={stateFilter} onChange={(ev) => setStateFilter(ev.target.value)} className={inputClass}>
+              <option value="">All states</option>
+              {states.map((st) => (
+                <option key={st}>{st}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="sr-only">Search by name or city</span>
+            <input type="search" value={query} onChange={(ev) => setQuery(ev.target.value)} placeholder="Search by name or city" className={inputClass} />
+          </label>
+        </div>
+        <Field label="Institute" error={e.orgId}>
+          <select name="orgId" value={orgId} onChange={(ev) => setOrgId(ev.target.value)} required className={inputClass} aria-invalid={!!e.orgId}>
+            <option value="" disabled>
+              {matches.length ? `Choose from ${matches.length} ${matches.length === 1 ? "institute" : "institutes"}` : "No institute matches"}
+            </option>
+            {(chosen && !matches.includes(chosen) ? [chosen, ...matches] : matches).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
+                {c.city ? `, ${c.city}` : ""}
+                {c.verified ? "" : " (pending review)"}
               </option>
             ))}
           </select>
         </Field>
+        <p className="text-sm text-subtle">
+          Not listed?{" "}
+          <Link href="/institutions/new" className="font-semibold text-ink underline underline-offset-4">
+            Ask your institute to register
+          </Link>{" "}
+          or register it yourself if you run its labs.
+        </p>
+      </fieldset>
+
+      <div>
         <Field label="Department" error={e.deptId}>
-          <select key={orgId} name="deptId" defaultValue={v.orgId === orgId ? v.deptId : ""} required className={inputClass} aria-invalid={!!e.deptId}>
+          <select key={orgId} name="deptId" defaultValue={v.orgId === orgId ? v.deptId : ""} required disabled={!orgId} className={inputClass} aria-invalid={!!e.deptId}>
             <option value="" disabled>
-              Choose one
+              {orgId ? "Choose one" : "Choose your institute first"}
             </option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
+            {groups.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.items.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </Field>

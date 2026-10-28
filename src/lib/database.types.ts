@@ -368,9 +368,9 @@ export type Database = {
         ]
       }
       organizations: {
-        Row: { city: string | null; created_at: string; id: string; name: string; slug: string }
-        Insert: { city?: string | null; created_at?: string; id?: string; name: string; slug: string }
-        Update: { city?: string | null; created_at?: string; id?: string; name?: string; slug?: string }
+        Row: { lat: number | null; lng: number | null; aishe_code: string | null; city: string | null; created_at: string; created_by: string | null; email_domain: string | null; id: string; kind: string; name: string; slug: string; state: string | null; status: string; website: string | null }
+        Insert: { lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name: string; slug: string; state?: string | null; status?: string; website?: string | null }
+        Update: { lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name?: string; slug?: string; state?: string | null; status?: string; website?: string | null }
         Relationships: []
       }
       profiles: {
@@ -423,6 +423,8 @@ export type Database = {
       }
       resources: {
         Row: {
+          lat: number | null
+          lng: number | null
           auto_approve: boolean
           category: string
           checklist: Json
@@ -448,6 +450,8 @@ export type Database = {
           status: Database["public"]["Enums"]["resource_status"]
         }
         Insert: {
+          lat?: number | null
+          lng?: number | null
           auto_approve?: boolean
           category: string
           checklist?: Json
@@ -473,6 +477,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["resource_status"]
         }
         Update: {
+          lat?: number | null
+          lng?: number | null
           auto_approve?: boolean
           category?: string
           checklist?: Json

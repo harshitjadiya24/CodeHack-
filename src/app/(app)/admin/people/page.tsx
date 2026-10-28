@@ -4,6 +4,7 @@ import { requirePageRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROLE_LABEL } from "@/lib/demo";
 import { VerifyUserForm } from "./verify-form";
+import { RoleForm } from "./role-form";
 
 export const metadata: Metadata = { title: "People" };
 
@@ -22,10 +23,10 @@ export default async function PeoplePage() {
     <>
       <PageHeader eyebrow="Identity and standing" title="People" />
       <p className="-mt-4 mb-6 max-w-2xl text-ink-2">
-        Unverified accounts can browse but cannot request anything. Every change here needs a reason and is written to the audit chain.
+        Unverified accounts can browse but cannot request anything. Lab in-charges sign up themselves; verify them, then make them owners here. Every change needs a reason and is written to the audit chain.
       </p>
       <Card className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="w-full min-w-[1040px] text-sm">
           <thead className="border-b border-rule text-left text-xs text-subtle">
             <tr>
               <th className="px-4 py-2 font-normal">Name</th>
@@ -45,7 +46,7 @@ export default async function PeoplePage() {
                     {p.roll_no ?? "Staff"} {p.dept?.code && `· ${p.dept.code}`}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-ink-2">{ROLE_LABEL[p.role]}</td>
+                <td className="px-4 py-2 text-ink-2">{p.id === admin.id ? ROLE_LABEL[p.role] : <RoleForm userId={p.id} role={p.role} />}</td>
                 <td className="px-4 py-2 font-mono">{live.get(p.id) ?? 0}</td>
                 <td className="px-4 py-2 font-mono">{p.strikes}</td>
                 <td className="px-4 py-2">

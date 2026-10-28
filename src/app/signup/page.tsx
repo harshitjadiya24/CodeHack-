@@ -30,7 +30,10 @@ export default async function SignupPage() {
           Saajha
         </Link>
         <h1 className="type-h2">Create your account</h1>
-        <p className="mb-8 mt-3 max-w-[48ch] text-ink-2">For students and researchers. Lab owners and staff get their accounts from the admin office.</p>
+        <p className="mb-8 mt-3 max-w-[50ch] text-ink-2">
+          For students, researchers and faculty at any institute on Saajha. Lab in-charges: sign up as a researcher, and your admin office will make you an
+          owner.
+        </p>
         <Card className="p-5 sm:p-7">
           <SignupForm campuses={campuses} />
         </Card>
