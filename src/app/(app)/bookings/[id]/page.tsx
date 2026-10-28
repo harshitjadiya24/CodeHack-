@@ -9,6 +9,7 @@ import { CancelForm, DecisionForm } from "@/components/action-forms";
 import { ConfirmCheckInForm, ReportIncidentForm, VerifyReturnForm } from "@/components/handover-forms";
 import { ConditionRecord } from "@/components/condition-record";
 import { DisputeForm, ExtendForm } from "@/components/booking-extras";
+import { Ticket } from "@/components/board/ticket";
 import { campusParts } from "@/lib/domain/time";
 import { signedHandoverPhotos } from "@/lib/services/handovers";
 import { OWNER_ROLES, STAFF_ROLES, requireUser } from "@/lib/auth";
@@ -71,13 +72,13 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
         <div className="flex flex-wrap items-start gap-4">
           <ResourceIcon category={b.resource.category} />
           <div className="flex-1">
-            <p className="text-sm text-muted">Booking · {b.id.slice(0, 8)}</p>
-            <h1 className="font-display text-3xl leading-tight">
+            <p className="text-sm text-subtle">Booking · {b.id.slice(0, 8)}</p>
+            <h1 className="type-h2">
               <Link href={`/resources/${b.resource.id}`} className="hover:underline">
                 {b.resource.name}
               </Link>
             </h1>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-subtle">
               {formatCampus(b.starts_at, { weekday: "long" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} · {b.resource.location}
             </p>
           </div>
@@ -91,7 +92,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
 
         {!!incidents?.length && (
           <Card className="p-5">
-            <h2 className="mb-3 font-medium">Incidents</h2>
+            <h2 className="mb-3 font-bold">Incidents</h2>
             <ul className="space-y-3">
               {incidents.map((i) => (
                 <li key={i.id} className="rounded-md border border-rule p-3 text-sm">
@@ -113,20 +114,33 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
         {receipt && <DecisionReceiptCard receipt={receipt} />}
 
         <Card className="p-5">
-          <h2 className="mb-1 font-medium">Purpose</h2>
+          <h2 className="mb-1 font-bold">Purpose</h2>
           <p className="text-sm text-ink-2">{b.purpose}</p>
           {b.deadline_note && <p className="mt-2 text-sm text-ink-2">Deadline: {b.deadline_note}</p>}
           {!isRequester && (
-            <p className="mt-2 text-sm text-muted">
+            <p className="mt-2 text-sm text-subtle">
               Requested by {b.requester?.full_name} {b.requester?.roll_no ? `(${b.requester.roll_no})` : ""}
             </p>
           )}
         </Card>
       </div>
 
-      <aside className="space-y-4">
+      {/* On a phone the ticket and the next step come first: they are what you act on. */}
+      <aside className="order-first space-y-4 lg:order-none">
+        <Ticket
+          status={`${status.label}${b.status === "waitlisted" && b.waitlist_position ? ` #${b.waitlist_position}` : ""}`}
+          code={`SJ-${b.id.slice(0, 4).toUpperCase()}`}
+          tone={["approved", "checked_in", "closed"].includes(b.status) ? "ok" : status.tone === "saffron" || status.tone === "info" ? "draw" : status.tone === "danger" ? "danger" : status.tone === "warn" ? "warn" : "neutral"}
+          rows={[
+            ["Borrower", b.requester?.full_name ?? "—"],
+            ["Slot", `${formatCampus(b.starts_at, { weekday: "short", hour12: false })}–${formatCampus(b.ends_at, { day: undefined, month: undefined, hour12: false })}`],
+            ["Where", b.resource.location],
+            ["Decided by", receipt ? (receipt.decidedBy.kind === "person" ? receipt.decidedBy.name : "Published rules") : "Pending"],
+          ]}
+          stub={timeline?.at(-1)?.hash ? { left: <span className="font-mono">record {timeline.at(-1)!.hash.slice(0, 12)}</span>, right: "Show at the desk" } : undefined}
+        />
         <Card className="space-y-3 p-5">
-          <h2 className="font-medium">Next step</h2>
+          <h2 className="font-bold">Next step</h2>
           {awaitingAttendant && (
             <p className="rounded-md bg-info-soft p-3 text-sm text-info">Condition recorded. Waiting for a lab attendant to confirm in person.</p>
           )}
@@ -156,14 +170,14 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
           {["approved", "checked_in", "overdue", "returned", "closed"].includes(b.status) && (isRequester || canManage || isAttendant) && (
             <ReportIncidentForm bookingId={b.id} />
           )}
-          {["closed", "cancelled", "rejected"].includes(b.status) && <p className="text-sm text-muted">This booking is finished. Its record stays in the audit chain.</p>}
+          {["closed", "cancelled", "rejected"].includes(b.status) && <p className="text-sm text-subtle">This booking is finished. Its record stays in the audit chain.</p>}
           <ButtonLink href={`/bookings/${b.id}/receipt`} variant="ghost" className="w-full">
             Printable record (PDF)
           </ButtonLink>
         </Card>
 
         <Card className="p-5">
-          <h2 className="mb-4 font-medium">History</h2>
+          <h2 className="mb-4 font-bold">History</h2>
           <AuditTimeline entries={timeline ?? []} />
           <Link href="/audit/verify" className="mt-4 inline-block text-sm text-accent underline">
             Verify the audit chain

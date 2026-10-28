@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LiveBell } from "@/components/live-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { requireUser, type Role } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { ROLE_LABEL } from "@/lib/demo";
@@ -54,9 +55,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:px-3 focus:py-2">
         Skip to content
       </a>
-      <header className="blueprint-grid text-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 md:px-8">
-          <Link href="/" className="font-display text-2xl font-semibold leading-none text-white">
+      <header className="sticky top-0 z-30 border-b border-rule bg-paper/90 backdrop-blur">
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 md:px-8">
+          <Link href="/" className="flex items-center gap-2.5 text-xl font-extrabold leading-none text-ink">
+            <span aria-hidden className="board-chip grid size-8 place-items-center rounded-[4px] font-deva text-[17px]">
+              सा
+            </span>
             Saajha
           </Link>
           <nav aria-label="Main" className="order-3 flex w-full gap-1 overflow-x-auto md:order-none md:w-auto">
@@ -66,19 +70,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               </NavLink>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
             <LiveBell userId={user.id} initial={unread ?? 0} />
-            <Link href="/profile" className="hidden rounded-md px-2 py-1 text-right text-sm leading-tight hover:bg-white/10 sm:block">
-              <span className="block font-medium text-white">{user.full_name}</span>
-              <span className="block text-xs text-white/65">{ROLE_LABEL[user.role]}</span>
+            <Link href="/profile" className="hidden rounded-md px-2 py-1 text-right leading-tight hover:bg-paper-2 sm:block">
+              <span className="block text-[15px] font-bold text-ink">{user.full_name}</span>
+              <span className="block text-[13px] text-subtle">{ROLE_LABEL[user.role]}</span>
             </Link>
             <form action={logout}>
-              <button className="rounded-md px-2 py-1 text-sm text-white/70 hover:bg-white/10 hover:text-white">Sign out</button>
+              <button className="min-h-11 rounded-md px-3 text-[15px] text-subtle hover:bg-paper-2 hover:text-ink">Sign out</button>
             </form>
           </div>
         </div>
       </header>
-      <main id="main" className="mx-auto max-w-6xl px-4 py-10 md:px-8">
+      <main id="main" className="mx-auto max-w-[1240px] px-4 py-10 md:px-8 md:py-14">
         {children}
       </main>
     </div>

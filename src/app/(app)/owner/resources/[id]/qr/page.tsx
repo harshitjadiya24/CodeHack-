@@ -30,9 +30,9 @@ export default async function QrTagPage({ params, searchParams }: { params: Prom
         <p className="font-display text-2xl">Saajha</p>
         <div className="mx-auto my-4 w-56" dangerouslySetInnerHTML={{ __html: svg }} />
         <p className="font-medium">{r.name}</p>
-        <p className="text-sm text-muted">{r.location}</p>
+        <p className="text-sm text-subtle">{r.location}</p>
         <p className="mt-4 text-sm">Scan to check availability, book, check in or return.</p>
-        <p className="mt-1 font-mono text-xs text-muted">{r.qr_token}</p>
+        <p className="mt-1 font-mono text-xs text-subtle">{r.qr_token}</p>
       </Card>
       <div className="mt-4 print:hidden">
         <PrintButton />

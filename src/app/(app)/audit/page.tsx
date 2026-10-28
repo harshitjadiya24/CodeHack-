@@ -48,7 +48,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
 
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="border-b border-rule text-left text-xs text-muted">
+          <thead className="border-b border-rule text-left text-xs text-subtle">
             <tr>
               <th className="px-4 py-2 font-normal">#</th>
               <th className="px-4 py-2 font-normal">When</th>
@@ -61,7 +61,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           <tbody className="divide-y divide-rule">
             {(rows ?? []).map((r) => (
               <tr key={r.id} className="align-top">
-                <td className="px-4 py-2 font-mono text-xs text-muted">{r.id}</td>
+                <td className="px-4 py-2 font-mono text-xs text-subtle">{r.id}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-ink-2">{formatCampus(r.created_at)}</td>
                 <td className="px-4 py-2">
                   {r.entity === "booking" && r.entity_id ? (

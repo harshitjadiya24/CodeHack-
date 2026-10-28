@@ -3,18 +3,17 @@
 import { useActionState } from "react";
 import { Button, Field, inputClass } from "@/components/ui";
 import { requestBookingAction, type RequestState } from "./actions";
+import { DatePickerCard } from "@/components/date-picker-card";
 
 const HOURS = Array.from({ length: 10 }, (_, i) => `${String(9 + i).padStart(2, "0")}:00`);
 
-export function RequestForm({ resourceId, maxHours, minDate }: { resourceId: string; maxHours: number; minDate: string }) {
+export function RequestForm({ resourceId, maxHours, minDate, openWeekdays }: { resourceId: string; maxHours: number; minDate: string; openWeekdays: number[] }) {
   const [state, action, pending] = useActionState<RequestState, FormData>(requestBookingAction, {});
 
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="resourceId" value={resourceId} />
-      <Field label="Date">
-        <input type="date" name="date" min={minDate} defaultValue={minDate} required className={inputClass} />
-      </Field>
+      <DatePickerCard name="date" minDate={minDate} openWeekdays={openWeekdays} />
       <div className="grid grid-cols-2 gap-3">
         <Field label="From">
           <select name="from" defaultValue="10:00" className={inputClass}>

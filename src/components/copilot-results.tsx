@@ -9,7 +9,7 @@ export function CopilotResults({ ask, result, info }: { ask: string; result: Mat
   return (
     <Card className="mb-8 border-accent/40 p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 font-medium">
+        <h2 className="flex items-center gap-2 font-bold">
           <Sparkles className="size-4 text-accent" aria-hidden /> Best matches for “{ask}”
         </h2>
         <Pill tone={result.source === "ai" ? "accent" : "neutral"}>
@@ -17,7 +17,7 @@ export function CopilotResults({ ask, result, info }: { ask: string; result: Mat
         </Pill>
       </div>
       {result.matches.length === 0 ? (
-        <p className="text-sm text-muted">Nothing in the catalogue fits that yet. Try describing the task differently.</p>
+        <p className="text-sm text-subtle">Nothing in the catalogue fits that yet. Try describing the task differently.</p>
       ) : (
         <ol className="space-y-3">
           {result.matches.map((m, i) => {

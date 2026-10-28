@@ -34,8 +34,8 @@ export default async function NotificationsPage() {
                     {!n.read_at && <span className="sr-only">Unread: </span>}
                     {n.title}
                   </p>
-                  {n.body && <p className="text-sm text-muted">{n.body}</p>}
-                  <p className="mt-0.5 text-xs text-muted">{formatCampus(n.created_at)}</p>
+                  {n.body && <p className="text-sm text-subtle">{n.body}</p>}
+                  <p className="mt-0.5 text-xs text-subtle">{formatCampus(n.created_at)}</p>
                 </div>
               </div>
             );

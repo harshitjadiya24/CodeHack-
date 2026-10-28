@@ -28,7 +28,7 @@ export default async function VerifyChainPage() {
             </p>
           </div>
         </div>
-        <h3 className="mb-1 mt-6 text-sm font-medium">What this proves</h3>
+        <h3 className="mb-1 mt-6 text-sm font-bold">What this proves</h3>
         <ul className="list-disc space-y-1 pl-5 text-sm text-ink-2">
           <li>Each record stores the SHA-256 of its own contents plus the previous record’s hash.</li>
           <li>The database rejects any UPDATE or DELETE on the log, and even a database administrator who bypassed that would break every later hash.</li>

@@ -21,15 +21,15 @@ export default async function ReportPage() {
         </div>
       </div>
       <header className="border-b border-rule pb-4">
-        <p className="text-sm text-muted">Infrastructure and learning resources · utilisation evidence</p>
+        <p className="text-sm text-subtle">Infrastructure and learning resources · utilisation evidence</p>
         <h1 className="font-display text-4xl">Shared Facilities Utilisation Report</h1>
-        <p className="text-muted">
+        <p className="text-subtle">
           Northfield Institute of Technology · last {ins.weeks} weeks · generated {formatCampus(new Date(), { year: "numeric" })} from the Saajha audit chain
         </p>
       </header>
 
       <section>
-        <h2 className="mb-2 text-base font-semibold">1. Summary</h2>
+        <h2 className="mb-2 text-base font-bold">1. Summary</h2>
         <table className="w-full">
           <tbody className="divide-y divide-rule">
             {[
@@ -50,7 +50,7 @@ export default async function ReportPage() {
       </section>
 
       <section>
-        <h2 className="mb-2 text-base font-semibold">2. Equitable access</h2>
+        <h2 className="mb-2 text-base font-bold">2. Equitable access</h2>
         <p className="text-ink-2">
           Usage concentration (Gini) is {ins.fairness.gini.toFixed(2)}; the most active 20% of users accounted for {pct(ins.fairness.top20Share)} of hours.{" "}
           {ins.fairness.drawsRun} high-demand clashes were settled by verifiable Fair Draw and {ins.fairness.promoted} waitlisted users were promoted
@@ -59,7 +59,7 @@ export default async function ReportPage() {
       </section>
 
       <section>
-        <h2 className="mb-2 text-base font-semibold">3. Safety and accountability</h2>
+        <h2 className="mb-2 text-base font-bold">3. Safety and accountability</h2>
         <p className="text-ink-2">
           Access to every controlled resource required a verified, unexpired skill badge issued by a named manager. {ins.safety.incidents} incidents were recorded
           ({ins.safety.per100.toFixed(1)} per 100 bookings), each reviewed by a person; {ins.safety.strikes} resulted in a strike. Every approval, handover and
@@ -68,9 +68,9 @@ export default async function ReportPage() {
       </section>
 
       <section>
-        <h2 className="mb-2 text-base font-semibold">4. Utilisation by facility</h2>
+        <h2 className="mb-2 text-base font-bold">4. Utilisation by facility</h2>
         <table className="w-full">
-          <thead className="text-left text-xs text-muted">
+          <thead className="text-left text-xs text-subtle">
             <tr>
               <th className="py-1 font-normal">Facility</th>
               <th className="py-1 font-normal">Department</th>
@@ -91,7 +91,7 @@ export default async function ReportPage() {
         </table>
       </section>
 
-      <footer className="border-t border-rule pt-4 text-xs text-muted">
+      <footer className="border-t border-rule pt-4 text-xs text-subtle">
         Figures are computed from completed bookings only. Demonstration data is fictional. Prepared by {user.full_name}.
       </footer>
     </article>

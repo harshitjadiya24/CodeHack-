@@ -48,7 +48,7 @@ export default async function ManagerPage() {
       </p>
 
       <section aria-labelledby="badges" className="mb-10">
-        <h2 id="badges" className="mb-3 text-base font-semibold text-ink">
+        <h2 id="badges" className="mb-3 text-base font-bold text-ink">
           Trust Passport requests ({myBadges.length})
         </h2>
         {myBadges.length === 0 ? (
@@ -59,7 +59,7 @@ export default async function ManagerPage() {
               <Card key={b.id} className="space-y-3 p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p>
-                    <span className="font-medium">{b.user?.full_name}</span> <span className="text-sm text-muted">{b.user?.roll_no}</span>
+                    <span className="font-medium">{b.user?.full_name}</span> <span className="text-sm text-subtle">{b.user?.roll_no}</span>
                   </p>
                   <Pill tone="accent">{b.badge?.name}</Pill>
                 </div>
@@ -72,7 +72,7 @@ export default async function ManagerPage() {
                   ) : (
                     "No evidence attached"
                   )}
-                  <span className="text-muted"> · valid {b.badge?.validity_days} days once issued · submitted {formatCampus(b.created_at)}</span>
+                  <span className="text-subtle"> · valid {b.badge?.validity_days} days once issued · submitted {formatCampus(b.created_at)}</span>
                 </p>
                 <BadgeDecisionForm userBadgeId={b.id} />
               </Card>
@@ -82,7 +82,7 @@ export default async function ManagerPage() {
       </section>
 
       <section aria-labelledby="incidents" className="mb-10">
-        <h2 id="incidents" className="mb-3 text-base font-semibold text-ink">
+        <h2 id="incidents" className="mb-3 text-base font-bold text-ink">
           Incidents awaiting a decision ({myIncidents.length})
         </h2>
         {myIncidents.length === 0 ? (
@@ -98,7 +98,7 @@ export default async function ManagerPage() {
                     <span className="font-medium">{i.resource?.name}</span>
                   </div>
                   <p className="mt-2 text-sm text-ink-2">{i.description}</p>
-                  <p className="mt-2 text-xs text-muted">
+                  <p className="mt-2 text-xs text-subtle">
                     Reported by {i.reporter?.full_name ?? "Saajha (automatic rule)"} · {formatCampus(i.created_at)}
                     {i.booking?.user && ` · Borrower: ${i.booking.user.full_name} (${i.booking.user.strikes} strike${i.booking.user.strikes === 1 ? "" : "s"})`}
                   </p>
@@ -122,7 +122,7 @@ export default async function ManagerPage() {
 
       {!!recent?.length && (
         <section aria-labelledby="recent">
-          <h2 id="recent" className="mb-3 text-base font-semibold text-ink">
+          <h2 id="recent" className="mb-3 text-base font-bold text-ink">
             Recent decisions
           </h2>
           <Card className="divide-y divide-rule">
@@ -132,7 +132,7 @@ export default async function ManagerPage() {
                 <div key={r.id} className="px-5 py-3 text-sm">
                   <span className="font-medium">{r.resource?.name}</span> · {r.type} · {r.decision}
                   {r.strike_applied && <Pill tone="danger" className="ml-2">Strike</Pill>}
-                  <span className="block text-xs text-muted">
+                  <span className="block text-xs text-subtle">
                     {r.decider?.full_name} · {r.decided_at && formatCampus(r.decided_at)}
                   </span>
                 </div>

@@ -35,18 +35,18 @@ export default async function AdminPage() {
 
       <div className="mb-8 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <Card className="p-5">
-          <h2 className="font-medium">When is equipment actually used?</h2>
-          <p className="mb-4 text-sm text-muted">Booked hours by weekday and hour, campus time. Pale cells are idle capacity you could lend.</p>
+          <h2 className="font-bold">When is equipment actually used?</h2>
+          <p className="mb-4 text-sm text-subtle">Booked hours by weekday and hour, campus time. Pale cells are idle capacity you could lend.</p>
           <Heatmap heat={ins.heat} />
         </Card>
 
         <Card className="p-5">
-          <h2 className="mb-4 font-medium">Is access fair?</h2>
+          <h2 className="mb-4 font-bold">Is access fair?</h2>
           <dl className="space-y-4 text-sm">
             <div className="flex items-start justify-between gap-4">
               <dt>
                 Usage concentration (Gini)
-                <span className="block text-xs text-muted">0 = everyone gets equal time, 1 = one person takes all</span>
+                <span className="block text-xs text-subtle">0 = everyone gets equal time, 1 = one person takes all</span>
               </dt>
               <dd>
                 <Pill tone={giniTone} className="font-mono text-sm">
@@ -57,14 +57,14 @@ export default async function AdminPage() {
             <div className="flex items-start justify-between gap-4">
               <dt>
                 Share used by heaviest 20%
-                <span className="block text-xs text-muted">Watch for monopolisation</span>
+                <span className="block text-xs text-subtle">Watch for monopolisation</span>
               </dt>
               <dd className="font-mono">{pct(ins.fairness.top20Share)}</dd>
             </div>
             <div className="flex items-start justify-between gap-4">
               <dt>
                 Requests from first-time users
-                <span className="block text-xs text-muted">New people getting a turn</span>
+                <span className="block text-xs text-subtle">New people getting a turn</span>
               </dt>
               <dd className="font-mono">{pct(ins.fairness.firstTimeShare)}</dd>
             </div>
@@ -87,7 +87,7 @@ export default async function AdminPage() {
       <Card className="mb-8 overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm">
           <caption className="px-5 pt-5 text-left font-medium">Utilisation by resource</caption>
-          <thead className="text-left text-xs text-muted">
+          <thead className="text-left text-xs text-subtle">
             <tr>
               <th className="px-5 py-2 font-normal">Resource</th>
               <th className="px-5 py-2 font-normal">Department</th>
@@ -116,8 +116,8 @@ export default async function AdminPage() {
 
       {config && (
         <Card className="p-5">
-          <h2 className="font-medium">Fairness policy</h2>
-          <p className="mb-4 text-sm text-muted">These published rules drive every decision receipt. Changes are versioned in the audit log.</p>
+          <h2 className="font-bold">Fairness policy</h2>
+          <p className="mb-4 text-sm text-subtle">These published rules drive every decision receipt. Changes are versioned in the audit log.</p>
           <FairnessForm config={config} />
         </Card>
       )}

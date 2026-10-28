@@ -11,10 +11,10 @@ export function NewListing({ badges, aiOn }: { badges: { id: string; name: strin
   return (
     <div className="space-y-6">
       <Card className="border-accent/40 p-5">
-        <h2 className="flex items-center gap-2 font-medium">
+        <h2 className="flex items-center gap-2 font-bold">
           <Sparkles className="size-4 text-accent" aria-hidden /> Snap a photo, get a draft
         </h2>
-        <p className="mb-3 text-sm text-muted">
+        <p className="mb-3 text-sm text-subtle">
           {aiOn
             ? "AI drafts the name, description, safety rules and handover checklist. You review and edit every field before publishing."
             : "AI drafting is off (no Gemini key). The form below works the same by hand."}

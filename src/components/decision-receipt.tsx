@@ -9,12 +9,12 @@ export function DecisionReceiptCard({ receipt }: { receipt: DecisionReceipt }) {
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-rule bg-paper-2 px-5 py-3">
-        <p className="text-sm text-muted">Decision receipt</p>
+        <p className="text-sm text-subtle">Decision receipt</p>
         <h2 className="font-display text-2xl">{receipt.headline}</h2>
       </div>
       <div className="space-y-5 p-5">
         <div>
-          <h3 className="mb-1 text-sm font-medium">Why</h3>
+          <h3 className="mb-1 text-sm font-bold">Why</h3>
           <ul className="list-disc space-y-1 pl-5 text-sm text-ink-2">
             {receipt.reasons.map((r) => (
               <li key={r}>{r}</li>
@@ -23,16 +23,16 @@ export function DecisionReceiptCard({ receipt }: { receipt: DecisionReceipt }) {
         </div>
 
         <p className="flex items-center gap-2 text-sm text-ink-2">
-          {byPerson ? <UserCheck className="size-4 text-accent" aria-hidden /> : <Bot className="size-4 text-muted" aria-hidden />}
+          {byPerson ? <UserCheck className="size-4 text-accent" aria-hidden /> : <Bot className="size-4 text-subtle" aria-hidden />}
           {receipt.decidedBy.kind === "person"
             ? `Decided by ${receipt.decidedBy.name} (${receipt.decidedBy.role})`
             : "Applied automatically by published rules"}
-          <span className="text-muted">· {formatCampus(receipt.at)}</span>
+          <span className="text-subtle">· {formatCampus(receipt.at)}</span>
         </p>
 
         {receipt.priority && (
           <div>
-            <h3 className="mb-2 flex items-center gap-2 text-sm font-medium">
+            <h3 className="mb-2 flex items-center gap-2 text-sm font-bold">
               <Scale className="size-4 text-saffron" aria-hidden /> Priority score: {receipt.priority.score}
             </h3>
             <table className="w-full text-sm">

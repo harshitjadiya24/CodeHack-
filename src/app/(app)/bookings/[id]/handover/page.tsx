@@ -40,9 +40,9 @@ export default async function HandoverPage({ params, searchParams }: { params: P
       <Link href={`/bookings/${id}`} className="text-sm text-accent">
         ← Back to booking
       </Link>
-      <p className="mt-4 text-sm text-muted">{phase === "check_in" ? "Check-in" : "Return"}</p>
+      <p className="mt-4 text-sm text-subtle">{phase === "check_in" ? "Check-in" : "Return"}</p>
       <h1 className="font-display text-4xl leading-tight">{b.resource.name}</h1>
-      <p className="mb-6 text-sm text-muted">
+      <p className="mb-6 text-sm text-subtle">
         {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })}
       </p>
 

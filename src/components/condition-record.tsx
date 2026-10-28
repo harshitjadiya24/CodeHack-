@@ -12,10 +12,10 @@ export function ConditionRecord({ handovers, slots }: { handovers: Handover[]; s
 
   const Column = ({ h, title }: { h?: Handover; title: string }) => (
     <div>
-      <h3 className="mb-2 text-sm font-medium">{title}</h3>
+      <h3 className="mb-2 text-sm font-bold">{title}</h3>
       {h ? (
         <>
-          <p className="mb-2 text-xs text-muted">
+          <p className="mb-2 text-xs text-subtle">
             {formatCampus(h.created_at)}
             {h.attendant_confirmed_at && " · attendant confirmed"}
           </p>
@@ -37,7 +37,7 @@ export function ConditionRecord({ handovers, slots }: { handovers: Handover[]; s
           {h.notes && <p className="mt-2 text-xs text-ink-2">“{h.notes}”</p>}
         </>
       ) : (
-        <p className="text-sm text-muted">Not recorded yet.</p>
+        <p className="text-sm text-subtle">Not recorded yet.</p>
       )}
     </div>
   );
@@ -45,7 +45,7 @@ export function ConditionRecord({ handovers, slots }: { handovers: Handover[]; s
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-medium">Condition record</h2>
+        <h2 className="font-bold">Condition record</h2>
         <Pill tone="accent">
           <ShieldCheck className="size-3" aria-hidden /> Timestamped & hash-chained
         </Pill>

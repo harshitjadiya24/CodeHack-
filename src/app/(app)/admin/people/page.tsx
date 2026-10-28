@@ -26,7 +26,7 @@ export default async function PeoplePage() {
       </p>
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="border-b border-rule text-left text-xs text-muted">
+          <thead className="border-b border-rule text-left text-xs text-subtle">
             <tr>
               <th className="px-4 py-2 font-normal">Name</th>
               <th className="px-4 py-2 font-normal">Role</th>
@@ -41,7 +41,7 @@ export default async function PeoplePage() {
               <tr key={p.id}>
                 <td className="px-4 py-2">
                   {p.full_name}
-                  <span className="block text-xs text-muted">
+                  <span className="block text-xs text-subtle">
                     {p.roll_no ?? "Staff"} {p.dept?.code && `· ${p.dept.code}`}
                   </span>
                 </td>

@@ -6,9 +6,9 @@ const HOURS = Array.from({ length: 9 }, (_, i) => `${9 + i}`);
 export function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <Card className="p-4">
-      <p className="text-xs text-muted">{label}</p>
-      <p className="mt-1 font-display text-3xl leading-none text-ink">{value}</p>
-      {note && <p className="mt-1 text-xs text-muted">{note}</p>}
+      <p className="text-xs text-subtle">{label}</p>
+      <p className="readout mt-2 text-5xl">{value}</p>
+      {note && <p className="mt-1 text-xs text-subtle">{note}</p>}
     </Card>
   );
 }
@@ -24,7 +24,7 @@ export function Heatmap({ heat }: { heat: number[][] }) {
           <tr>
             <th />
             {HOURS.map((h) => (
-              <th key={h} scope="col" className="font-normal text-muted">
+              <th key={h} scope="col" className="font-normal text-subtle">
                 {h}:00
               </th>
             ))}
@@ -33,15 +33,18 @@ export function Heatmap({ heat }: { heat: number[][] }) {
         <tbody>
           {heat.map((row, d) => (
             <tr key={DAYS[d]}>
-              <th scope="row" className="pr-2 text-left font-normal text-muted">
+              <th scope="row" className="pr-2 text-left font-normal text-subtle">
                 {DAYS[d]}
               </th>
               {row.map((v, h) => (
                 <td
                   key={h}
                   title={`${DAYS[d]} ${HOURS[h]}:00 · ${v} booked hour${v === 1 ? "" : "s"}`}
-                  className="h-7 rounded text-center text-[10px] text-accent-ink"
-                  style={{ background: v ? `color-mix(in srgb, var(--accent) ${20 + Math.round((v / max) * 80)}%, var(--paper-2))` : "var(--paper-2)" }}
+                  className="tab h-7 rounded-[3px] text-center text-[11px] font-bold"
+                  style={{
+                    background: v ? `color-mix(in srgb, var(--board) ${15 + Math.round((v / max) * 85)}%, var(--paper-2))` : "var(--paper-2)",
+                    color: v / max > 0.45 ? "var(--board-ink)" : "var(--ink)",
+                  }}
                 >
                   {v || ""}
                 </td>

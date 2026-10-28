@@ -49,7 +49,7 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
       <aside className="space-y-4 lg:pt-24">
         <Card className="space-y-3 p-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-medium">Service status</h2>
+            <h2 className="font-bold">Service status</h2>
             <Pill tone={r.status === "active" ? "ok" : "warn"}>{r.status === "active" ? "In service" : "Maintenance"}</Pill>
           </div>
           <p className="text-sm text-ink-2">Under maintenance, students see your reason and cannot request it. Everyone with an upcoming slot is notified.</p>

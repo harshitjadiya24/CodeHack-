@@ -2,11 +2,11 @@
 
 import { motion, useReducedMotion } from "motion/react";
 
-/** A short settle on each route change: content lifts in place, nothing slides across the screen. */
+/** Route changes happen many times a day, so only a quick fade: enough to avoid a hard cut, never slow. */
 export default function AppTemplate({ children }: { children: React.ReactNode }) {
   const reduce = useReducedMotion();
   return (
-    <motion.div initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+    <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.14, ease: "easeOut" }}>
       {children}
     </motion.div>
   );

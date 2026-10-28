@@ -62,9 +62,9 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         <div className="flex gap-4">
           <ResourceIcon category={r.category} className="size-16" />
           <div>
-            <p className="text-sm text-muted">{r.category} · {r.kind}</p>
+            <p className="text-sm text-subtle">{r.category} · {r.kind}</p>
             <h1 className="font-display text-4xl leading-tight">{r.name}</h1>
-            <p className="mt-1 flex items-center gap-1 text-sm text-muted">
+            <p className="mt-1 flex items-center gap-1 text-sm text-subtle">
               <MapPin className="size-4" aria-hidden /> {r.location} · Owner: {owner?.full_name}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -85,7 +85,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
             { icon: IndianRupee, label: "Market rent", value: `${inr(r.rental_value_inr_per_hour)}/h` },
           ].map((s) => (
             <Card key={s.label} className="p-3">
-              <dt className="flex items-center gap-1 text-xs text-muted">
+              <dt className="flex items-center gap-1 text-xs text-subtle">
                 <s.icon className="size-3.5" aria-hidden /> {s.label}
               </dt>
               <dd className="mt-1 font-medium text-ink">{s.value}</dd>
@@ -94,11 +94,11 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         </dl>
 
         <Card className="p-5">
-          <h2 className="mb-2 font-medium">Usage rules</h2>
+          <h2 className="mb-2 font-bold">Usage rules</h2>
           <p className="text-sm text-ink-2">{r.rules}</p>
           {checklist.length > 0 && (
             <>
-              <h3 className="mb-1 mt-4 text-sm font-medium">Condition checked at every handover</h3>
+              <h3 className="mb-1 mt-4 text-sm font-bold">Condition checked at every handover</h3>
               <ul className="list-disc space-y-0.5 pl-5 text-sm text-ink-2">
                 {checklist.map((c) => (
                   <li key={c}>{c}</li>
@@ -106,7 +106,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
               </ul>
             </>
           )}
-          <h3 className="mb-1 mt-4 text-sm font-medium">Opening hours (campus time)</h3>
+          <h3 className="mb-1 mt-4 text-sm font-bold">Opening hours (campus time)</h3>
           <ul className="text-sm text-ink-2">
             {hours.map((h) => (
               <li key={h.span}>
@@ -117,7 +117,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         </Card>
 
         <Card className="p-5">
-          <h2 className="mb-3 flex items-center gap-2 font-medium">
+          <h2 className="mb-3 flex items-center gap-2 font-bold">
             <CalendarClock className="size-4" aria-hidden /> Next 7 days
           </h2>
           {busy?.length ? (
@@ -134,15 +134,15 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted">Wide open. This resource has no bookings in the next week.</p>
+            <p className="text-sm text-subtle">Wide open. This resource has no bookings in the next week.</p>
           )}
-          <p className="mt-2 text-xs text-muted">Only times are shown. Who booked stays private.</p>
+          <p className="mt-2 text-xs text-subtle">Only times are shown. Who booked stays private.</p>
         </Card>
       </div>
 
       <aside className="space-y-4">
         <Card className="p-5">
-          <h2 className="mb-1 font-medium">Can I use it?</h2>
+          <h2 className="mb-1 font-bold">Can I use it?</h2>
           <p className={`mb-4 text-sm ${eligibility.eligible ? "text-ok" : "text-danger"}`}>
             {eligibility.eligible ? "Yes, every requirement is met." : "Not yet. Here is exactly what is missing."}
           </p>
@@ -152,13 +152,13 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         {isBorrower && (
           <Card className="p-5">
             <div className="mb-4 flex items-baseline justify-between">
-              <h2 className="font-medium">Request a slot</h2>
-              <span className="text-xs text-muted">
+              <h2 className="font-bold">Request a slot</h2>
+              <span className="text-xs text-subtle">
                 {Math.max(0, ctx.config.weeklyCredits - used)} / {ctx.config.weeklyCredits} credits left this week
               </span>
             </div>
             {eligibility.eligible ? (
-              <RequestForm resourceId={r.id} maxHours={r.max_hours} minDate={minDate} />
+              <RequestForm resourceId={r.id} maxHours={r.max_hours} minDate={minDate} openWeekdays={[...new Set(ctx.rules.availability.map((w) => w.weekday))]} />
             ) : (
               <div className="space-y-3 text-sm text-ink-2">
                 <p>Requests open once the missing items above are sorted.</p>
@@ -172,7 +172,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
 
         {canManage && (
           <Card className="p-5">
-            <h2 className="mb-2 font-medium">Owner tools</h2>
+            <h2 className="mb-2 font-bold">Owner tools</h2>
             <div className="grid gap-2">
               <ButtonLink href={`/owner/resources/${r.id}/edit`} variant="secondary">Edit conditions / maintenance</ButtonLink>
               <ButtonLink href={`/owner/resources/${r.id}/qr`} variant="secondary">Print QR tag</ButtonLink>

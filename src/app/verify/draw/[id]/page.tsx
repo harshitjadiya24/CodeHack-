@@ -29,12 +29,12 @@ export default async function DrawVerifyPage({ params }: { params: Promise<{ id:
       </Link>
       <p className="mt-8 text-sm text-saffron">Fair Draw · public verification</p>
       <h1 className="font-display text-4xl leading-tight">{draw.resource?.name}</h1>
-      <p className="text-muted">
+      <p className="text-subtle">
         Slot {formatCampus(draw.slot_start, { weekday: "short" })} – {formatCampus(draw.slot_end, { day: undefined, month: undefined })}
       </p>
 
       <Card className="mt-8 space-y-4 p-6">
-        <h2 className="font-medium">How this draw stays honest</h2>
+        <h2 className="font-bold">How this draw stays honest</h2>
         <ol className="list-decimal space-y-1 pl-5 text-sm text-ink-2">
           <li>When the first clash happened, Saajha generated a secret random seed and published only its SHA-256 hash (the commit).</li>
           <li>Nobody could change the seed afterwards without the hash changing.</li>
@@ -43,13 +43,13 @@ export default async function DrawVerifyPage({ params }: { params: Promise<{ id:
         </ol>
         <dl className="grid gap-2 text-sm">
           <div>
-            <dt className="text-muted">Commit (published {formatCampus(draw.created_at)})</dt>
+            <dt className="text-subtle">Commit (published {formatCampus(draw.created_at)})</dt>
             <dd>
               <Mono className="break-all text-ink">{draw.commit_hash}</Mono>
             </dd>
           </div>
           <div>
-            <dt className="text-muted">Revealed seed</dt>
+            <dt className="text-subtle">Revealed seed</dt>
             <dd>{draw.seed ? <Mono className="break-all text-ink">{draw.seed}</Mono> : <Pill tone="warn">Not drawn yet: seed still secret</Pill>}</dd>
           </div>
         </dl>
@@ -57,10 +57,10 @@ export default async function DrawVerifyPage({ params }: { params: Promise<{ id:
 
       {draw.seed && results.length > 0 && (
         <Card className="mt-6 p-6">
-          <h2 className="mb-3 font-medium">Published result · drawn {draw.drawn_at && formatCampus(draw.drawn_at)}</h2>
+          <h2 className="mb-3 font-bold">Published result · drawn {draw.drawn_at && formatCampus(draw.drawn_at)}</h2>
           <table className="mb-5 w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-muted">
+              <tr className="text-left text-xs text-subtle">
                 <th className="pb-1 font-normal">Rank</th>
                 <th className="pb-1 font-normal">Booking ref</th>
                 <th className="pb-1 font-normal">Weight</th>

@@ -31,7 +31,7 @@ export default async function AttendantPage() {
       <PageHeader eyebrow="Lab floor" title="Handovers" />
 
       <section aria-labelledby="waiting" className="mb-10">
-        <h2 id="waiting" className="mb-3 text-base font-semibold text-ink">
+        <h2 id="waiting" className="mb-3 text-base font-bold text-ink">
           Supervised check-ins waiting for you ({waiting.length})
         </h2>
         {waiting.length === 0 ? (
@@ -42,7 +42,7 @@ export default async function AttendantPage() {
               <Card key={b.id} className="space-y-3 p-5">
                 <div>
                   <p className="font-medium">{b.resource?.name}</p>
-                  <p className="text-sm text-muted">
+                  <p className="text-sm text-subtle">
                     {b.user?.full_name} ({b.user?.roll_no}) · {formatCampus(b.starts_at)}
                   </p>
                   <Link href={`/bookings/${b.id}`} className="text-sm text-accent underline">
@@ -57,7 +57,7 @@ export default async function AttendantPage() {
       </section>
 
       <section aria-labelledby="live">
-        <h2 id="live" className="mb-3 text-base font-semibold text-ink">
+        <h2 id="live" className="mb-3 text-base font-bold text-ink">
           In use right now
         </h2>
         {live.length === 0 ? (
@@ -68,7 +68,7 @@ export default async function AttendantPage() {
               <Link key={b.id} href={`/bookings/${b.id}`} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-sm hover:bg-paper-2">
                 <span>
                   <span className="font-medium">{b.resource?.name}</span>
-                  <span className="text-muted">
+                  <span className="text-subtle">
                     {" "}
                     · {b.user?.full_name} · due {formatCampus(b.ends_at, { day: undefined, month: undefined })}
                   </span>

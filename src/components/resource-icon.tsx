@@ -18,7 +18,7 @@ const ICONS: Record<string, LucideIcon> = {
 export function ResourceIcon({ category, className }: { category: string; className?: string }) {
   const Icon = ICONS[category] ?? Box;
   return (
-    <span className={cn("grid size-12 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent", className)}>
+    <span className={cn("board-chip grid size-12 shrink-0 place-items-center rounded-md", className)}>
       <Icon className="size-6" aria-hidden />
     </span>
   );

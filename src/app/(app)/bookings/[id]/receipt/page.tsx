@@ -35,7 +35,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
       <header className="border-b border-rule pb-4">
-        <p className="text-sm text-muted">Saajha booking record · {b.id}</p>
+        <p className="text-sm text-subtle">Saajha booking record · {b.id}</p>
         <h1 className="font-display text-3xl">{b.resource.name}</h1>
         <p className="text-ink-2">
           {b.requester?.full_name} ({b.requester?.roll_no}) · {formatCampus(b.starts_at, { weekday: "long", year: "numeric" })} –{" "}
@@ -48,7 +48,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
       {receipt && (
         <section>
-          <h2 className="mb-1 text-base font-semibold">Decision: {receipt.headline}</h2>
+          <h2 className="mb-1 text-base font-bold">Decision: {receipt.headline}</h2>
           <ul className="list-disc pl-5 text-ink-2">
             {receipt.reasons.map((r) => (
               <li key={r}>{r}</li>
@@ -60,7 +60,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
       {!!handovers?.length && (
         <section>
-          <h2 className="mb-1 text-base font-semibold">Condition record</h2>
+          <h2 className="mb-1 text-base font-bold">Condition record</h2>
           {handovers.map((h) => (
             <div key={h.phase} className="mb-2">
               <p className="font-medium">
@@ -80,7 +80,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
       {!!incidents?.length && (
         <section>
-          <h2 className="mb-1 text-base font-semibold">Incidents</h2>
+          <h2 className="mb-1 text-base font-bold">Incidents</h2>
           {incidents.map((i, n) => (
             <p key={n} className="text-ink-2">
               {i.type} ({i.severity}, {i.status}): {i.description} {i.decision && `— Decision: ${i.decision}`}
@@ -90,7 +90,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
       )}
 
       <section>
-        <h2 className="mb-1 text-base font-semibold">Audit trail</h2>
+        <h2 className="mb-1 text-base font-bold">Audit trail</h2>
         <table className="w-full">
           <tbody className="divide-y divide-rule">
             {(log ?? []).map((e) => (
@@ -98,13 +98,13 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
                 <td className="py-1 pr-2 whitespace-nowrap">{formatCampus(e.created_at)}</td>
                 <td className="py-1 pr-2">{ACTION_LABEL[e.action] ?? e.action}</td>
                 <td className="py-1 pr-2 text-ink-2">{e.actor?.full_name ?? "Automatic rule"}</td>
-                <td className="py-1 font-mono text-[10px] text-muted">{e.hash.slice(0, 16)}</td>
+                <td className="py-1 font-mono text-[10px] text-subtle">{e.hash.slice(0, 16)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      <footer className="border-t border-rule pt-3 text-xs text-muted">
+      <footer className="border-t border-rule pt-3 text-xs text-subtle">
         Each hash links to the previous entry in the campus audit chain. Verify at /audit/verify. Generated {formatCampus(new Date(), { year: "numeric" })}.
       </footer>
     </article>

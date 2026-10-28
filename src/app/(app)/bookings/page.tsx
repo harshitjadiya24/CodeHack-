@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonLink, Card, EmptyState, PageHeader, Pill } from "@/components/ui";
 import { ResourceIcon } from "@/components/resource-icon";
+import { BookingTabs } from "@/components/booking-tabs";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { BOOKING_STATUS } from "@/lib/status";
@@ -31,7 +32,7 @@ export default async function BookingsPage() {
           <ResourceIcon category={b.resource?.category ?? ""} className="size-10" />
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium">{b.resource?.name}</p>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-subtle">
               {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} · {b.credits} credits
             </p>
           </div>
@@ -47,21 +48,11 @@ export default async function BookingsPage() {
         <ButtonLink href="/resources">Find a resource</ButtonLink>
       </PageHeader>
 
-      <section aria-labelledby="live" className="mb-10">
-        <h2 id="live" className="mb-3 text-base font-semibold text-ink">
-          Active and upcoming
-        </h2>
-        {live.length ? <ul className="space-y-2">{live.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title="Nothing upcoming">Browse the catalogue to request something.</EmptyState>}
-      </section>
-
-      {past.length > 0 && (
-        <section aria-labelledby="past">
-          <h2 id="past" className="mb-3 text-base font-semibold text-ink">
-            History
-          </h2>
-          <ul className="space-y-2">{past.map((b) => <Row key={b.id} b={b} />)}</ul>
-        </section>
-      )}
+      <BookingTabs
+        counts={[live.length, past.length]}
+        active={live.length ? <ul className="space-y-2">{live.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title="Nothing upcoming">Browse the catalogue to request something.</EmptyState>}
+        history={past.length ? <ul className="space-y-2">{past.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title="No history yet">Finished, cancelled and declined bookings appear here.</EmptyState>}
+      />
     </>
   );
 }

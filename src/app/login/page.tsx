@@ -15,13 +15,16 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
 
   return (
-    <main className="mx-auto grid min-h-screen max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1fr_1.2fr] md:px-8">
+    <main className="mx-auto grid min-h-screen max-w-[1240px] gap-12 px-4 py-12 md:grid-cols-[1fr_1.2fr] md:px-8">
       <section className="flex flex-col justify-center">
-        <Link href="/" className="mb-10 font-display text-2xl text-ink">
+        <Link href="/" className="mb-12 flex items-center gap-2.5 text-xl font-extrabold text-ink">
+          <span aria-hidden className="board-chip grid size-8 place-items-center rounded-[4px] font-deva text-[17px]">
+            सा
+          </span>
           Saajha
         </Link>
-        <h1 className="font-display text-4xl leading-tight">Sign in to your campus</h1>
-        <p className="mb-8 mt-2 text-ink-2">Northfield Institute of Technology · Riverside College of Engineering</p>
+        <h1 className="type-h2">Sign in to your campus</h1>
+        <p className="mb-8 mt-3 text-ink-2">Northfield Institute of Technology and Riverside College of Engineering</p>
         <Card className="p-6">
           <LoginForm next={next} />
         </Card>
@@ -29,11 +32,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
       <section aria-labelledby="demo-heading" className="flex flex-col justify-center">
         <div className="mb-4">
-          <p className="text-sm text-saffron">For judges</p>
-          <h2 id="demo-heading" className="font-display text-3xl">
+          <p className="text-[15px] font-semibold text-subtle">For judges</p>
+          <h2 id="demo-heading" className="type-h3 mt-1 text-3xl">
             Try any role in one click
           </h2>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-subtle">
             Fictional demo accounts. Password for all: <Mono className="text-ink">{DEMO_PASSWORD}</Mono>
           </p>
         </div>
@@ -44,13 +47,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                 <input type="hidden" name="email" value={a.email} />
                 <button
                   type="submit"
-                  className="w-full rounded-lg border border-rule bg-card p-4 text-left transition hover:border-accent"
+                  className="w-full rounded-lg border border-rule bg-card p-4 text-left transition-[border-color,transform] duration-150 hover:border-ink active:scale-[0.99]"
                 >
                   <span className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-ink">{a.name}</span>
-                    <Pill tone={a.role === "student" || a.role === "researcher" ? "accent" : "saffron"}>{ROLE_LABEL[a.role]}</Pill>
+                    <span className="font-bold text-ink">{a.name}</span>
+                    <Pill tone="neutral">{ROLE_LABEL[a.role]}</Pill>
                   </span>
-                  <span className="mt-1 block text-sm text-muted">{a.blurb}</span>
+                  <span className="mt-1 block text-sm text-subtle">{a.blurb}</span>
                 </button>
               </form>
             </li>

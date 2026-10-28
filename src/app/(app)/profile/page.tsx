@@ -39,31 +39,31 @@ export default async function ProfilePage() {
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <Card className="space-y-3 p-5 text-sm">
           <p>
-            <span className="text-muted">Role</span> · {ROLE_LABEL[user.role]}
+            <span className="text-subtle">Role</span> · {ROLE_LABEL[user.role]}
           </p>
           <p>
-            <span className="text-muted">Email</span> · {user.email}
+            <span className="text-subtle">Email</span> · {user.email}
           </p>
           {user.roll_no && (
             <p>
-              <span className="text-muted">Roll number</span> · {user.roll_no}
+              <span className="text-subtle">Roll number</span> · {user.roll_no}
             </p>
           )}
           <p className="flex items-center gap-2">
-            <span className="text-muted">Identity</span> <Pill tone={user.verified ? "ok" : "warn"}>{user.verified ? "Verified by the admin office" : "Not verified yet"}</Pill>
+            <span className="text-subtle">Identity</span> <Pill tone={user.verified ? "ok" : "warn"}>{user.verified ? "Verified by the admin office" : "Not verified yet"}</Pill>
           </p>
           <p>
-            <span className="text-muted">Credits this week</span> · {Math.max(0, (cfg?.weekly_credits ?? 20) - used)} of {cfg?.weekly_credits ?? 20} left
+            <span className="text-subtle">Credits this week</span> · {Math.max(0, (cfg?.weekly_credits ?? 20) - used)} of {cfg?.weekly_credits ?? 20} left
           </p>
           <p>
-            <span className="text-muted">Standing</span> · {user.strikes} of {MAX_STRIKES} strikes
+            <span className="text-subtle">Standing</span> · {user.strikes} of {MAX_STRIKES} strikes
           </p>
           <Link href="/passport" className="inline-block text-accent underline">
             Trust Passport →
           </Link>
         </Card>
         <Card className="p-5">
-          <h2 className="mb-3 font-medium">Who can see what</h2>
+          <h2 className="mb-3 font-bold">Who can see what</h2>
           <dl className="space-y-3 text-sm">
             {VISIBILITY.map(([what, who]) => (
               <div key={what}>
@@ -72,7 +72,7 @@ export default async function ProfilePage() {
               </div>
             ))}
           </dl>
-          <p className="mt-4 text-xs text-muted">
+          <p className="mt-4 text-xs text-subtle">
             These rules are enforced by row-level security in the database, not just hidden in the interface.{" "}
             <Link href="/privacy" className="underline">
               Privacy notice

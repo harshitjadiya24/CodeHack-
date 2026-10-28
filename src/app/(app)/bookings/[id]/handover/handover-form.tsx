@@ -70,7 +70,7 @@ export function HandoverForm({
                 <img src={previews[i]!} alt={`${slot} photo`} className="absolute inset-0 size-full object-cover" />
               ) : (
                 <>
-                  <Camera className="mb-1 size-6 text-muted" aria-hidden />
+                  <Camera className="mb-1 size-6 text-subtle" aria-hidden />
                   <span className="px-2 text-ink-2">{slot}</span>
                 </>
               )}
@@ -127,7 +127,7 @@ export function HandoverForm({
       <Button type="submit" disabled={!ready || pending} className="w-full py-3 text-base">
         {pending ? "Uploading and recording…" : phase === "check_in" ? "Record condition and check in" : "Record condition and return"}
       </Button>
-      {!ready && <p className="text-center text-xs text-muted">Add every photo to continue.</p>}
+      {!ready && <p className="text-center text-xs text-subtle">Add every photo to continue.</p>}
     </form>
   );
 }

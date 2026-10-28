@@ -50,7 +50,7 @@ export default async function OwnerQueuePage() {
 
       {drawRows && drawRows.length > 0 && (
         <section aria-labelledby="draws" className="mb-10">
-          <h2 id="draws" className="mb-3 text-base font-semibold text-saffron">
+          <h2 id="draws" className="mb-3 text-base font-bold text-saffron">
             Fair Draws ready
           </h2>
           <div className="space-y-4">
@@ -62,10 +62,10 @@ export default async function OwnerQueuePage() {
                   <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="font-medium">{entrants[0]?.resource?.name}</p>
-                      <p className="text-sm text-muted">
+                      <p className="text-sm text-subtle">
                         {formatCampus(d.slot_start, { weekday: "short" })} – {formatCampus(d.slot_end, { day: undefined, month: undefined })}
                       </p>
-                      <p className="mt-1 text-xs text-muted">
+                      <p className="mt-1 text-xs text-subtle">
                         Seed committed: <Mono>{d.commit_hash.slice(0, 20)}…</Mono>
                       </p>
                     </div>
@@ -73,7 +73,7 @@ export default async function OwnerQueuePage() {
                   </div>
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-xs text-muted">
+                      <tr className="text-left text-xs text-subtle">
                         <th className="pb-1 font-normal">Entrant</th>
                         <th className="pb-1 font-normal">Priority</th>
                         <th className="pb-1 text-right font-normal">Chance of winning</th>
@@ -103,7 +103,7 @@ export default async function OwnerQueuePage() {
                       })}
                     </tbody>
                   </table>
-                  <p className="mt-3 text-xs text-muted">
+                  <p className="mt-3 text-xs text-subtle">
                     Odds are approximate for weighted sampling with one winner. Everyone keeps a chance; heavy recent users simply have less of one.
                   </p>
                 </Card>
@@ -114,7 +114,7 @@ export default async function OwnerQueuePage() {
       )}
 
       <section aria-labelledby="pending" className="mb-10">
-        <h2 id="pending" className="mb-3 text-base font-semibold text-ink">
+        <h2 id="pending" className="mb-3 text-base font-bold text-ink">
           Awaiting your decision ({pending.length})
         </h2>
         {pending.length === 0 ? (
@@ -134,7 +134,7 @@ export default async function OwnerQueuePage() {
                       {b.resource?.requires_supervision && <Pill tone="info">Supervised</Pill>}
                       {rivals.length > 0 && <Pill tone="warn">Competes with {rivals.length} other request{rivals.length > 1 ? "s" : ""}</Pill>}
                     </div>
-                    <p className="text-sm text-muted">
+                    <p className="text-sm text-subtle">
                       {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} ·{" "}
                       {b.requester?.full_name} {b.requester?.roll_no && `(${b.requester.roll_no})`}
                     </p>
@@ -164,7 +164,7 @@ export default async function OwnerQueuePage() {
       </section>
 
       <section aria-labelledby="upcoming">
-        <h2 id="upcoming" className="mb-3 text-base font-semibold text-ink">
+        <h2 id="upcoming" className="mb-3 text-base font-bold text-ink">
           Approved and in use
         </h2>
         {upcoming.length === 0 ? (
@@ -175,7 +175,7 @@ export default async function OwnerQueuePage() {
               <Link key={b.id} href={`/bookings/${b.id}`} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-sm hover:bg-paper-2">
                 <span>
                   <span className="font-medium">{b.resource?.name}</span>
-                  <span className="text-muted"> · {b.requester?.full_name} · {formatCampus(b.starts_at, { weekday: "short" })}</span>
+                  <span className="text-subtle"> · {b.requester?.full_name} · {formatCampus(b.starts_at, { weekday: "short" })}</span>
                 </span>
                 <Pill tone={BOOKING_STATUS[b.status].tone}>{BOOKING_STATUS[b.status].label}</Pill>
               </Link>

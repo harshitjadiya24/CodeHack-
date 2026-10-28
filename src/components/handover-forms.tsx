@@ -64,7 +64,7 @@ export function VerifyReturnForm({ bookingId, flagged }: { bookingId: string; fl
       <Button disabled={pending} variant={issue ? "danger" : "primary"} className="w-full">
         {pending ? "Saving…" : issue ? "Close and send to manager" : "Verify and close"}
       </Button>
-      <p className="text-xs text-muted">Penalties are never automatic. A manager reviews every incident.</p>
+      <p className="text-xs text-subtle">Penalties are never automatic. A manager reviews every incident.</p>
     </form>
   );
 }

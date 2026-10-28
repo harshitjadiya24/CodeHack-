@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, ShieldCheck, Users } from "lucide-react";
-import { Card, EmptyState, PageHeader, Pill, inputClass } from "@/components/ui";
+import { Button, Card, EmptyState, PageHeader, Pill, inputClass } from "@/components/ui";
 import { ResourceIcon } from "@/components/resource-icon";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -76,7 +76,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
       <form className="mb-4 flex gap-2" aria-label="Ask Saajha Copilot">
         <label className="sr-only" htmlFor="ask">Describe what you need</label>
         <div className="relative flex-1">
-          <Sparkles className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-accent" aria-hidden />
+          <Sparkles className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle" aria-hidden />
           <input
             id="ask"
             name="ask"
@@ -85,7 +85,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
             placeholder="Describe your task: “I need to test a 12V motor driver circuit next week”"
           />
         </div>
-        <button className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-ink">Ask Copilot</button>
+        <Button>Ask Copilot</Button>
       </form>
 
       {copilot && <CopilotResults ask={ask} result={copilot} info={info} />}
@@ -100,11 +100,11 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
             <option key={c}>{c}</option>
           ))}
         </select>
-        <label className="flex items-center gap-2 rounded-md border border-rule bg-card px-3 py-2 text-sm">
-          <input type="checkbox" name="eligible" value="1" defaultChecked={!!eligible} className="accent-[var(--accent)]" />
+        <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-rule bg-card px-3 text-[15px]">
+          <input type="checkbox" name="eligible" value="1" defaultChecked={!!eligible} className="size-4 accent-[var(--ink)]" />
           Only what I can use
         </label>
-        <button className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper">Apply</button>
+        <Button variant="secondary">Apply</Button>
       </form>
 
       {shown.length === 0 ? (
@@ -114,14 +114,14 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
           {shown.map((r) => (
             <li key={r.id}>
               <Link href={`/resources/${r.id}`} className="group block h-full">
-                <Card className="flex h-full gap-4 p-5 transition group-hover:border-accent">
+                <Card className="flex h-full gap-4 p-5 transition-colors duration-150 group-hover:border-ink">
                   <ResourceIcon category={r.category} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-start justify-between gap-2">
-                      <h2 className="font-medium text-ink">{r.name}</h2>
+                      <h2 className="font-bold text-ink">{r.name}</h2>
                       {r.demand === "high" && <Pill tone="saffron">High demand · Fair Draw</Pill>}
                     </div>
-                    <p className="mt-1 flex items-center gap-1 text-sm text-muted">
+                    <p className="mt-1 flex items-center gap-1 text-sm text-subtle">
                       <MapPin className="size-3.5" aria-hidden /> {r.location}
                     </p>
                     <p className="mt-2 line-clamp-2 text-sm text-ink-2">{r.description}</p>

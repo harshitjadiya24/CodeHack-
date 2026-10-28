@@ -39,7 +39,7 @@ export default async function PassportPage() {
               <li key={badge.id}>
                 <Card className={`h-full p-5 ${state === "verified" ? "border-ok/40" : ""}`}>
                   <div className="flex items-start justify-between gap-2">
-                    <h2 className="font-medium">{badge.name}</h2>
+                    <h2 className="font-bold">{badge.name}</h2>
                     {state === "verified" && (
                       <Pill tone="ok">
                         <BadgeCheck className="size-3" aria-hidden /> Verified
@@ -57,7 +57,7 @@ export default async function PassportPage() {
                     )}
                   </div>
                   <p className="mt-1 text-sm text-ink-2">{badge.description}</p>
-                  {opens.length > 0 && <p className="mt-2 text-xs text-muted">Unlocks: {opens.join(", ")}</p>}
+                  {opens.length > 0 && <p className="mt-2 text-xs text-subtle">Unlocks: {opens.join(", ")}</p>}
                   {state === "verified" && held?.expires_at && <p className="mt-2 text-xs text-ok">Valid until {formatCampus(held.expires_at, { hour: undefined, minute: undefined, year: "numeric" })}</p>}
                   {state === "rejected" && held?.note && <p className="mt-2 text-sm text-danger">Reviewer: {held.note}</p>}
                   {["none", "rejected", "expired"].includes(state) && <BadgeRequestForm badgeId={badge.id} />}
@@ -68,15 +68,19 @@ export default async function PassportPage() {
         </ul>
 
         <aside className="space-y-4">
-          <Card className="p-5 text-center">
-            <h2 className="font-medium">Show at the lab</h2>
-            <p className="mb-4 text-sm text-muted">An attendant scans this to see your current badges. Nothing else about you is shown.</p>
-            <div className="mx-auto w-44" dangerouslySetInnerHTML={{ __html: qrSvg }} />
-            <p className="mt-3 font-medium">{user.full_name}</p>
-            <p className="text-xs text-muted">{user.roll_no}</p>
-          </Card>
+          <figure className="overflow-hidden rounded-lg border-2 border-ink bg-card text-center">
+            <figcaption className="chart-code flex justify-between bg-board px-4 py-3 text-[15px] text-board-ink">
+              <span>Lab pass</span>
+              <span className="tab">{user.roll_no}</span>
+            </figcaption>
+            <div className="p-5">
+              <div className="mx-auto w-44 rounded-md bg-white p-2" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+              <p className="type-h3 mt-4">{user.full_name}</p>
+              <p className="mt-2 text-sm text-subtle">An attendant scans this to see your current badges. Nothing else about you is shown.</p>
+            </div>
+          </figure>
           <Card className="p-5">
-            <h2 className="font-medium">Standing</h2>
+            <h2 className="font-bold">Standing</h2>
             <p className="mt-1 text-sm text-ink-2">
               {user.strikes} of {MAX_STRIKES} strikes. Strikes are only ever added by a manager after reviewing an incident, with a written reason.
             </p>

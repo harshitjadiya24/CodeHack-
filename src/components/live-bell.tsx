@@ -29,7 +29,7 @@ export function LiveBell({ userId, initial }: { userId: string; initial: number 
   }, [userId, router]);
 
   return (
-    <Link href="/notifications" className="relative rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}>
+    <Link href="/notifications" className="relative grid size-11 place-items-center rounded-md border border-rule bg-card text-ink transition-colors hover:border-ink" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}>
       <Bell className="size-5" aria-hidden />
       <AnimatePresence>
         {unread > 0 && (
@@ -39,7 +39,7 @@ export function LiveBell({ userId, initial }: { userId: string; initial: number 
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.4, opacity: 0 }}
             transition={{ type: "spring", stiffness: 500, damping: 22 }}
-            className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-signal px-1 text-[10px] font-semibold text-white"
+            className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-[4px] bg-board px-1 text-[11px] font-bold text-board-ink ring-2 ring-board-ink"
           >
             {unread}
           </motion.span>

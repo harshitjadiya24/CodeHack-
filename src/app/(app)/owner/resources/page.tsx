@@ -43,10 +43,10 @@ export default async function OwnerResourcesPage() {
                 <Link href={`/resources/${r.id}`} className="font-medium hover:underline">
                   {r.name}
                 </Link>
-                <p className="text-xs text-muted">{r.location}</p>
+                <p className="text-xs text-subtle">{r.location}</p>
               </div>
               <div className="w-48">
-                <div className="flex justify-between text-xs text-muted">
+                <div className="flex justify-between text-xs text-subtle">
                   <span>{Math.round(h)} h used</span>
                   <span>{util}% utilised</span>
                 </div>
@@ -56,7 +56,7 @@ export default async function OwnerResourcesPage() {
               </div>
               <span className="w-28 text-right text-sm">
                 {inr(h * r.rental_value_inr_per_hour)}
-                <span className="block text-xs text-muted">value unlocked</span>
+                <span className="block text-xs text-subtle">value unlocked</span>
               </span>
               {util < 10 && <Pill tone="warn">Mostly idle</Pill>}
               <ButtonLink href={`/owner/resources/${r.id}/edit`} variant="ghost" className="px-3 py-1.5">

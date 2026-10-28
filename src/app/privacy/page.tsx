@@ -22,7 +22,7 @@ export default function PrivacyPage() {
       <div className="mt-10 space-y-10">
         {SECTIONS.map(([title, points]) => (
           <section key={title}>
-            <h2 className="mb-2 text-lg font-medium">{title}</h2>
+            <h2 className="mb-2 text-lg font-bold">{title}</h2>
             <ul className="list-disc space-y-1 pl-5 text-ink-2">
               {points.map((p) => (
                 <li key={p}>{p}</li>

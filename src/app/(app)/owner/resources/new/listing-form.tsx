@@ -63,7 +63,7 @@ export function ListingForm({ badges, draft, resourceId }: { badges: { id: strin
       </Card>
 
       <Card className="grid gap-4 p-5 md:grid-cols-2">
-        <h2 className="font-medium md:col-span-2">Access conditions</h2>
+        <h2 className="font-bold md:col-span-2">Access conditions</h2>
         <fieldset className="md:col-span-2">
           <legend className="mb-2 text-sm font-medium">Required Trust Passport badges</legend>
           <div className="flex flex-wrap gap-2">
@@ -103,7 +103,7 @@ export function ListingForm({ badges, draft, resourceId }: { badges: { id: strin
       </Card>
 
       <Card className="grid gap-4 p-5 md:grid-cols-2">
-        <h2 className="font-medium md:col-span-2">Handover protocol</h2>
+        <h2 className="font-bold md:col-span-2">Handover protocol</h2>
         <Field label="Condition checklist" hint="One item per line. Checked at every check-in and return.">
           <textarea name="checklist" rows={5} required defaultValue={draft?.checklist} className={inputClass} placeholder={"Nozzle clean\nBuild plate undamaged"} />
         </Field>
