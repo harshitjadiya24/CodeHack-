@@ -121,7 +121,9 @@
       "high": "High demand",
       "moderate": "Moderate",
       "idle": "Mostly idle"
-    }
+    },
+    "seatsLabel": "Room for at least this many people",
+    "seatsPlaceholder": "People"
   },
   "Nearby": {
     "title": "Closest open slots",
@@ -287,7 +289,13 @@
       "deadlineHint": "A real course or project deadline raises your priority.",
       "deadlinePlaceholder": "Capstone demo on 6 Nov",
       "submit": "Request this slot",
-      "submitting": "Checking rules…"
+      "submitting": "Checking rules…",
+      "repeat": "Repeat",
+      "repeatHint": "For a weekly lab session. Each week is checked and decided on its own.",
+      "once": "Just this once",
+      "weekly": "Same time every week, {count} weeks",
+      "seriesDone": "{sent} of {total} weeks requested.",
+      "seriesSent": "Requested, open it"
     },
     "errors": {
       "pickDate": "Pick a date.",
@@ -304,7 +312,8 @@
       "submit": "Ask my institute to endorse me",
       "submitting": "Sending…",
       "note": "Your admin office decides. If they agree, {host} sees that your institute vouches for you."
-    }
+    },
+    "seats": "Seats"
   },
   "Booking": {
     "title": "Booking",

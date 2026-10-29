@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button, Field, inputClass } from "@/components/ui";
 import { requestBookingAction, type RequestState } from "./actions";
@@ -35,6 +36,16 @@ export function RequestForm({ resourceId, maxHours, minDate, openWeekdays }: { r
       <Field label={t("purpose")} hint={t("purposeHint")}>
         <textarea name="purpose" rows={3} required minLength={10} className={inputClass} placeholder={t("purposePlaceholder")} />
       </Field>
+      <Field label={t("repeat")} hint={t("repeatHint")}>
+        <select name="weeks" defaultValue="1" className={inputClass}>
+          <option value="1">{t("once")}</option>
+          {[2, 3, 4, 6, 8].map((n) => (
+            <option key={n} value={n}>
+              {t("weekly", { count: n })}
+            </option>
+          ))}
+        </select>
+      </Field>
       <Field label={t("deadline")} hint={t("deadlineHint")}>
         <input name="deadlineNote" className={inputClass} placeholder={t("deadlinePlaceholder")} />
       </Field>
@@ -49,6 +60,26 @@ export function RequestForm({ resourceId, maxHours, minDate, openWeekdays }: { r
               ))}
             </ul>
           )}
+        </div>
+      )}
+
+      {state.series && (
+        <div role="status" className="rounded-xl border border-rule bg-card p-3 text-sm">
+          <p className="font-medium">{t("seriesDone", { sent: state.series.filter((w) => w.bookingId).length, total: state.series.length })}</p>
+          <ul className="mt-2 space-y-1.5">
+            {state.series.map((w) => (
+              <li key={w.date} className="flex flex-wrap gap-x-2">
+                <span className="font-mono text-[13px]">{w.date}</span>
+                {w.bookingId ? (
+                  <Link href={`/bookings/${w.bookingId}`} className="text-ok underline">
+                    {t("seriesSent")}
+                  </Link>
+                ) : (
+                  <span className="text-danger">{w.reason}</span>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

@@ -74,3 +74,17 @@ test("server actions finish on pages with translated titles", async ({ page }) =
   await page.locator("header").getByRole("button", { name: /View in English/ }).click();
   await expect(page.getByRole("navigation", { name: "Main" })).toContainText("Discover");
 });
+
+test("groups find a room big enough", async ({ page }) => {
+  await signInAs(page, /Meera/);
+  await page.goto("/resources?seats=50");
+  await expect(page.getByRole("link", { name: /Seminar Hall B/ }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /Rigol/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Discussion Room 2/ })).toHaveCount(0);
+});
+
+test("the request form offers a weekly repeat", async ({ page }) => {
+  await signInAs(page, /Meera/);
+  await openResource(page, /Discussion Room 2/);
+  await expect(page.locator("select[name=weeks] option")).toHaveText(["Just this once", "Same time every week, 2 weeks", "Same time every week, 3 weeks", "Same time every week, 4 weeks", "Same time every week, 6 weeks", "Same time every week, 8 weeks"]);
+});

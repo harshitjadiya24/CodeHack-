@@ -4,6 +4,8 @@
 
 Built for the problem statement **"Unlock Underused Equipment and Spaces"**.
 
+**Live:** https://baanto-eight.vercel.app · **Judges:** start with the [testing guide](docs/judge-guide.md) · [Project document](docs/project-document.md)
+
 ![Landing page](docs/screens/landing.png)
 
 ## The problem
@@ -62,6 +64,9 @@ Tap **हिन्दी** in the header or on the sign-in page. The app shell, 
 ## Bookings that look after themselves
 
 - **Waitlist:** when someone cancels a held slot, the next person in line is moved in automatically, but only after the same eligibility and fair-use checks as a new request. Anyone passed over is told why. Everyone behind moves up a place and gets a notification. Entries whose slot has passed are closed by the database's own sweep job.
+- **Weekly sessions:** a request can repeat at the same time for up to 8 weeks. Each week goes through the same checks and is decided on its own, and the form says which weeks went through and why any didn't.
+- **Rooms by size:** spaces list how many people they hold, and Discover filters for a group size.
+- **Worth a look:** the review desk lists anyone who used most of a scarce resource while others were turned away, and repeated no-shows, from the last four weeks. It's advice for a person to act on; nothing changes automatically.
 - **No-shows free the slot:** if nobody has started check-in 15 minutes after an approved slot begins, the slot is released and offered down the waitlist under the usual checks. Nothing is penalised automatically: the no-show becomes an incident, and a manager decides whether it earns a strike.
 - **Security deposits on the record:** the counter records each deposit taken (cash, UPI or card, with a reference). After the return, staff hand it back in full, or the owner or a manager keeps part of it with a written reason the borrower sees and can contest. Every step is in the booking's audit history.
 - **Calendar:** every booking has **Add to calendar** (an `.ics` file with a 30-minute reminder), and **My bookings** exports them all at once. Waitlisted slots come in as tentative, so they don't block your day.

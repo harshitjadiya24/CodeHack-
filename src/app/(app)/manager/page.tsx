@@ -5,6 +5,7 @@ import { BadgeDecisionForm, EndorsementDecisionForm, EndorsementRevokeForm, Inci
 import { STAFF_ROLES, requirePageRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCampus } from "@/lib/domain/time";
+import { usageFlags } from "@/lib/services/operations";
 
 export const metadata: Metadata = { title: "Review desk" };
 
@@ -12,7 +13,7 @@ export default async function ManagerPage() {
   const user = await requirePageRole(STAFF_ROLES);
   const db = createAdminClient();
 
-  const [{ data: badges }, { data: incidents }, { data: recent }, { data: endorsements }] = await Promise.all([
+  const [{ data: badges }, { data: incidents }, { data: recent }, { data: endorsements }, flags] = await Promise.all([
     db
       .from("user_badges")
       .select("id, note, evidence_path, created_at, user:profiles!user_badges_user_id_fkey(full_name, roll_no, org_id), badge:skill_badges(name, validity_days)")
@@ -37,6 +38,7 @@ export default async function ManagerPage() {
       .eq("home_org_id", user.org_id)
       .in("status", ["requested", "approved"])
       .order("created_at"),
+    usageFlags(user.org_id),
   ]);
   const asked = (endorsements ?? []).filter((e) => e.status === "requested");
   const live = (endorsements ?? []).filter((e) => e.status === "approved");
@@ -142,6 +144,28 @@ export default async function ManagerPage() {
           </div>
         )}
       </section>
+
+      {flags.length > 0 && (
+        <section aria-labelledby="patterns" className="mb-10">
+          <h2 id="patterns" className="mb-1 text-base font-bold text-ink">
+            Worth a look ({flags.length})
+          </h2>
+          <p className="mb-3 text-sm text-subtle">From the last four weeks. Nothing here changes a booking or adds a strike; talk to the person, or adjust the resource’s limits.</p>
+          <Card className="divide-y divide-rule">
+            {flags.map((f) => (
+              <div key={`${f.kind}-${f.userId}-${f.kind === "hogging" ? f.resourceId : ""}`} className="flex flex-wrap items-baseline justify-between gap-2 px-5 py-3 text-sm">
+                <span>
+                  <span className="font-medium">{f.person}</span>{" "}
+                  {f.kind === "hogging"
+                    ? `used ${Math.round(f.share * 100)}% of ${f.resource}'s booked hours (${Math.round(f.hours)} h) while ${f.turnedAway} other request${f.turnedAway === 1 ? " was" : "s were"} declined or waitlisted.`
+                    : `didn't turn up for ${f.count} approved slots.`}
+                </span>
+                <Pill tone="warn">{f.kind === "hogging" ? "Heavy use" : "No-shows"}</Pill>
+              </div>
+            ))}
+          </Card>
+        </section>
+      )}
 
       <section aria-labelledby="incidents" className="mb-10">
         <h2 id="incidents" className="mb-3 text-base font-bold text-ink">

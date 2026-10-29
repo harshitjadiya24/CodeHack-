@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CalendarClock, Coins, IndianRupee, MapPin, Star, Timer, Wrench } from "lucide-react";
+import { CalendarClock, Coins, IndianRupee, MapPin, Star, Timer, Wrench, Users } from "lucide-react";
 import { ratingFor } from "@/lib/services/operations";
 import { ButtonLink, Card, Pill } from "@/components/ui";
 import { ResourceIcon } from "@/components/resource-icon";
@@ -123,6 +123,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
             { icon: Timer, label: t("maxPerBooking"), value: t("hours", { count: r.max_hours }) },
             { icon: IndianRupee, label: t("deposit"), value: r.deposit_inr ? inr(r.deposit_inr) : t("none") },
             { icon: IndianRupee, label: t("marketRent"), value: t("perHour", { amount: inr(r.rental_value_inr_per_hour) }) },
+            ...(r.capacity ? [{ icon: Users, label: t("seats"), value: String(r.capacity) }] : []),
           ].map((s) => (
             <Card key={s.label} className="p-3">
               <dt className="flex items-center gap-1 text-xs text-subtle">

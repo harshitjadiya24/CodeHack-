@@ -1,7 +1,7 @@
 # Baanto: testing guide for judges
 
-**Live link:** _to be added after deployment_
-**Source code:** https://github.com/ (repository link)
+**Live link:** https://baanto-eight.vercel.app
+**Source code:** https://github.com/harshitjadiya24/CodeHack-
 
 Everything runs on the **demo campus**, a fictional college called Northfield Institute of Technology. On `/login`, every account is one click away. If you prefer to type, the password for all of them is `Saajha@2026`.
 
@@ -68,6 +68,9 @@ As **Aarav**, tap **Return and record condition**. Add photos and mark **Issue**
 - **Verify the audit chain** (`/audit/verify`) proves that no entry was edited or removed.
 
 ## Worth a look if you have time
+- **Weekly sessions:** on a room (for example Discussion Room 2), choose *Same time every week* in the request form.
+- **Room size:** in Discover, type a group size (for example 50) to see only rooms that hold that many.
+- **Prof. Sharma → Review desk → Worth a look:** heavy use while others were turned away, and repeated no-shows. Advisory only.
 - **IQAC Office → Insights:** utilisation heatmap, mostly idle equipment with one-tap fixes, next week's forecast, and **NAAC report** (Criterion IV, with a CSV export).
 - **IQAC Office → Import from spreadsheets:** upload the template. Every row is checked before anything is listed.
 - **Zoya (partner campus):** she is asked for an endorsement from her home institute, not just refused.

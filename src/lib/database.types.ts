@@ -531,6 +531,7 @@ export type Database = {
           max_hours: number
           name: string
           open_to_partners: boolean
+          capacity: number | null
           org_id: string
           owner_id: string
           photo_slots: Json
@@ -559,6 +560,7 @@ export type Database = {
           max_hours?: number
           name: string
           open_to_partners?: boolean
+          capacity?: number | null
           org_id: string
           owner_id: string
           photo_slots?: Json
@@ -587,6 +589,7 @@ export type Database = {
           max_hours?: number
           name?: string
           open_to_partners?: boolean
+          capacity?: number | null
           org_id?: string
           owner_id?: string
           photo_slots?: Json

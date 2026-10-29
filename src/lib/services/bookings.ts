@@ -7,7 +7,7 @@ import type { EligibilityCheck } from "@/lib/domain/eligibility";
 import { commitFor, newSeed, runDraw } from "@/lib/domain/draw";
 import { receipt, type DecisionReceipt } from "@/lib/domain/receipt";
 import { promotionOrder, renumber, type Queued } from "@/lib/domain/waitlist";
-import { NO_SHOW_GRACE_MINUTES, NO_SHOW_LOOKBACK_HOURS, noShows, worthOffering } from "@/lib/domain/noshow";
+import { NO_SHOW_GRACE_MINUTES, NO_SHOW_HEADLINE, NO_SHOW_LOOKBACK_HOURS, noShows, worthOffering } from "@/lib/domain/noshow";
 import { formatCampus } from "@/lib/domain/time";
 import type { Enums, Json, Tables } from "@/lib/database.types";
 import { bookingHistory, eligibilityFor, loadResourceContext } from "./context";
@@ -581,7 +581,7 @@ export async function releaseNoShows(now = new Date()) {
       reason: `No-show: not checked in within ${NO_SHOW_GRACE_MINUTES} minutes of the start`,
       receipt: receipt({
         outcome: "cancelled",
-        headline: "Released: nobody checked in",
+        headline: NO_SHOW_HEADLINE,
         reasons: [
           `Check-in hadn't started ${NO_SHOW_GRACE_MINUTES} minutes after the slot began, so it was offered to the next person.`,
           "No strike is added automatically. A manager looks at no-shows and decides, and you can explain on the incident.",

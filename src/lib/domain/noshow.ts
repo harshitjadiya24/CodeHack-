@@ -4,6 +4,8 @@
 export const NO_SHOW_GRACE_MINUTES = 15;
 /** Older slots are history, not something to free up. */
 export const NO_SHOW_LOOKBACK_HOURS = 24;
+/** The receipt headline of a released no-show; the review desk counts them by it. */
+export const NO_SHOW_HEADLINE = "Released: nobody checked in";
 
 export type HeldSlot = { id: string; startsAt: string; endsAt: string; checkedIn: boolean };
 

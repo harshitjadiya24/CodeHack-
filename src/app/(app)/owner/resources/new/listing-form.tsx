@@ -23,6 +23,7 @@ export type ListingDraft = Partial<{
   requiresSupervision: boolean;
   autoApprove: boolean;
   openToPartners?: boolean;
+  capacity?: number | null;
   badgeIds: string[];
   point: Point | null;
 }>;
@@ -103,6 +104,9 @@ export function ListingForm({
         </Field>
         <Field label="Credits per hour">
           <input name="creditRate" type="number" min={0} max={10} defaultValue={draft?.creditRate ?? 1} className={inputClass} />
+        </Field>
+        <Field label="Seats (spaces only)" hint="How many people the room holds, so groups can find one big enough.">
+          <input name="capacity" type="number" min={1} max={5000} defaultValue={draft?.capacity ?? ""} className={inputClass} />
         </Field>
         <Field label="Refundable deposit (₹)">
           <input name="depositInr" type="number" min={0} defaultValue={draft?.depositInr ?? 0} className={inputClass} />

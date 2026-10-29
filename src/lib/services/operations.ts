@@ -8,6 +8,8 @@ import { matchRegister, readRegister, type RegisterMatch } from "@/lib/domain/re
 import { forecastNextWeek, idleResources, weeklyHours, type NudgeAction } from "@/lib/domain/forecast";
 import { nextOpenSlot } from "@/lib/domain/nearby";
 import { formatCampus } from "@/lib/domain/time";
+import { NO_SHOW_HEADLINE } from "@/lib/domain/noshow";
+import { usagePatterns, type UsageRow } from "@/lib/domain/patterns";
 import { audit, notify } from "./records";
 import type { ServiceResult } from "./bookings";
 
@@ -307,4 +309,28 @@ export async function userForCalendarToken(token: string): Promise<string | null
   if (!/^[0-9a-f-]{36}$/.test(token)) return null;
   const { data } = await createAdminClient().from("calendar_feeds").select("user_id").eq("token", token).maybeSingle();
   return data?.user_id ?? null;
+}
+
+const TURNED_AWAY: Enums<"booking_status">[] = ["rejected", "waitlisted"];
+
+/** The review desk's "worth a look" list for this campus over the last four weeks, with names attached. */
+export async function usageFlags(orgId: string) {
+  const db = createAdminClient();
+  const since = new Date(Date.now() - 28 * 24 * 3_600_000).toISOString();
+  const { data } = await db
+    .from("bookings")
+    .select("user_id, resource_id, status, starts_at, ends_at, decision_receipt, resource:resources!inner(name, org_id), person:profiles!bookings_user_id_fkey(full_name)")
+    .eq("resource.org_id", orgId)
+    .gte("starts_at", since)
+    .in("status", [...USED, ...TURNED_AWAY, "cancelled"]);
+  const rows = data ?? [];
+  const usage: UsageRow[] = rows.flatMap((b) => {
+    const hours = (new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 3_600_000;
+    const headline = (b.decision_receipt as { headline?: string } | null)?.headline;
+    const outcome = USED.includes(b.status) ? "used" : TURNED_AWAY.includes(b.status) ? "turned_away" : headline === NO_SHOW_HEADLINE ? "no_show" : null;
+    return outcome ? [{ userId: b.user_id, resourceId: b.resource_id, hours, outcome }] : [];
+  });
+  const name = new Map(rows.map((b) => [b.user_id, b.person?.full_name ?? "Someone"]));
+  const resource = new Map(rows.map((b) => [b.resource_id, b.resource?.name ?? "a resource"]));
+  return usagePatterns(usage).map((f) => ({ ...f, person: name.get(f.userId)!, resource: f.kind === "hogging" ? resource.get(f.resourceId)! : null }));
 }

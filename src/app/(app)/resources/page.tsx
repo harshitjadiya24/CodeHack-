@@ -17,14 +17,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("Shell.nav"))("discover") };
 }
 
-type Search = { q?: string; category?: string; eligible?: string; ask?: string; where?: string };
+type Search = { q?: string; category?: string; eligible?: string; ask?: string; where?: string; seats?: string };
 
 // How far to look. Other institutes appear only once they are verified; a pending one stays on its own campus.
 const SCOPES = [{ key: "campus" }, { key: "city" }, { key: "state" }] as const;
 
 export default async function ResourcesPage({ searchParams }: { searchParams: Promise<Search> }) {
   const user = await requireUser();
-  const { q = "", category = "", eligible = "", ask = "", where = "campus" } = await searchParams;
+  const { q = "", category = "", eligible = "", ask = "", where = "campus", seats = "" } = await searchParams;
+  const minSeats = Math.max(0, Number.parseInt(seats, 10) || 0);
   const scope = SCOPES.some((s) => s.key === where) ? where : "campus";
   const [t, tn, locale] = await Promise.all([getTranslations("Discover"), getTranslations("Nearby"), getLocale()]);
   const words: SlotWords = {
@@ -117,7 +118,9 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
     (r) =>
       (!needle || `${r.name} ${r.description} ${r.category} ${r.location}`.toLowerCase().includes(needle)) &&
       (!category || r.category === category) &&
-      (!eligible || r.canUse),
+      (!eligible || r.canUse) &&
+      // A group size shows only rooms that hold that many people.
+      (!minSeats || (r.capacity ?? 0) >= minSeats),
   );
 
   // One pin per building (or per institute when it has no building points), for what the filters show.
@@ -186,7 +189,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
         )}
       </nav>
 
-      <form className="mb-8 grid gap-3 md:grid-cols-[1fr_220px_auto_auto]" role="search">
+      <form className="mb-8 grid gap-3 md:grid-cols-[1fr_200px_120px_auto_auto]" role="search">
         <input type="hidden" name="where" value={scope} />
         <label className="sr-only" htmlFor="q">{t("searchLabel")}</label>
         <input id="q" name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className={inputClass} />
@@ -197,6 +200,8 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
             <option key={c}>{c}</option>
           ))}
         </select>
+        <label className="sr-only" htmlFor="seats">{t("seatsLabel")}</label>
+        <input id="seats" name="seats" type="number" min={1} inputMode="numeric" defaultValue={seats} placeholder={t("seatsPlaceholder")} className={inputClass} />
         <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-rule bg-card px-3 text-[15px]">
           <input type="checkbox" name="eligible" value="1" defaultChecked={!!eligible} className="size-4 accent-[var(--ink)]" />
           {t("eligibleOnly")}

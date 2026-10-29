@@ -1,8 +1,8 @@
 # Baanto: project document
 
 **Problem statement:** Unlock Underused Equipment and Spaces
-**Live product:** _link to be added after deployment_. Testing steps are in [judge-guide.md](judge-guide.md).
-**Repository:** _repository link_
+**Live product:** https://baanto-eight.vercel.app. Testing steps are in [judge-guide.md](judge-guide.md).
+**Repository:** https://github.com/harshitjadiya24/CodeHack-
 
 ## 1. Use case we chose
 
@@ -52,10 +52,12 @@ Baanto is a resource-sharing platform where every access decision is **checked a
 - **Users know where they stand.** Every eligibility check shows passed or failed, with the reason and how to fix it. Every decision comes with a *decision receipt*.
 - **Fair by design:**
   - weekly credits and per-booking caps;
+  - weekly repeats for lab sessions, each week checked on its own;
   - a priority score whose factors are shown (deadlines up, recent heavy use and strikes down);
   - a seeded, publicly re-runnable **Fair Draw** for contested slots;
   - waitlists that promote automatically after re-checking the rules;
-  - **no-show release**, so a booked but unused slot goes to the next person.
+  - **no-show release**, so a booked but unused slot goes to the next person;
+  - a **"worth a look" list** for managers: someone holding most of a scarce resource while others were turned away, or repeated no-shows. It's advisory; a person decides.
 - **Accountable handovers:**
   - photos and a checklist at check-in and return, with an automatic before/after comparison;
   - attendant confirmation for supervised equipment;
@@ -66,7 +68,7 @@ Baanto is a resource-sharing platform where every access decision is **checked a
 ## 5. The complete workflow
 
 1. **List.** The owner creates a listing: photos, location pin, hours, rules, badges, deposit and checklist. Spreadsheet import lists many at once.
-2. **Discover.** Search, filters, a map of the closest open slots, campus, city and state scope, and AI matching from a task description.
+2. **Discover.** Search, filters (including room size), a map of the closest open slots, campus, city and state scope, and AI matching from a task description.
 3. **Check eligibility.** Identity verified by the admin office, training badges (or an endorsement for a partner campus), strikes, fair-use limits, and partner sharing.
 4. **Request.** Choose a slot and give a purpose and an optional deadline. Rules are checked again on the server.
 5. **Review.**
@@ -94,12 +96,14 @@ Baanto is a resource-sharing platform where every access decision is **checked a
 - **Borrower tools:**
   - Discover with map, AI matching and eligibility filter.
   - Trust Passport with training badges and an offline QR.
-  - Bookings, calendar export and subscribe feed, extensions, cancellations, ratings.
+  - Bookings, weekly repeats, calendar export and subscribe feed, extensions, cancellations, ratings.
+  - Room capacity, with a group-size filter in Discover.
 - **Handover flow:**
   - Photo and checklist check-in and return; attendant confirmation; condition comparison.
   - Deposit collection and settlement.
 - **Problem handling:**
   - Incidents with the borrower's response and manager decisions; strikes with reasons.
+  - Usage patterns worth a look on the review desk (heavy use while others wait, repeated no-shows).
   - Overdue and no-show automation; waitlist auto-promotion.
 - **Cross-campus:** endorsements from the home institute, and per-resource partner sharing.
 - **Admin office:**
@@ -118,7 +122,7 @@ Baanto is a resource-sharing platform where every access decision is **checked a
   - Postgres with row-level security on every table.
   - Every booking state change goes through one SQL function, so the rules hold even if the UI is bypassed.
   - Also used: Auth, Storage (private buckets, signed URLs), Realtime (live notifications), and `pg_cron` (overdue, reminders, waitlist expiry, retention).
-- **Domain logic:** pure TypeScript modules, covered by 91 unit tests (Vitest). These cover eligibility, fair-use rules, priority, the seeded draw, waitlist, no-shows, deposits, condition comparison, forecasting and CSV parsing.
+- **Domain logic:** pure TypeScript modules, covered by 96 unit tests (Vitest). These cover eligibility, fair-use rules, priority, the seeded draw, waitlist, no-shows, deposits, condition comparison, forecasting and CSV parsing.
 - **End-to-end tests:** Playwright.
   - The full lifecycle from request to deposit settlement runs as one test.
   - Smoke tests cover discovery, eligibility in English and Hindi, staff pages, security headers and the health check.
@@ -161,7 +165,6 @@ Architecture diagram: [docs/workflow.png](workflow.png).
 
 - **Email:** account emails (confirmation, password reset) are built but stay switched off until a sending domain is verified. Until then, borrowing still requires the admin office to verify each student. Reminders reach people inside the app, not by email or WhatsApp.
 - **Deposits** are recorded, not collected online; there is no UPI payment integration.
-- **No recurring bookings** for weekly lab sessions, and no room-capacity filter.
 - **Use is measured** from check-in and check-out, not from sensors on the equipment.
 - **Hindi** covers the borrower journey and the main staff pages; some admin pages and the landing page are English only.
 - **Individuals** who don't belong to a registered institute or community organisation can't join.
@@ -169,7 +172,6 @@ Architecture diagram: [docs/workflow.png](workflow.png).
 
 ## 11. What comes next
 
-- Recurring bookings and room capacity.
 - Email and WhatsApp reminders.
 - UPI deposits.
 - Paid access for nearby startups and small businesses, with the college setting rates.

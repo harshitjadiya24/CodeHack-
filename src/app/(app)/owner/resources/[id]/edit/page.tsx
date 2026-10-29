@@ -48,6 +48,7 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
             requiresSupervision: r.requires_supervision,
             autoApprove: r.auto_approve,
             openToPartners: r.open_to_partners,
+            capacity: r.capacity,
             checklist: ((r.checklist as string[]) ?? []).join("\n"),
             photoSlots: ((r.photo_slots as string[]) ?? []).join("\n"),
             badgeIds: (reqs ?? []).map((x) => x.badge_id),
