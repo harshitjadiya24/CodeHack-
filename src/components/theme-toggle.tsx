@@ -12,7 +12,7 @@ export function ThemeToggle() {
   const [mode, setMode] = useState<Mode>("system");
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("saajha-theme") as Mode | null;
+      const saved = localStorage.getItem("baanto-theme") as Mode | null;
       if (saved === "light" || saved === "dark") setMode(saved);
     } catch {}
   }, []);
@@ -22,10 +22,10 @@ export function ThemeToggle() {
     setMode(next);
     try {
       if (next === "system") {
-        localStorage.removeItem("saajha-theme");
+        localStorage.removeItem("baanto-theme");
         delete document.documentElement.dataset.theme;
       } else {
-        localStorage.setItem("saajha-theme", next);
+        localStorage.setItem("baanto-theme", next);
         document.documentElement.dataset.theme = next;
       }
     } catch {}

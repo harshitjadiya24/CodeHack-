@@ -142,7 +142,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
         title={t("title")}
       />
 
-      <form className="mb-4 flex gap-2" aria-label="Ask Saajha Copilot">
+      <form className="mb-4 flex gap-2" aria-label="Ask Baanto Copilot">
         <label className="sr-only" htmlFor="ask">{t("askLabel")}</label>
         <div className="relative flex-1">
           <Sparkles className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle" aria-hidden />

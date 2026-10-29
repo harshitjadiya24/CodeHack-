@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 // Installable on phones: opens straight to Discover, in its own window, in the Common Room colours.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Saajha: borrow the lab next door",
-    short_name: "Saajha",
+    name: "Baanto: borrow the lab next door",
+    short_name: "Baanto",
     description: "Find idle campus equipment you're cleared for, book a fair slot, and show your Trust Passport at the lab desk.",
     start_url: "/resources",
     scope: "/",

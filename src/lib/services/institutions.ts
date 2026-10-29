@@ -6,7 +6,7 @@ import { audit } from "@/lib/services/records";
 import { geocodeInstitute } from "@/lib/geocode";
 import { INDIAN_STATES, INSTITUTE_KINDS, departmentTemplate, starterBadges, type InstituteKind } from "@/lib/india";
 
-// Any institute in India can join Saajha. The person registering becomes its admin office.
+// Any institute in India can join Baanto. The person registering becomes its admin office.
 // Trust: every new institute starts "pending review". It works for its own campus straight away, but isn't
 // offered to other campuses until someone has checked it is real. Typing an email on the institute's domain
 // proves nothing without an inbox check, so it is only recorded as a hint for the reviewer.
@@ -65,10 +65,10 @@ export async function registerInstitution(input: InstitutionInput): Promise<Inst
 
   if (aishe) {
     const { data: taken } = await db.from("organizations").select("id").ilike("aishe_code", aishe).maybeSingle();
-    if (taken) return { ok: false, error: "An institute with this AISHE code is already on Saajha. Ask its admin office to add you.", field: "aisheCode" };
+    if (taken) return { ok: false, error: "An institute with this AISHE code is already on Baanto. Ask its admin office to add you.", field: "aisheCode" };
   }
   const { data: sameName } = await db.from("organizations").select("id").ilike("name", input.name).ilike("city", input.city).maybeSingle();
-  if (sameName) return { ok: false, error: "This institute is already on Saajha. Students can sign up and pick it from the list.", field: "name" };
+  if (sameName) return { ok: false, error: "This institute is already on Baanto. Students can sign up and pick it from the list.", field: "name" };
 
   const domainMatch = onDomain(input.email, input.website);
   const point = await geocodeInstitute(input.name, input.city, input.state);

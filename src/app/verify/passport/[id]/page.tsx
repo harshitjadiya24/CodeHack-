@@ -23,7 +23,7 @@ export default async function PassportVerifyPage({ params }: { params: Promise<{
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
-      <p className="mb-2 text-center font-display text-2xl">Saajha</p>
+      <p className="mb-2 text-center font-display text-2xl">Baanto</p>
       <Card className="p-6">
         <p className="text-sm text-subtle">Trust Passport · live check</p>
         <h1 className="mt-1 font-display text-3xl">{p.full_name}</h1>

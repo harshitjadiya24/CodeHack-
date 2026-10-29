@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// End-to-end smoke tests against a running Saajha (default: the production build on :3100).
+// End-to-end smoke tests against a running Baanto (default: the production build on :3100).
 // They sign in with the seeded demo accounts and only read, so they can run against the shared demo database.
 //   NEXT_DIST_DIR=.next-prod npx next build && NEXT_DIST_DIR=.next-prod npx next start -p 3100
 //   npm run e2e

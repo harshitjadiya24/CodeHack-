@@ -7,7 +7,7 @@ export function ServiceWorker({ signedOut = false }: { signedOut?: boolean }) {
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
     // Don't wait for the worker: drop the saved passport from here too (same cache name as public/sw.js).
-    if (signedOut && "caches" in window) void caches.open("saajha-pages-v2").then((c) => c.delete("/passport"));
+    if (signedOut && "caches" in window) void caches.open("baanto-pages-v2").then((c) => c.delete("/passport"));
     navigator.serviceWorker
       .register("/sw.js")
       .then((reg) => {

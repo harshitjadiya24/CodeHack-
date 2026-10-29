@@ -1,4 +1,4 @@
--- Saajha demo seed. All people, institutions and numbers are fictional.
+-- Baanto demo seed. All people, institutions and numbers are fictional.
 -- Every demo account uses the password: Saajha@2026
 
 -- ── Organisations & departments ───────────────────────────────────────────────
@@ -99,7 +99,7 @@ with demo (id, email, full_name, roll_no, role, org, dept) as (values
 insert into public.profiles (id, org_id, dept_id, full_name, roll_no, role, verified)
 select id, org, dept, full_name, nullif(roll_no, ''), role, true from demo;
 
--- The IQAC demo account doubles as the Saajha review team, so judges can see the institute review console.
+-- The IQAC demo account doubles as the Baanto review team, so judges can see the institute review console.
 insert into public.platform_staff (user_id) values ('33333333-0000-0000-0000-000000000007');
 
 -- ── Trust Passport badges ─────────────────────────────────────────────────────

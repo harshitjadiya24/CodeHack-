@@ -17,7 +17,7 @@ export async function GET() {
   return new NextResponse(lines.join("\n"), {
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": `attachment; filename="saajha-audit-${new Date().toISOString().slice(0, 10)}.csv"`,
+      "content-disposition": `attachment; filename="baanto-audit-${new Date().toISOString().slice(0, 10)}.csv"`,
     },
   });
 }

@@ -24,7 +24,7 @@ export default async function VerifyChainPage() {
             <p className="mt-1 text-ink-2">
               {result?.ok
                 ? `All ${result.checked} records were re-hashed just now (${formatCampus(new Date())}) and every link matches.`
-                : `Record #${result?.broken_at} does not match its hash. Something was altered outside Saajha.`}
+                : `Record #${result?.broken_at} does not match its hash. Something was altered outside Baanto.`}
             </p>
           </div>
         </div>

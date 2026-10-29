@@ -1,4 +1,4 @@
-// Generated from the Supabase schema (project saajha). Regenerate after every migration.
+// Generated from the Supabase schema (project baanto). Regenerate after every migration.
 
 export type Json =
   | string

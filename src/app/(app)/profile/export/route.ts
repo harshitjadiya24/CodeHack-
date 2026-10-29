@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
-/** Everything Saajha holds about the signed-in person, read through RLS as that person. */
+/** Everything Baanto holds about the signed-in person, read through RLS as that person. */
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Unauthorised", { status: 401 });
@@ -22,6 +22,6 @@ export async function GET() {
     notifications: notifications.data,
   };
   return new NextResponse(JSON.stringify(body, null, 2), {
-    headers: { "content-type": "application/json", "content-disposition": 'attachment; filename="my-saajha-data.json"' },
+    headers: { "content-type": "application/json", "content-disposition": 'attachment; filename="my-baanto-data.json"' },
   });
 }

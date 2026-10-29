@@ -26,7 +26,7 @@ export default async function OpsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Saajha team" title="Institutes on Saajha" />
+      <PageHeader eyebrow="Baanto team" title="Institutes on Baanto" />
       <p className="-mt-4 mb-8 max-w-2xl text-ink-2">
         A new institute works for its own campus at once, but other campuses only see it after someone here has checked it is real. Check the website, the
         AISHE code on aishe.gov.in, and whether the person registering plausibly works there.
@@ -84,7 +84,7 @@ export default async function OpsPage() {
                 </dl>
                 <p className="text-sm text-subtle">
                   {i.counts.people} {i.counts.people === 1 ? "person" : "people"} · {i.counts.departments} departments · {i.counts.resources} resources listed. The
-                  email isn’t checked by Saajha, so treat a matching domain as a hint, not proof.
+                  email isn’t checked by Baanto, so treat a matching domain as a hint, not proof.
                 </p>
                 <ReviewForm orgId={i.id} status={i.status} />
               </Card>

@@ -9,7 +9,7 @@ type Hit = { lat: string; lon: string };
 async function search(q: string): Promise<{ lat: number; lng: number } | null> {
   try {
     const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=in&q=${encodeURIComponent(q)}`;
-    const res = await fetch(url, { headers: { "User-Agent": "Saajha/1.0 (campus equipment sharing)" }, signal: AbortSignal.timeout(4000) });
+    const res = await fetch(url, { headers: { "User-Agent": "Baanto/1.0 (campus equipment sharing)" }, signal: AbortSignal.timeout(4000) });
     if (!res.ok) return null;
     const [hit] = (await res.json()) as Hit[];
     return hit ? { lat: Number(hit.lat), lng: Number(hit.lon) } : null;

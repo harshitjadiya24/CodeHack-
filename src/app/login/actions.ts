@@ -15,7 +15,7 @@ const credentials = z.object({
   next: z.string().optional(),
 });
 
-/** Only same-site paths, so `next` can never redirect off Saajha. */
+/** Only same-site paths, so `next` can never redirect off Baanto. */
 function safeNext(next: string | undefined, role: Role): string {
   return next && next.startsWith("/") && !next.startsWith("//") ? next : homeFor(role);
 }
@@ -27,7 +27,7 @@ async function signIn(email: string, password: string, next?: string): Promise<L
   const { data: profile } = await supabase.from("profiles").select("role, org:organizations(status)").eq("id", data.user.id).single();
   if (profile?.org?.status === "suspended") {
     await supabase.auth.signOut();
-    return { error: "Your institute’s account is paused by the Saajha team. Ask your admin office, or write to the Saajha team." };
+    return { error: "Your institute’s account is paused by the Baanto team. Ask your admin office, or write to the Baanto team." };
   }
   redirect(safeNext(next, profile?.role ?? "student"));
 }

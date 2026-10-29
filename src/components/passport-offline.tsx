@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 
 // Must match public/sw.js.
-const PAGES = "saajha-pages-v2";
-const STATIC = "saajha-static-v2";
+const PAGES = "baanto-pages-v2";
+const STATIC = "baanto-static-v2";
 
 /**
  * Keeps a copy of this Trust Passport, and the files it needs to render, for when there's no signal at the lab desk.

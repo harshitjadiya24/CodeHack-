@@ -8,7 +8,7 @@ export default async function ForbiddenPage() {
       <p className="text-sm text-danger">403 · Not permitted</p>
       <h1 className="mt-2 font-display text-3xl">This area is for another role</h1>
       <p className="mt-2 text-ink-2">
-        Saajha checks your role on every page and in the database, so this view stays private to the people responsible for it.
+        Baanto checks your role on every page and in the database, so this view stays private to the people responsible for it.
       </p>
       <ButtonLink href={homeFor(user.role)} className="mt-6">
         Go to my home

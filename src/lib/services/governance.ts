@@ -136,7 +136,7 @@ export async function setUserRole(admin: CurrentUser, input: { userId: string; r
   await notify(db, {
     userId: p.id,
     kind: "user.role_changed",
-    title: `You are now a ${ROLE_NAMES[input.role]} on Saajha`,
+    title: `You are now a ${ROLE_NAMES[input.role]} on Baanto`,
     body: input.reason,
     link: "/",
   });

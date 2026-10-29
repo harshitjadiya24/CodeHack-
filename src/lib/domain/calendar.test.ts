@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { foldLine, icsDate, icsText, toIcs } from "./calendar";
 
 const event = {
-  uid: "b1@saajha",
+  uid: "b1@baanto",
   start: new Date("2026-10-30T04:30:00Z"),
   end: new Date("2026-10-30T06:30:00Z"),
   summary: "3D Printer, Makerspace",
@@ -31,7 +31,7 @@ describe("calendar file", () => {
   });
 
   it("builds a calendar with CRLF line endings, a reminder and a confirmed status", () => {
-    const ics = toIcs([{ ...event, alarmMinutes: 30 }], { name: "Saajha", now: new Date("2026-10-29T00:00:00Z") });
+    const ics = toIcs([{ ...event, alarmMinutes: 30 }], { name: "Baanto", now: new Date("2026-10-29T00:00:00Z") });
     expect(ics.startsWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n")).toBe(true);
     expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
     expect(ics).toContain("DTSTART:20261030T043000Z\r\nDTEND:20261030T063000Z");
@@ -42,7 +42,7 @@ describe("calendar file", () => {
   });
 
   it("marks a waitlisted slot tentative and free, so it doesn't block the person's calendar", () => {
-    const ics = toIcs([{ ...event, tentative: true }], { name: "Saajha" });
+    const ics = toIcs([{ ...event, tentative: true }], { name: "Baanto" });
     expect(ics).toContain("STATUS:TENTATIVE");
     expect(ics).toContain("TRANSP:TRANSPARENT");
     expect(ics).not.toContain("VALARM");

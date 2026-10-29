@@ -21,15 +21,15 @@ export function bookingEvent(b: Row, origin: string): CalendarEvent {
   const name = b.resource?.name ?? "Booking";
   const place = [b.resource?.location, b.resource?.org?.name].filter(Boolean).join(", ");
   return {
-    uid: `${b.id}@saajha`,
+    uid: `${b.id}@baanto`,
     start: new Date(b.starts_at),
     end: new Date(b.ends_at),
     summary: waiting ? `Waitlisted #${b.waitlist_position ?? "?"}: ${name}` : name,
     location: place || undefined,
     description: [
-      waiting ? "You're on the waitlist. Saajha moves you in automatically if a place opens up." : "Booked on Saajha. Scan the QR tag on the resource to check in.",
+      waiting ? "You're on the waitlist. Baanto moves you in automatically if a place opens up." : "Booked on Baanto. Scan the QR tag on the resource to check in.",
       `Purpose: ${b.purpose}`,
-      `Booking SJ-${b.id.slice(0, 4).toUpperCase()}`,
+      `Booking BT-${b.id.slice(0, 4).toUpperCase()}`,
     ].join("\n"),
     url: `${origin}/bookings/${b.id}`,
     tentative: waiting,

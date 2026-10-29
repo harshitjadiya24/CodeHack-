@@ -13,10 +13,10 @@ const mona = Mona_Sans({ variable: "--font-mona", subsets: ["latin"], axes: ["wd
 const deva = Noto_Sans_Devanagari({ variable: "--font-deva-src", subsets: ["devanagari"], weight: ["400", "600", "700", "800"], display: "swap", preload: false });
 
 export const metadata: Metadata = {
-  appleWebApp: { capable: true, title: "Saajha", statusBarStyle: "default" },
-  title: { default: "Saajha: borrow the lab next door", template: "%s · Saajha" },
+  appleWebApp: { capable: true, title: "Baanto", statusBarStyle: "default" },
+  title: { default: "Baanto: borrow the lab next door", template: "%s · Baanto" },
   description:
-    "Saajha opens idle campus labs and equipment to students. See what you are cleared for, book a slot, and when too many people want the same hour, a fair draw anyone can check decides.",
+    "Baanto opens idle campus labs and equipment to students. See what you are cleared for, book a slot, and when too many people want the same hour, a fair draw anyone can check decides.",
 };
 
 // Status bar matches the page in both themes.
@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang={locale === "hi" ? "hi-IN" : "en-IN"} suppressHydrationWarning>
       <head>
         {/* Apply the saved theme before paint so there is no flash. */}
-        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("saajha-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("baanto-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}` }} />
       </head>
       <body className={`${mona.variable} ${deva.variable} antialiased`}>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>

@@ -38,7 +38,7 @@ test("someone with open bookings is told why they can't delete their account yet
 
 test("the missing-training reason reads in Hindi too", async ({ page, context, baseURL }) => {
   await signInAs(page, /Aarav/);
-  await context.addCookies([{ name: "saajha-locale", value: "hi", url: baseURL! }]);
+  await context.addCookies([{ name: "baanto-locale", value: "hi", url: baseURL! }]);
   await page.goto("/resources?q=Laser");
   await openResource(page, /Laser Cutter/);
   await expect(page.getByText("अभी नहीं। नीचे ठीक-ठीक लिखा है कि क्या बाकी है।")).toBeVisible();

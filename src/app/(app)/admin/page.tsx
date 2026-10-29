@@ -30,13 +30,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
       {org?.status === "pending" && (
         <p role="status" className="mb-6 rounded-[22px] border border-rule bg-warn-soft px-5 py-3 text-[15px] text-warn">
-          <b>Pending review.</b> Your institute works for your own campus now. Other campuses will see it once the Saajha team has checked it is real.
+          <b>Pending review.</b> Your institute works for your own campus now. Other campuses will see it once the Baanto team has checked it is real.
         </p>
       )}
       {welcome && (
         <section aria-labelledby="setup-title" className="mb-10 rounded-[22px] border border-rule bg-card">
           <h2 id="setup-title" className="chart-code bg-board px-5 py-3 text-[15px] text-board-ink">
-            {org?.name} is on Saajha. Four things to do next
+            {org?.name} is on Baanto. Four things to do next
           </h2>
           <ol className="grid gap-px bg-rule sm:grid-cols-2 lg:grid-cols-4">
             {[

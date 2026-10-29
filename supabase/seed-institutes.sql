@@ -9,7 +9,7 @@ insert into public.organizations (id, name, slug, city, state, kind, email_domai
   ('11111111-0000-0000-0000-000000000012', 'Banyan School of Design',           'banyan',      'Ahmedabad', 'Gujarat',     'arts_science', 'banyan.demo',      'active',  23.0335, 72.5601),
   ('11111111-0000-0000-0000-000000000013', 'Silverline Institute of Technology', 'silverline',  'Bengaluru', 'Karnataka',   'engineering',  'silverline.demo',  'active',  12.9352, 77.6203),
   ('11111111-0000-0000-0000-000000000014', 'Pearl City College of Engineering', 'pearlcity',   'Hyderabad', 'Telangana',   'engineering',  'pearlcity.demo',   'active',  17.4401, 78.3802),
-  -- Waiting in the Saajha review console (/ops), so the approve flow has something to approve.
+  -- Waiting in the Baanto review console (/ops), so the approve flow has something to approve.
   ('11111111-0000-0000-0000-000000000015', 'Tea Garden Institute of Technology', 'teagarden',  'Guwahati',  'Assam',       'engineering',  'teagarden.demo',   'pending', 26.1402, 91.6604)
 on conflict (id) do nothing;
 

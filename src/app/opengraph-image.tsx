@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Saajha: borrow the lab next door";
+export const alt = "Baanto: borrow the lab next door";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -24,12 +24,12 @@ const TAGS = [
 /** Share card: the headline and three shelf tags, as on the landing page. */
 export default async function OpengraphImage() {
   const headline = "Borrow the lab next door.";
-  const font = await mona(`saajha ${headline} ${TAGS.map((t) => t.name + t.tag).join("")}`);
+  const font = await mona(`baanto ${headline} ${TAGS.map((t) => t.name + t.tag).join("")}`);
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", background: "#ffffff", padding: 64, fontFamily: "Mona", color: "#1c1c1e" }}>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: 600 }}>
-          <div style={{ fontSize: 40, letterSpacing: -1 }}>saajha</div>
+          <div style={{ fontSize: 40, letterSpacing: -1 }}>baanto</div>
           <div style={{ fontSize: 104, lineHeight: 0.92, letterSpacing: -5 }}>{headline}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 22, marginLeft: 40, paddingTop: 30 }}>

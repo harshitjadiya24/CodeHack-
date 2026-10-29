@@ -23,6 +23,7 @@ export function newSeed(): string {
 }
 
 export async function commitFor(seed: string): Promise<string> {
+  // The prefix is from the app's first name and stays: changing it would break re-checking every draw already published.
   return sha256Hex(`saajha-draw:${seed}`);
 }
 

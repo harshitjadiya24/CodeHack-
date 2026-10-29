@@ -54,7 +54,7 @@ export default async function ManagerPage() {
     <>
       <PageHeader eyebrow="Human oversight" title="Review desk" />
       <p className="-mt-4 mb-8 max-w-2xl text-ink-2">
-        Saajha never issues a badge or applies a penalty on its own. Everything that affects someone’s access lands here for a person to decide, and every decision is recorded with its reason.
+        Baanto never issues a badge or applies a penalty on its own. Everything that affects someone’s access lands here for a person to decide, and every decision is recorded with its reason.
       </p>
 
       <section aria-labelledby="endorsements-title" id="endorsements" className="mb-10 scroll-mt-24">
@@ -161,7 +161,7 @@ export default async function ManagerPage() {
                   </div>
                   <p className="mt-2 text-sm text-ink-2">{i.description}</p>
                   <p className="mt-2 text-xs text-subtle">
-                    Reported by {i.reporter?.full_name ?? "Saajha (automatic rule)"} · {formatCampus(i.created_at)}
+                    Reported by {i.reporter?.full_name ?? "Baanto (automatic rule)"} · {formatCampus(i.created_at)}
                     {i.booking?.user && ` · Borrower: ${i.booking.user.full_name} (${i.booking.user.strikes} strike${i.booking.user.strikes === 1 ? "" : "s"})`}
                   </p>
                   {i.borrower_response && (

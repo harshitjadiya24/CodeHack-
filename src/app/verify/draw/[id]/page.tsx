@@ -25,7 +25,7 @@ export default async function DrawVerifyPage({ params }: { params: Promise<{ id:
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <Link href="/" className="font-display text-2xl">
-        Saajha
+        Baanto
       </Link>
       <p className="mt-8 text-sm text-saffron">Fair Draw · public verification</p>
       <h1 className="font-display text-4xl leading-tight">{draw.resource?.name}</h1>
@@ -36,7 +36,7 @@ export default async function DrawVerifyPage({ params }: { params: Promise<{ id:
       <Card className="mt-8 space-y-4 p-6">
         <h2 className="font-bold">How this draw stays honest</h2>
         <ol className="list-decimal space-y-1 pl-5 text-sm text-ink-2">
-          <li>When the first clash happened, Saajha generated a secret random seed and published only its SHA-256 hash (the commit).</li>
+          <li>When the first clash happened, Baanto generated a secret random seed and published only its SHA-256 hash (the commit).</li>
           <li>Nobody could change the seed afterwards without the hash changing.</li>
           <li>At draw time the seed was revealed. Each entrant got a key u^(1/weight), where u comes from hashing the seed with their booking reference.</li>
           <li>Highest key wins. Higher priority means better odds, never certainty, and request order plays no part.</li>

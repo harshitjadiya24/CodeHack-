@@ -5,7 +5,7 @@ import type { Json } from "@/lib/database.types";
 import { audit, notify } from "./records";
 import type { ServiceResult } from "./bookings";
 
-// The Saajha team's side: checking that a newly registered institute is real before other campuses see it,
+// The Baanto team's side: checking that a newly registered institute is real before other campuses see it,
 // and pausing one that isn't. Platform staff are listed in their own table, apart from any institute's roles.
 
 const asJson = (v: unknown) => v as Json;
@@ -65,7 +65,7 @@ export async function institutesForReview() {
 }
 
 export async function reviewInstitute(staff: CurrentUser, input: { orgId: string; decision: InstituteDecision; reason: string }): Promise<ServiceResult> {
-  if (!(await isPlatformStaff(staff.id))) return { ok: false, error: "Only the Saajha team reviews institutes." };
+  if (!(await isPlatformStaff(staff.id))) return { ok: false, error: "Only the Baanto team reviews institutes." };
   const rule = NEXT_STATUS[input.decision];
   if (!rule) return { ok: false, error: "Choose what to do." };
   const reason = input.reason.trim();
@@ -97,7 +97,7 @@ export async function reviewInstitute(staff: CurrentUser, input: { orgId: string
           input.decision === "approve"
             ? "Your institute is approved. Other campuses can now find it."
             : input.decision === "suspend"
-              ? "Your institute has been paused by the Saajha team"
+              ? "Your institute has been paused by the Baanto team"
               : "Your institute is active again",
         body: reason,
         link: "/admin",

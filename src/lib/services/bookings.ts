@@ -124,7 +124,7 @@ export async function requestBooking(
       headline: `Waitlisted at position #${position}`,
       reasons: [
         "Another person already holds this slot.",
-        "If it frees up, Saajha promotes the next eligible person on the waitlist automatically and notifies them.",
+        "If it frees up, Baanto promotes the next eligible person on the waitlist automatically and notifies them.",
       ],
       decidedBy: { kind: "system" },
       priority,
@@ -278,7 +278,7 @@ export async function decideBooking(
     const r = receipt({
       outcome: "approved",
       headline: `Approved by ${actor.full_name}`,
-      reasons: [reason.trim() || "Eligibility, fair-use limits and slot availability were checked.", "Bring your Saajha booking to check in."],
+      reasons: [reason.trim() || "Eligibility, fair-use limits and slot availability were checked.", "Bring your Baanto booking to check in."],
       decidedBy: person(actor),
       priority,
     });

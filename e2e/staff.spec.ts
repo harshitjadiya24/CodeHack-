@@ -12,11 +12,11 @@ test("a home admin office has an endorsements desk", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Cross-campus endorsements/ })).toBeVisible();
 });
 
-test("the Saajha team reviews institutes; students can't", async ({ browser }) => {
+test("the Baanto team reviews institutes; students can't", async ({ browser }) => {
   const team = await browser.newPage();
   await signInAs(team, /IQAC/);
   await team.goto("/ops");
-  await expect(team.getByRole("heading", { name: "Institutes on Saajha" })).toBeVisible();
+  await expect(team.getByRole("heading", { name: "Institutes on Baanto" })).toBeVisible();
   await expect(team.getByRole("link", { name: "Institutes" })).toBeVisible();
 
   const student = await browser.newPage();

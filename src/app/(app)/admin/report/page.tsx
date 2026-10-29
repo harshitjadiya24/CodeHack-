@@ -64,7 +64,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
         <p className="mt-1 text-subtle">
           {org?.name}
           {org?.city ? `, ${org.city}` : ""} · academic year {r.ay.label} (1 July {start} – 30 June {start + 1})
-          {inProgress ? `, ${r.weeks} weeks so far` : ""} · generated {formatCampus(new Date(), { year: "numeric" })} from the Saajha audit chain
+          {inProgress ? `, ${r.weeks} weeks so far` : ""} · generated {formatCampus(new Date(), { year: "numeric" })} from the Baanto audit chain
         </p>
       </header>
 

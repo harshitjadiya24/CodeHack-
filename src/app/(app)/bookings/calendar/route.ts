@@ -16,5 +16,5 @@ export async function GET(request: Request) {
     .gte("ends_at", new Date().toISOString())
     .order("starts_at");
   const origin = new URL(request.url).origin;
-  return icsResponse(toIcs((data ?? []).map((b) => bookingEvent(b, origin)), { name: "My Saajha bookings" }), "saajha-bookings.ics");
+  return icsResponse(toIcs((data ?? []).map((b) => bookingEvent(b, origin)), { name: "My Baanto bookings" }), "baanto-bookings.ics");
 }

@@ -73,7 +73,7 @@ export default async function Landing() {
       </a>
       <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur">
         <div className="mx-auto flex h-[76px] max-w-[1200px] items-center justify-between px-4 md:px-8">
-          <Link href="/" aria-label="Saajha home">
+          <Link href="/" aria-label="Baanto home">
             <Wordmark />
           </Link>
           <nav aria-label="Main" className="flex items-center gap-1.5 text-[15px] sm:gap-2">
@@ -95,7 +95,7 @@ export default async function Landing() {
                 Create account
               </ButtonLink>
             )}
-            <ButtonLink href={cta}>{home ? "Open Saajha" : "Sign in"}</ButtonLink>
+            <ButtonLink href={cta}>{home ? "Open Baanto" : "Sign in"}</ButtonLink>
           </nav>
         </div>
       </header>
@@ -107,11 +107,11 @@ export default async function Landing() {
               Borrow the lab next door.
             </SplitHeading>
             <p className="mt-6 max-w-[40ch] text-[19px] text-subtle">
-              Your college already owns a 3D printer, a microscope and a camera kit. Most days nobody touches them. Saajha shows you which ones you’re
+              Your college already owns a 3D printer, a microscope and a camera kit. Most days nobody touches them. Baanto shows you which ones you’re
               cleared for and books you in.
             </p>
             <div className="mt-8 flex flex-wrap gap-2.5">
-              <ButtonLink href={cta}>{home ? "Open Saajha" : "Browse equipment"}</ButtonLink>
+              <ButtonLink href={cta}>{home ? "Open Baanto" : "Browse equipment"}</ButtonLink>
               <ButtonLink href="/institutions/new" variant="secondary">
                 Bring your campus
               </ButtonLink>
@@ -227,7 +227,7 @@ export default async function Landing() {
               <Ticket
                 className="mt-5"
                 status="Confirmed"
-                code="SJ-4827"
+                code="BT-4827"
                 rows={[
                   ["Borrower", "Meera Shah, B.Des 3"],
                   ["Slot", "Thu 29 Oct, 11:00–16:00"],
@@ -283,7 +283,7 @@ export default async function Landing() {
             <div>
               <dl className="grid grid-cols-2 gap-6">
                 <div className="flex flex-col">
-                  <dt className="mt-2 text-sm text-subtle">institutes on Saajha</dt>
+                  <dt className="mt-2 text-sm text-subtle">institutes on Baanto</dt>
                   <dd className="readout order-first text-[clamp(2.75rem,5vw,4rem)]">
                     <CountUp value={reach.institutes} kind="int" />
                   </dd>
@@ -322,7 +322,7 @@ export default async function Landing() {
             ))}
           </dl>
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <ButtonLink href={cta}>{home ? "Open Saajha" : "Open the demo"}</ButtonLink>
+            <ButtonLink href={cta}>{home ? "Open Baanto" : "Open the demo"}</ButtonLink>
             {!home && (
               <ButtonLink href="/signup" variant="secondary">
                 Create your account

@@ -1,11 +1,11 @@
-// Saajha service worker. Small on purpose, no build step.
+// Baanto service worker. Small on purpose, no build step.
 //  - Built assets (/_next/static) are content-hashed, so they are cached forever once seen.
 //  - Pages always come from the network. The one exception: the last Trust Passport you opened is kept,
 //    so its QR still shows at a lab desk with no signal. It is cleared the moment you're signed out.
 //  - Any other page with no network shows /offline.
 const VERSION = "v2";
-const STATIC = `saajha-static-${VERSION}`;
-const PAGES = `saajha-pages-${VERSION}`;
+const STATIC = `baanto-static-${VERSION}`;
+const PAGES = `baanto-pages-${VERSION}`;
 const OFFLINE = "/offline";
 const PASSPORT = "/passport";
 

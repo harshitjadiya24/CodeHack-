@@ -136,7 +136,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
       <aside className="order-first space-y-4 lg:order-none">
         <Ticket
           status={`${status.label}${b.status === "waitlisted" && b.waitlist_position ? ` #${b.waitlist_position}` : ""}`}
-          code={`SJ-${b.id.slice(0, 4).toUpperCase()}`}
+          code={`BT-${b.id.slice(0, 4).toUpperCase()}`}
           tone={["approved", "checked_in", "closed"].includes(b.status) ? "ok" : status.tone === "saffron" || status.tone === "info" ? "draw" : status.tone === "danger" ? "danger" : status.tone === "warn" ? "warn" : "neutral"}
           rows={[
             [t("borrower"), b.requester?.full_name ?? "—"],

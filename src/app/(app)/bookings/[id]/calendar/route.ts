@@ -13,6 +13,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const { data: b } = await supabase.from("bookings").select(CALENDAR_SELECT).eq("id", id).eq("user_id", user.id).maybeSingle();
   if (!b) return new Response("Not found", { status: 404 });
   if (!(CALENDAR_STATUSES as readonly string[]).includes(b.status)) return new Response("This booking has no slot to add to a calendar.", { status: 409 });
-  const ics = toIcs([bookingEvent(b, new URL(request.url).origin)], { name: "Saajha" });
-  return icsResponse(ics, `saajha-${b.id.slice(0, 8)}.ics`);
+  const ics = toIcs([bookingEvent(b, new URL(request.url).origin)], { name: "Baanto" });
+  return icsResponse(ics, `baanto-${b.id.slice(0, 8)}.ics`);
 }

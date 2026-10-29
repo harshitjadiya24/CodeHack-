@@ -22,7 +22,7 @@ test("sign-up explains every missing field without creating anything", async ({ 
 });
 
 test("sign-up errors come back in Hindi when Hindi is chosen", async ({ page, context, baseURL }) => {
-  await context.addCookies([{ name: "saajha-locale", value: "hi", url: baseURL! }]);
+  await context.addCookies([{ name: "baanto-locale", value: "hi", url: baseURL! }]);
   await page.goto("/signup");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("अपना खाता बनाएँ");
   await page.getByRole("button", { name: "खाता बनाएँ" }).click();
@@ -41,7 +41,7 @@ test("signed-out visitors are sent to sign in", async ({ page }) => {
 
 test("the app is installable: manifest, icons and a never-stale service worker", async ({ request }) => {
   const manifest = await (await request.get("/manifest.webmanifest")).json();
-  expect(manifest.short_name).toBe("Saajha");
+  expect(manifest.short_name).toBe("Baanto");
   expect(manifest.display).toBe("standalone");
   expect(manifest.icons.some((i: { purpose?: string }) => i.purpose === "maskable")).toBe(true);
   for (const icon of manifest.icons) expect((await request.get(icon.src)).ok()).toBe(true);

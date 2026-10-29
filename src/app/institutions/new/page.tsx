@@ -49,7 +49,7 @@ export default async function RegisterInstitutionPage() {
       <aside aria-labelledby="after-heading" className="md:sticky md:top-12 md:self-start md:pt-28">
         <p className="readout text-6xl">{institutes}</p>
         <p className="mt-1 text-[15px] text-subtle">
-          institutes across {states} {states === 1 ? "state" : "states"} on Saajha
+          institutes across {states} {states === 1 ? "state" : "states"} on Baanto
         </p>
         <h2 id="after-heading" className="type-h3 mt-12 text-3xl">
           What happens next
@@ -72,7 +72,7 @@ export default async function RegisterInstitutionPage() {
         </ol>
         <div className="mt-10 rounded-[22px] border border-rule bg-card p-5 text-[15px] text-ink-2">
           <b className="text-ink">How we stop impersonation.</b> Every new institute starts as pending review. It works for your own campus straight away,
-          but isn’t shown to other campuses until the Saajha team has checked it against your website and AISHE code.
+          but isn’t shown to other campuses until the Baanto team has checked it against your website and AISHE code.
         </div>
       </aside>
     </main>

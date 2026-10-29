@@ -27,7 +27,7 @@ export default async function QrTagPage({ params, searchParams }: { params: Prom
         </p>
       )}
       <Card className="p-8 text-center print:border-0">
-        <p className="font-display text-2xl">Saajha</p>
+        <p className="font-display text-2xl">Baanto</p>
         <div className="mx-auto my-4 w-56" dangerouslySetInnerHTML={{ __html: svg }} />
         <p className="font-medium">{r.name}</p>
         <p className="text-sm text-subtle">{r.location}</p>

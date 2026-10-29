@@ -49,7 +49,7 @@ export function foldLine(line: string): string {
 
 export function toIcs(events: CalendarEvent[], opts: { name: string; now?: Date }): string {
   const stamp = icsDate(opts.now ?? new Date());
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Saajha//Bookings//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", `X-WR-CALNAME:${icsText(opts.name)}`];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Baanto//Bookings//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", `X-WR-CALNAME:${icsText(opts.name)}`];
   for (const e of events) {
     lines.push("BEGIN:VEVENT", `UID:${e.uid}`, `DTSTAMP:${stamp}`, `DTSTART:${icsDate(e.start)}`, `DTEND:${icsDate(e.end)}`, `SUMMARY:${icsText(e.summary)}`);
     if (e.location) lines.push(`LOCATION:${icsText(e.location)}`);

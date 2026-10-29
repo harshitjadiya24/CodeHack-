@@ -1,6 +1,6 @@
-# Saajha
+# Baanto
 
-**Borrow the lab next door.** Saajha opens idle campus equipment and spaces to the students who need them. It shows what you're cleared to use and books you a slot. When too many people want the same hour, a fair draw that anyone can re-check decides.
+**Borrow the lab next door.** Baanto opens idle campus equipment and spaces to the students who need them. It shows what you're cleared to use and books you a slot. When too many people want the same hour, a fair draw that anyone can re-check decides.
 
 Built for the problem statement **"Unlock Underused Equipment and Spaces"**.
 
@@ -10,9 +10,9 @@ Built for the problem statement **"Unlock Underused Equipment and Spaces"**.
 
 Indian colleges already own 3D printers, oscilloscopes, microscopes, camera kits and seminar rooms. Most of them sit idle for most of the week. Students who could use them don't know they exist, aren't sure they're allowed, or lose out to whoever asks first. Lab owners say no because they can't tell who is trained or who broke something.
 
-Saajha fixes the trust problem, not just the booking:
+Baanto fixes the trust problem, not just the booking:
 
-| Worry | What Saajha does |
+| Worry | What Baanto does |
 |---|---|
 | "Am I allowed to use this?" | A **Trust Passport** of verified training badges. Every resource lists what it needs, and you're told exactly what's missing. |
 | "Someone always grabs it first" | Popular slots go to a **Fair Draw**: seeded, weighted towards people who've had less time, sealed before anyone asks, and re-runnable by anyone. |
@@ -28,7 +28,7 @@ Open `/login` and use any demo account (password for all: `Saajha@2026`), or cli
 2. **Aarav** (student, missing a badge): the same resource tells him exactly which training he lacks.
 3. **Dr. Priya Nair** (lab owner): decide requests with the priority score shown, or run a Fair Draw on a contested slot.
 4. **Ravi** (attendant): confirm a supervised pick-up with photos.
-5. **IQAC Office** (admin): campus insights, fairness, the NAAC report for any academic year (with a CSV), and a check that the audit chain is intact. This account is also on the Saajha review team, so it sees **Institutes** (`/ops`), where new institutes are approved or suspended.
+5. **IQAC Office** (admin): campus insights, fairness, the NAAC report for any academic year (with a CSV), and a check that the audit chain is intact. This account is also on the Baanto review team, so it sees **Institutes** (`/ops`), where new institutes are approved or suspended.
 6. **Zoya** (student at the partner campus, Riverside) and **Riverside Admin Office**: borrowing across campuses. Zoya asks her own institute to endorse her for Northfield. Riverside's admin office endorses her for 30, 90 or 180 days, with a reason. She can then request Northfield's equipment, and Northfield's owners see "Guest from Riverside, endorsed until …" on her requests.
 
 The one-click demo accounts are at the fictional *Northfield Institute of Technology, Pune*, apart from Zoya and the Riverside admin office at the partner campus, Riverside College of Engineering.
@@ -48,7 +48,7 @@ Any college can register at `/institutions/new` in a few minutes:
 
 - Choose the institute type, and its departments, starter training badges and fair-use policy are set up for it.
 - New institutes work for their own campus straight away.
-- An institute stays **pending review** and isn't shown to other campuses until the Saajha team has checked it. That check happens in the review console, against the institute's website and AISHE code.
+- An institute stays **pending review** and isn't shown to other campuses until the Baanto team has checked it. That check happens in the review console, against the institute's website and AISHE code.
 - A suspended institute's people can't sign in, and see why.
 - **Cross-campus endorsements:** a student borrows from a partner campus only when their home institute vouches for them, for a purpose and a set period. Their training carries over wherever the host has a badge of the same name. Both campuses' audit logs record it.
 - Students sign up at `/signup`, pick their institute and roll number, and can browse at once. The admin office verifies them before they can borrow.
@@ -67,7 +67,7 @@ Tap **हिन्दी** in the header or on the sign-in page. The app shell, 
 
 ## On phones
 
-Saajha installs as an app ("Add to Home screen"). Once you've opened your Trust Passport on a phone, its QR still shows at the lab desk with no signal. The saved copy is removed as soon as you sign out. Every other page shows a clear offline notice instead of an error.
+Baanto installs as an app ("Add to Home screen"). Once you've opened your Trust Passport on a phone, its QR still shows at the lab desk with no signal. The saved copy is removed as soon as you sign out. Every other page shows a clear offline notice instead of an error.
 
 ## How it's built
 
@@ -145,7 +145,7 @@ CI runs them too, once the repository has the three Supabase secrets.
 - **New institutes:** start pending and are hidden from other campuses until checked.
 - **Students:** can't borrow until the admin office has checked their roll number.
 - **Public pages** (the landing page and the share image) show counts and initials only, never names.
-- **Your data (DPDP Act 2023):** people can download everything Saajha holds about them from their profile, and delete their account there. Deletion removes their name, roll number, certificates, notifications and pending requests, and stops sign-in. Past bookings and the audit chain stay without their name, because the institution must keep them. It's refused, with the reason, while they still have open bookings or incidents, own resources, or are the institute's only admin.
+- **Your data (DPDP Act 2023):** people can download everything Baanto holds about them from their profile, and delete their account there. Deletion removes their name, roll number, certificates, notifications and pending requests, and stops sign-in. Past bookings and the audit chain stay without their name, because the institution must keep them. It's refused, with the reason, while they still have open bookings or incidents, own resources, or are the institute's only admin.
 - **Offline copy:** the Trust Passport saved on a phone is wiped on sign-out.
 - **The audit log** can only be appended to, and anyone can check that it hasn't been tampered with.
 
