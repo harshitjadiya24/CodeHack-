@@ -5,6 +5,7 @@ import { ROLE_LABEL } from "@/lib/demo";
 import { checkUsageRules, creditCost, priorityScore, type Priority } from "@/lib/domain/fairness";
 import { commitFor, newSeed, runDraw } from "@/lib/domain/draw";
 import { receipt, type DecisionReceipt } from "@/lib/domain/receipt";
+import { promotionOrder, renumber, type Queued } from "@/lib/domain/waitlist";
 import { formatCampus } from "@/lib/domain/time";
 import type { Enums, Json, Tables } from "@/lib/database.types";
 import { bookingHistory, eligibilityFor, loadResourceContext } from "./context";
@@ -470,18 +471,48 @@ export async function cancelBooking(actor: CurrentUser, bookingId: string, reaso
   if (error) return { ok: false, error: error.message.includes("illegal transition") ? "This booking can no longer be cancelled." : error.message };
 
   if (heldSlot) await promoteWaitlist(db, booking.resource, booking.starts_at, booking.ends_at);
+  // Leaving the queue moves everyone behind you up.
+  else if (booking.status === "waitlisted") await closeQueueGaps(db, booking.resource, booking.starts_at, booking.ends_at);
   return { ok: true, message: heldSlot ? "Cancelled. The slot was offered to the waitlist." : "Cancelled." };
 }
 
-async function promoteWaitlist(db: Db, resource: Tables<"resources">, start: string, end: string) {
-  const queue = (await overlapping(db, resource.id, start, end, ["waitlisted"])).sort(
-    (a, b) => (a.waitlist_position ?? 999) - (b.waitlist_position ?? 999),
-  );
+const queued = (b: Tables<"bookings">): Queued & { row: Tables<"bookings"> } => ({
+  id: b.id,
+  waitlistPosition: b.waitlist_position,
+  priorityScore: b.priority_score === null ? null : Number(b.priority_score),
+  startsAt: b.starts_at,
+  endsAt: b.ends_at,
+  row: b,
+});
+
+/**
+ * A held slot was freed: offer it down the queue. Each person is checked again against the same rules as a new request
+ * (eligibility and fair-use limits as of now), because a lot can change while you wait. Passed-over people are told why.
+ */
+export async function promoteWaitlist(db: Db, resource: Tables<"resources">, start: string, end: string) {
   const ctx = await loadResourceContext(db, resource.id);
-  for (const candidate of queue) {
+  if (!ctx) return;
+  const queue = promotionOrder((await overlapping(db, resource.id, start, end, ["waitlisted"])).map(queued), new Date());
+  for (const { row: candidate } of queue) {
     const { data: profile } = await db.from("profiles").select("*").eq("id", candidate.user_id).single();
-    if (!profile || !ctx) continue;
-    if (!(await eligibilityFor(db, profile, ctx)).eligible) continue;
+    if (!profile) continue;
+    const eligibility = await eligibilityFor(db, profile, ctx);
+    const slot = { resourceId: resource.id, startsAt: new Date(candidate.starts_at), endsAt: new Date(candidate.ends_at) };
+    // "Must start in the future" is about new requests; a promotion into a slot that has begun is still useful.
+    const violations = checkUsageRules({ config: ctx.config, resource: ctx.rules, slot, history: await bookingHistory(db, candidate.user_id) }).filter(
+      (v) => v.rule !== "future",
+    );
+    const blocker = eligibility.checks.find((c) => c.blocking && !c.passed)?.reason ?? violations[0]?.reason;
+    if (blocker) {
+      await notify(db, {
+        userId: candidate.user_id,
+        kind: "waitlist.skipped",
+        title: `A slot opened up, but you were passed over: ${resource.name}`,
+        body: `${blocker} You stay on the waitlist.`,
+        link: `/bookings/${candidate.id}`,
+      });
+      continue;
+    }
     const { error } = await transition(db, {
       bookingId: candidate.id,
       to: "approved",
@@ -490,12 +521,30 @@ async function promoteWaitlist(db: Db, resource: Tables<"resources">, start: str
       receipt: receipt({
         outcome: "promoted",
         headline: "Promoted from the waitlist",
-        reasons: ["The person ahead of you cancelled.", "You were next in line and are still eligible."],
+        reasons: ["The person ahead of you cancelled.", "You were next in line and still meet every rule."],
         decidedBy: { kind: "system" },
         priority: { score: Number(candidate.priority_score ?? 100), breakdown: (candidate.priority_breakdown ?? []) as Priority["breakdown"] },
       }),
       notify: { title: `A slot opened up: ${resource.name}`, body: `You're in for ${formatCampus(candidate.starts_at)}.` },
     });
-    if (!error) return;
+    // A clash with another approved booking (the exclusion constraint) means this slot isn't free for them: try the next.
+    if (!error) break;
+  }
+  await closeQueueGaps(db, resource, start, end);
+}
+
+/** Renumber whoever is still waiting for this time, and tell the people who moved up. */
+async function closeQueueGaps(db: Db, resource: Tables<"resources">, start: string, end: string) {
+  const waiting = (await overlapping(db, resource.id, start, end, ["waitlisted"])).map(queued);
+  for (const move of renumber(waiting)) {
+    await db.from("bookings").update({ waitlist_position: move.to }).eq("id", move.id).eq("status", "waitlisted");
+    const b = waiting.find((w) => w.id === move.id)!.row;
+    await notify(db, {
+      userId: b.user_id,
+      kind: "waitlist.moved",
+      title: `You moved up to #${move.to}: ${resource.name}`,
+      body: formatCampus(b.starts_at),
+      link: `/bookings/${b.id}`,
+    });
   }
 }
