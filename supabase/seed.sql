@@ -284,3 +284,6 @@ update public.resources r set lat = v.lat, lng = v.lng from (values
   ('Central Makerspace', 18.5918, 73.7383), ('ECE Block', 18.5921, 73.7396), ('CSE Block', 18.5909, 73.7399),
   ('Media & Design Studio', 18.5904, 73.7381), ('Library', 18.5913, 73.7389), ('Admin Block', 18.5911, 73.7375)) v(building, lat, lng)
 where split_part(r.location, ',', 1) = v.building and r.org_id = '11111111-0000-0000-0000-000000000001';
+
+-- Fictional: kept apart from real institutes.
+update public.organizations set is_demo = true where email_domain like '%.demo';

@@ -123,7 +123,10 @@ export default async function Landing() {
           </div>
         </div>
 
-        <section aria-label="Figures from the demo campus" className="mt-16 border-t border-rule md:mt-[72px]">
+        <section aria-labelledby="figures-note" className="mt-16 border-t border-rule md:mt-[72px]">
+          <p id="figures-note" className="pt-4 text-sm text-subtle">
+            Figures from the demo campus, a fictional college you can try below.
+          </p>
           <dl className="grid grid-cols-2 gap-x-6 lg:grid-cols-4">
             {figures.map((f) => (
               <div key={f.label} className="flex flex-col py-6">
@@ -328,7 +331,7 @@ export default async function Landing() {
                 Create your account
               </ButtonLink>
             )}
-            <span className="text-[15px] text-subtle">Judges can skip sign-up: demo accounts are one click away.</span>
+            <span className="text-[15px] text-subtle">Want to look around first? The demo campus needs no sign-up.</span>
           </div>
         </section>
       </main>
@@ -336,11 +339,14 @@ export default async function Landing() {
       <footer className="mt-32 border-t border-rule">
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-4 pb-12 pt-8 text-sm text-subtle md:px-8">
           <span>
-            <Wordmark className="mr-2 text-base text-ink" /> built for “Unlock Underused Equipment and Spaces”. Demo data is fictional.
+            <Wordmark className="mr-2 text-base text-ink" /> lets colleges share the equipment and spaces they already own. The demo campus is fictional.
           </span>
           <span className="flex gap-5">
             <Link href="/privacy" className="hover:text-ink">
               Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-ink">
+              Terms
             </Link>
             <Link href="/audit/verify" className="hover:text-ink">
               Check the record

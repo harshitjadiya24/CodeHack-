@@ -2,6 +2,7 @@
   "Shell": {
     "skip": "Skip to content",
     "signOut": "Sign out",
+    "demo": "<b>You’re in the demo.</b> Northfield and its people are fictional, and nothing here reaches a real college. To use your own campus, sign out and create an account.",
     "unverified": "<b>Waiting for verification.</b> The admin office is checking your roll number. You can browse and add training now; requests unlock once you’re verified.",
     "nav": {
       "discover": "Discover",
@@ -38,9 +39,32 @@
     "submitting": "Signing in…",
     "new": "New to Baanto?",
     "createAccount": "Create an account",
-    "judges": "For judges",
+    "judges": "Look around first",
     "demoTitle": "Try any role in one click",
-    "demoNote": "Fictional demo accounts. Password for all:"
+    "demoNote": "Fictional demo accounts. Password for all:",
+    "forgot": "Forgot your password?",
+    "checkEmail": "Almost there. We sent a link to your email. Open it to confirm your address, then sign in.",
+    "linkExpired": "That link has expired or was already used. Sign in, or ask for a new one.",
+    "passwordChanged": "Password changed. Sign in with the new one.",
+    "wrong": "Email or password is incorrect.",
+    "unconfirmed": "Confirm your email first. Open the link we sent you, or ask for a new one.",
+    "resend": "Send the link again",
+    "resent": "If that email needs confirming, a new link is on its way. Check spam too.",
+    "forgotTitle": "Reset your password",
+    "forgotLede": "Enter the email you signed up with. We'll send a link to choose a new password.",
+    "sendLink": "Send reset link",
+    "sending": "Sending…",
+    "resetSent": "If an account uses that email, a reset link is on its way. It works for an hour. Check spam too.",
+    "back": "Back to sign in",
+    "newTitle": "Choose a new password",
+    "newPassword": "New password",
+    "newHint": "At least 8 characters.",
+    "confirmPassword": "Type it again",
+    "save": "Save password",
+    "saving": "Saving…",
+    "mismatch": "The two passwords don't match.",
+    "tooShort": "Use at least 8 characters.",
+    "failed": "We couldn't change it just now. Ask for a new link and try again."
   },
   "Passport": {
     "eyebrow": "Your verified skills",
@@ -435,7 +459,7 @@
     "passwordHint": "At least 8 characters, with a letter and a number.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
-    "consent": "I agree to the <link>privacy notice</link>. My name, roll number and booking history are shared only with my campus.",
+    "consent": "I agree to the <terms>terms of use</terms> and the <link>privacy notice</link>. My name, roll number and booking history are shared only with my campus.",
     "attention": "Some fields need attention:",
     "submit": "Create account",
     "submitting": "Creating your account…",
@@ -541,5 +565,13 @@
     "unverify": "Unverify",
     "roleReason": "Why? e.g. In-charge of the PCB lab",
     "change": "Change"
+  },
+  "Errors": {
+    "title": "Something went wrong on our side.",
+    "body": "Nothing you did caused this, and your bookings are safe. Try again, and if it keeps happening, send the reference below to your admin office.",
+    "retry": "Try again",
+    "home": "Back to the start",
+    "reference": "Reference",
+    "tag": "Not your fault"
   }
 }

@@ -72,6 +72,11 @@ export default async function ProfilePage() {
           <Link href="/passport" className="inline-block text-accent underline">
             Trust Passport →
           </Link>
+          {!user.isDemo && (
+            <Link href="/account/password" className="ml-4 inline-block text-accent underline">
+              Change password
+            </Link>
+          )}
         </Card>
         <Card className="p-5">
           <h2 className="mb-3 font-bold">Who can see what</h2>

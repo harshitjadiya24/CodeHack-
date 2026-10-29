@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { Enums, Tables } from "@/lib/database.types";
 
 export type Role = Enums<"user_role">;
-export type CurrentUser = Tables<"profiles"> & { email: string; orgStatus: string };
+// isDemo: the person belongs to the fictional demo campus, which is kept apart from real institutes.
+export type CurrentUser = Tables<"profiles"> & { email: string; orgStatus: string; isDemo: boolean };
 
 export const STAFF_ROLES: Role[] = ["manager", "admin"];
 export const OWNER_ROLES: Role[] = ["owner", "manager", "admin"];
@@ -18,10 +19,10 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase.from("profiles").select("*, org:organizations(status)").eq("id", user.id).single();
+  const { data } = await supabase.from("profiles").select("*, org:organizations(status, is_demo)").eq("id", user.id).single();
   if (!data) return null;
   const { org, ...profile } = data;
-  return { ...profile, email: user.email ?? "", orgStatus: org?.status ?? "active" };
+  return { ...profile, email: user.email ?? "", orgStatus: org?.status ?? "active", isDemo: org?.is_demo ?? false };
 });
 
 /** Signed in, and their institute isn't suspended. A suspended institute's people see /suspended instead. */

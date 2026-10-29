@@ -12,18 +12,19 @@ import { loginAsDemo } from "./actions";
 import { Wordmark } from "@/components/wordmark";
 import { GoogleButton } from "@/components/google-button";
 import { createClient } from "@/lib/supabase/server";
+import { emailConfirmation } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("Login"))("submit") };
 }
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; created?: string; deleted?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; created?: string; deleted?: string; check?: string; link?: string; password?: string }> }) {
   const user = await getCurrentUser();
   if (user) redirect(homeFor(user.role));
   // Signed in with Google but never finished sign-up: send them to finish it rather than show sign-in again.
   const { data: auth } = await (await createClient()).auth.getUser();
   if (auth.user) redirect("/signup/complete");
-  const { next, created, deleted } = await searchParams;
+  const { next, created, deleted, check, link, password } = await searchParams;
   const t = await getTranslations("Login");
   const tr = await getTranslations("Shell.roles");
 
@@ -45,6 +46,16 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             {t("created")}
           </p>
         )}
+        {(check || password) && (
+          <p role="status" className="mb-4 rounded-xl bg-ok-soft px-3 py-2.5 text-[15px] text-ok">
+            {check ? t("checkEmail") : t("passwordChanged")}
+          </p>
+        )}
+        {link && (
+          <p role="alert" className="mb-4 rounded-xl bg-paper-2 px-3 py-2.5 text-[15px] text-ink-2">
+            {t("linkExpired")}
+          </p>
+        )}
         {deleted && (
           <p role="status" className="mb-4 rounded-xl bg-paper-2 px-3 py-2.5 text-[15px] text-ink-2">
             {t("deleted")}
@@ -52,7 +63,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         )}
         <Card className="space-y-4 p-6">
           <GoogleButton next={next} />
-          <LoginForm next={next} />
+          <LoginForm next={next} emailLinks={emailConfirmation()} />
         </Card>
         <p className="mt-6 text-[15px] text-subtle">
           {t("new")}{" "}

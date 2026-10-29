@@ -23,12 +23,13 @@ const NEXT_STATUS: Record<InstituteDecision, { from: string[]; to: "active" | "s
   reactivate: { from: ["suspended"], to: "active", action: "org.reactivated", verb: "reactivated" },
 };
 
-/** Everything a reviewer needs to judge an institute, pending ones first. */
-export async function institutesForReview() {
+/** Everything a reviewer needs to judge an institute, pending ones first. The demo's reviewer sees only the demo's institutes. */
+export async function institutesForReview(staff: Pick<CurrentUser, "isDemo">) {
   const db = createAdminClient();
   const { data: orgs } = await db
     .from("organizations")
     .select("id, name, kind, city, state, website, aishe_code, status, created_at, created_by, departments(count), profiles(count), resources(count)")
+    .eq("is_demo", staff.isDemo)
     .order("created_at", { ascending: false });
   const ids = (orgs ?? []).map((o) => o.id);
   const { data: registered } = ids.length
@@ -73,8 +74,8 @@ export async function reviewInstitute(staff: CurrentUser, input: { orgId: string
   if (input.decision === "suspend" && input.orgId === staff.org_id) return { ok: false, error: "You can’t suspend your own institute from here." };
 
   const db = createAdminClient();
-  const { data: org } = await db.from("organizations").select("id, name, status").eq("id", input.orgId).maybeSingle();
-  if (!org) return { ok: false, error: "Institute not found." };
+  const { data: org } = await db.from("organizations").select("id, name, status, is_demo").eq("id", input.orgId).maybeSingle();
+  if (!org || org.is_demo !== staff.isDemo) return { ok: false, error: "Institute not found." };
   if (!rule.from.includes(org.status)) return { ok: false, error: `It is already ${org.status.replace("_", " ")}.` };
 
   await db.from("organizations").update({ status: rule.to }).eq("id", org.id);

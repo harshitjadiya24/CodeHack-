@@ -20,7 +20,7 @@ const STATUS: Record<string, { label: string; tone: Tone }> = {
 export default async function OpsPage() {
   const user = await requireUser();
   if (!(await isPlatformStaff(user.id))) redirect("/forbidden");
-  const institutes = await institutesForReview();
+  const institutes = await institutesForReview(user);
   const waiting = institutes.filter((i) => i.status === "pending" || i.status === "domain_verified");
   const rest = institutes.filter((i) => !waiting.includes(i));
 

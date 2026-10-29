@@ -144,8 +144,8 @@ export async function registerInstitution(input: InstitutionInput): Promise<Inst
 export async function institutionCount() {
   const db = createAdminClient();
   const [{ count: institutes }, { data: states }] = await Promise.all([
-    db.from("organizations").select("id", { count: "exact", head: true }).neq("status", "suspended"),
-    db.from("organizations").select("state").neq("status", "suspended"),
+    db.from("organizations").select("id", { count: "exact", head: true }).neq("status", "suspended").eq("is_demo", false),
+    db.from("organizations").select("state").neq("status", "suspended").eq("is_demo", false),
   ]);
   return { institutes: institutes ?? 0, states: new Set((states ?? []).map((s) => s.state).filter(Boolean)).size };
 }

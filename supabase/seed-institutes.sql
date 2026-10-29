@@ -217,3 +217,6 @@ insert into public.audit_log (org_id, actor_id, action, entity, entity_id, reaso
 select '11111111-0000-0000-0000-000000000015', '33333333-0000-0000-0000-000000000112', 'org.registered', 'organization', '11111111-0000-0000-0000-000000000015',
   'Dr. Bhaskar Bora, Registrar', '{"kind": "engineering", "state": "Assam", "city": "Guwahati", "website": "https://teagarden.demo", "domainMatch": true}'::jsonb
 where not exists (select 1 from public.audit_log where action = 'org.registered' and entity_id = '11111111-0000-0000-0000-000000000015');
+
+-- Fictional: kept apart from real institutes.
+update public.organizations set is_demo = true where email_domain like '%.demo';

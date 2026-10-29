@@ -1,0 +1,10 @@
+<!-- Supabase → Authentication → Emails → "Reset password". Subject: Reset your Baanto password -->
+<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #18181a">
+  <p style="font-size: 22px; font-weight: 800; margin: 0 0 24px">baanto</p>
+  <p style="font-size: 16px; line-height: 1.5">Someone asked to reset the password for this email. If it was you, choose a new one. The link works once, for an hour.</p>
+  <p style="margin: 28px 0">
+    <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery"
+       style="background: #18181a; color: #fff; padding: 12px 22px; border-radius: 999px; text-decoration: none; font-weight: 600">Choose a new password</a>
+  </p>
+  <p style="font-size: 14px; color: #55555a; line-height: 1.5">If it wasn't you, ignore this email. Your password stays the same.</p>
+</div>

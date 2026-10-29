@@ -46,8 +46,8 @@ export async function requestEndorsement(user: CurrentUser, input: { hostOrgId: 
   if (input.hostOrgId === user.org_id) return { ok: false, error: "That’s your own campus. You don’t need an endorsement." };
 
   const db = createAdminClient();
-  const { data: host } = await db.from("organizations").select("id, name, status").eq("id", input.hostOrgId).maybeSingle();
-  if (!host || !["active", "domain_verified"].includes(host.status)) return { ok: false, error: "That campus isn’t open to other institutes yet." };
+  const { data: host } = await db.from("organizations").select("id, name, status, is_demo").eq("id", input.hostOrgId).maybeSingle();
+  if (!host || host.is_demo !== user.isDemo || !["active", "domain_verified"].includes(host.status)) return { ok: false, error: "That campus isn’t open to other institutes yet." };
 
   const { data: open } = await db
     .from("endorsements")

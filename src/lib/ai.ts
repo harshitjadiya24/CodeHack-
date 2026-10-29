@@ -1,5 +1,6 @@
 import "server-only";
 import { GoogleGenAI } from "@google/genai";
+import { allow, clientIp } from "@/lib/rate-limit";
 
 // Gemini (free tier) behind a small advisory interface. Every caller has a rule-based
 // fallback, so the product works with no key, and AI output is never a decision.
@@ -19,6 +20,7 @@ function gemini() {
 /** Asks for JSON and parses it; returns null on any failure so callers fall back. */
 export async function askJson<T>(prompt: string, image?: { data: string; mimeType: string }): Promise<T | null> {
   if (!aiEnabled()) return null;
+  if (!(await allow("ai", await clientIp()))) return null;
   try {
     const parts: ({ text: string } | { inlineData: { data: string; mimeType: string } })[] = [{ text: prompt }];
     if (image) parts.push({ inlineData: image });

@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/login", "/signup", "/institutions", "/verify", "/r", "/privacy", "/opengraph-image", "/icon.svg", "/offline", "/calendar", "/auth"];
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/institutions", "/verify", "/r", "/privacy", "/terms", "/opengraph-image", "/icon.svg", "/offline", "/calendar", "/auth"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -39,5 +39,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)"],
+  // The health check, cron jobs and the Sentry tunnel skip the session lookup entirely.
+  matcher: ["/((?!_next/static|_next/image|api/health|api/cron|monitoring|favicon.ico|manifest.webmanifest|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)"],
 };

@@ -442,9 +442,9 @@ export type Database = {
         ]
       }
       organizations: {
-        Row: { lat: number | null; lng: number | null; aishe_code: string | null; city: string | null; created_at: string; created_by: string | null; email_domain: string | null; id: string; kind: string; name: string; slug: string; state: string | null; status: string; website: string | null }
-        Insert: { lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name: string; slug: string; state?: string | null; status?: string; website?: string | null }
-        Update: { lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name?: string; slug?: string; state?: string | null; status?: string; website?: string | null }
+        Row: { is_demo: boolean; lat: number | null; lng: number | null; aishe_code: string | null; city: string | null; created_at: string; created_by: string | null; email_domain: string | null; id: string; kind: string; name: string; slug: string; state: string | null; status: string; website: string | null }
+        Insert: { is_demo?: boolean; lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name: string; slug: string; state?: string | null; status?: string; website?: string | null }
+        Update: { is_demo?: boolean; lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name?: string; slug?: string; state?: string | null; status?: string; website?: string | null }
         Relationships: []
       }
       platform_staff: {
@@ -683,6 +683,7 @@ export type Database = {
         Args: never
         Returns: { broken_at: number | null; checked: number; ok: boolean }[]
       }
+      same_world: { Args: { a: string; b: string }; Returns: boolean }
       weekly_nudges: { Args: never; Returns: Json }
     }
     Enums: {

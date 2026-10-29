@@ -1,0 +1,10 @@
+<!-- Supabase → Authentication → Emails → "Confirm signup". Subject: Confirm your email for Baanto -->
+<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #18181a">
+  <p style="font-size: 22px; font-weight: 800; margin: 0 0 24px">baanto</p>
+  <p style="font-size: 16px; line-height: 1.5">Confirm this is your email, and your Baanto account is ready. Your admin office still checks your roll number before you can borrow.</p>
+  <p style="margin: 28px 0">
+    <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/passport?welcome=1"
+       style="background: #18181a; color: #fff; padding: 12px 22px; border-radius: 999px; text-decoration: none; font-weight: 600">Confirm my email</a>
+  </p>
+  <p style="font-size: 14px; color: #55555a; line-height: 1.5">If you didn't sign up for Baanto, ignore this email. No account is made without this click.</p>
+</div>

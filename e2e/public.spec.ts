@@ -69,3 +69,34 @@ test("a calendar feed with an unknown token is not found", async ({ request }) =
   const res = await request.get("/calendar/not-a-real-token");
   expect(res.status()).toBe(404);
 });
+
+test("the demo campus is never offered at sign-up", async ({ page }) => {
+  await page.goto("/signup");
+  const campuses = await page.locator("select[name=orgId] option").allTextContents();
+  expect(campuses.length).toBeGreaterThan(1);
+  for (const demo of ["Northfield", "Riverside", "Lakeview", "Tea Garden"]) expect(campuses.join("|")).not.toContain(demo);
+});
+
+test("terms, privacy and the health check are public", async ({ request }) => {
+  expect((await request.get("/terms")).status()).toBe(200);
+  const privacy = await request.get("/privacy");
+  expect(privacy.status()).toBe(200);
+  expect(await privacy.text()).toContain("Grievance officer");
+  const health = await request.get("/api/health");
+  expect(health.status()).toBe(200);
+  expect(await health.json()).toMatchObject({ ok: true, db: "ok" });
+});
+
+test("pages carry security headers", async ({ request }) => {
+  const headers = (await request.get("/")).headers();
+  expect(headers["x-frame-options"]).toBe("DENY");
+  expect(headers["x-content-type-options"]).toBe("nosniff");
+  expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+  expect(headers["strict-transport-security"]).toContain("max-age=");
+  expect(headers["content-security-policy-report-only"]).toContain("frame-ancestors 'none'");
+  expect(headers["x-powered-by"]).toBeUndefined();
+});
+
+test("cron jobs refuse callers without the secret", async ({ request }) => {
+  expect((await request.get("/api/cron/retention")).status()).toBe(401);
+});

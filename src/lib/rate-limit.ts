@@ -3,12 +3,20 @@ import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Limits are per IP (and per email for sign-in), counted in Postgres so every server instance agrees.
-// Generous on purpose: a hackathon hall or a college hostel shares one IP.
+// Generous on purpose: a lecture hall or a college hostel shares one IP.
 const LIMITS = {
   signup: { max: 20, windowSeconds: 3600 },
   institution: { max: 5, windowSeconds: 3600 },
   "login-ip": { max: 60, windowSeconds: 600 },
   "login-email": { max: 10, windowSeconds: 600 },
+  // Password-reset emails cost money and can be used to pester someone's inbox.
+  "reset-ip": { max: 10, windowSeconds: 3600 },
+  "reset-email": { max: 3, windowSeconds: 3600 },
+  "resend-email": { max: 3, windowSeconds: 3600 },
+  // Gemini is paid per call; past this, Discover quietly uses keyword matching.
+  ai: { max: 60, windowSeconds: 86400 },
+  // A whole stock register is one upload; this only stops a loop.
+  import: { max: 30, windowSeconds: 3600 },
 } as const;
 
 export type Bucket = keyof typeof LIMITS;

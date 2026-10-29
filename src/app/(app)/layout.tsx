@@ -92,6 +92,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </header>
+      {user.isDemo && (
+        <div role="note" className="tone-sky border-b border-rule">
+          <p className="mx-auto max-w-[1240px] px-4 py-2 text-[15px] md:px-8">
+            {t.rich("demo", { b: (c) => <b>{c}</b> })}
+          </p>
+        </div>
+      )}
       {!user.verified && ["student", "researcher"].includes(user.role) && (
         <div role="status" className="border-b border-rule bg-board-soft">
           <p className="mx-auto max-w-[1240px] px-4 py-2.5 text-[15px] text-ink md:px-8">

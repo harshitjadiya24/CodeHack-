@@ -153,6 +153,11 @@ export function SignupForm({ campuses, google }: { campuses: Campus[]; google?: 
         <input type="checkbox" name="consent" className="mt-1 size-4 shrink-0 accent-[var(--ink)]" aria-invalid={!!e.consent} />
         <span>
           {t.rich("consent", {
+            terms: (c) => (
+              <Link href="/terms" className="font-semibold text-ink underline underline-offset-4" target="_blank">
+                {c}
+              </Link>
+            ),
             link: (c) => (
               <Link href="/privacy" className="font-semibold text-ink underline underline-offset-4" target="_blank">
                 {c}

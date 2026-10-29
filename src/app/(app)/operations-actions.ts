@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/auth";
+import { allow } from "@/lib/rate-limit";
 import { campusInstant } from "@/lib/domain/time";
 import type { InventoryPreview } from "@/lib/services/operations";
 import { applyNudge, calendarToken, cancelMaintenance, importInventory, saveFeedback, scheduleMaintenance, verifyFromRegister } from "@/lib/services/operations";
@@ -28,6 +29,7 @@ export type InventoryState = SimpleState & { preview?: InventoryPreview; csv?: s
 
 export async function inventoryAction(_prev: InventoryState, formData: FormData): Promise<InventoryState> {
   const user = await requireUser();
+  if (!(await allow("import", user.id))) return { error: "Too many uploads in the last hour. Wait a little and try again." };
   const csv = await fileText(formData);
   if (typeof csv !== "string") return csv;
   const commit = formData.get("commit") === "1";
@@ -44,6 +46,7 @@ export type RegisterState = SimpleState & { match?: RegisterMatch; problems?: { 
 
 export async function registerAction(_prev: RegisterState, formData: FormData): Promise<RegisterState> {
   const user = await requireUser();
+  if (!(await allow("import", user.id))) return { error: "Too many uploads in the last hour. Wait a little and try again." };
   const csv = await fileText(formData);
   if (typeof csv !== "string") return csv;
   const commit = formData.get("commit") === "1";

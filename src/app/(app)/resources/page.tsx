@@ -42,6 +42,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
       .from("organizations")
       .select("id")
       .in("status", ["active", "domain_verified"])
+      .eq("is_demo", user.isDemo)
       .eq(scope === "city" ? "city" : "state", (scope === "city" ? home.city : home.state) ?? "");
     orgIds = [...new Set([user.org_id, ...(nearby ?? []).map((o) => o.id)])];
   }

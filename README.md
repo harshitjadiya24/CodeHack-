@@ -133,6 +133,12 @@ npm run dev                  # http://localhost:3000
 | `GEMINI_API_KEY` | no | Turns on AI matching in Discover |
 | `NEXT_PUBLIC_DEMO_MODE` | no | `1` lets check-in happen at any time, for demos |
 | `NEXT_PUBLIC_GOOGLE_AUTH` | no | `1` shows **Continue with Google** on sign-in and sign-up |
+| `NEXT_PUBLIC_SITE_URL` | prod | The public address, for email links, QR codes and calendar feeds |
+| `EMAIL_CONFIRMATION` | prod | `1` once Supabase sends mail through your domain: new accounts confirm their email, and **Forgot password** appears |
+| `CRON_SECRET` | prod | Any long random string; Vercel sends it to the daily photo-retention job |
+| `NEXT_PUBLIC_GRIEVANCE_NAME`, `NEXT_PUBLIC_GRIEVANCE_EMAIL` | prod | The grievance officer shown on the privacy page (DPDP Act) |
+| `NEXT_PUBLIC_SENTRY_DSN` | no | Turns on error reports. Names, emails, roll numbers, cookies and form data are stripped first |
+| `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | no | Upload source maps on Vercel, so error reports show real line numbers |
 
 **Google sign-in:** in Google Cloud Console, create an OAuth client (Web application) with the redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`. In Supabase, open Authentication → Sign In / Providers → Google, paste the client ID and secret, and add `http://localhost:3000/auth/callback` (and your deployed URL's `/auth/callback`) to Authentication → URL Configuration → Redirect URLs. Then set `NEXT_PUBLIC_GOOGLE_AUTH=1`.
 
@@ -153,11 +159,28 @@ npm run e2e
 
 CI runs them too, once the repository has the three Supabase secrets.
 
+## Going live
+
+The demo campus and real colleges share one database. Every institute has an `is_demo` flag: demo people only ever see demo institutes and real people only real ones, nobody can sign up into the demo, and the database refuses an endorsement across the two. Demo sessions show a banner saying so, and demo accounts can't change the shared password.
+
+**Checklist**
+
+1. **Database:** apply every migration in `supabase/migrations`. The last one adds indexes, faster RLS and a nightly clean-up (notifications after six months, rate-limit counters after two days).
+2. **Vercel:** import the repo, set the variables above (never `NEXT_PUBLIC_DEMO_MODE` in production), and deploy. `vercel.json` pins the Mumbai region, next to the Supabase project, and schedules `/api/cron/retention` daily to delete handover photos after a year.
+3. **Supabase → Authentication → URL Configuration:** set the Site URL to your address, and add `https://<your address>/auth/confirm` and `/auth/callback` to the redirect URLs.
+4. **Email (needs a domain):** verify the domain in Resend (SPF and DKIM records), then in Supabase → Authentication → Emails → SMTP use host `smtp.resend.com`, port `465`, user `resend`, and a Resend API key as the password, sending from `no-reply@<your domain>`. Paste `supabase/templates/confirm.html` and `recovery.html` into the "Confirm signup" and "Reset password" templates, turn on **Confirm email**, and set `EMAIL_CONFIRMATION=1`.
+5. **Supabase → Authentication → Passwords:** turn on leaked-password protection (Pro plan).
+6. **Baanto team:** add the people who review new institutes with `insert into platform_staff (user_id) values ('<their user id>');`. The demo IQAC account only reviews demo institutes.
+7. **Monitoring:** point an uptime monitor (UptimeRobot is free) at `/api/health`. It returns 200 when the database answers, 503 when it doesn't.
+8. **Security headers** are on for every page. The Content Security Policy starts in report-only mode; once a week of real use shows no violations in the browser console or Sentry, rename the header to `Content-Security-Policy` in `next.config.ts`.
+9. **Backups:** the free Supabase plan keeps daily backups for 7 days. Move to Pro (point-in-time recovery) before a college depends on it.
+
 ## Security and privacy
 
 - **Abuse limits:** sign-up, sign-in and institute registration are rate-limited per IP (and per email for sign-in). The counts are kept in Postgres, so they hold across server instances.
 - **New institutes:** start pending and are hidden from other campuses until checked.
-- **Students:** can't borrow until the admin office has checked their roll number.
+- **Students:** can't borrow until the admin office has checked their roll number. With `EMAIL_CONFIRMATION=1` they also confirm their email before they can sign in.
+- **Rate limits** also cover password-reset and confirmation emails, spreadsheet imports, and AI matching (60 a day per IP, then keyword matching takes over).
 - **Public pages** (the landing page and the share image) show counts and initials only, never names.
 - **Your data (DPDP Act 2023):** people can download everything Baanto holds about them from their profile, and delete their account there. Deletion removes their name, roll number, certificates, notifications and pending requests, and stops sign-in. Past bookings and the audit chain stay without their name, because the institution must keep them. It's refused, with the reason, while they still have open bookings or incidents, own resources, or are the institute's only admin.
 - **Offline copy:** the Trust Passport saved on a phone is wiped on sign-out.

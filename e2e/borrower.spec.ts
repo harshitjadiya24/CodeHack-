@@ -54,3 +54,12 @@ test("upcoming bookings download as a calendar file", async ({ page }) => {
   expect(ics.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
   expect(ics.trimEnd().endsWith("END:VCALENDAR")).toBe(true);
 });
+
+test("demo accounts are told they're in the demo, and can't change the shared password", async ({ page }) => {
+  await signInAs(page, /Meera/);
+  await expect(page.getByRole("note")).toContainText("You’re in the demo.");
+  await page.goto("/profile");
+  await expect(page.getByRole("link", { name: "Change password" })).toHaveCount(0);
+  await page.goto("/account/password");
+  await expect(page).toHaveURL(/\/profile/);
+});

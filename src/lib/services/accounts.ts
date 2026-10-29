@@ -1,9 +1,10 @@
 import "server-only";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { audit, notify } from "@/lib/services/records";
 
-// Self-service sign-up. Anyone can create a borrower account and sign in straight away,
+// Self-service sign-up. Anyone can create a borrower account (after confirming their email, when that is on),
 // but nobody can borrow until the admin office has checked the roll number and verified them.
 // Staff roles are assigned by the admin office, never chosen.
 
@@ -29,7 +30,7 @@ export const signupSchema = z.object({
 
 export type SignupInput = z.infer<typeof signupSchema>;
 // `code` is the message key under Signup.errors; `error` is the same in English.
-export type SignupResult = { ok: true; email: string } | { ok: false; error: string; code: string; field?: keyof SignupInput };
+export type SignupResult = { ok: true; email: string; confirm?: boolean } | { ok: false; error: string; code: string; field?: keyof SignupInput };
 
 export async function listCampuses() {
   const db = createAdminClient();
@@ -37,6 +38,8 @@ export async function listCampuses() {
     .from("organizations")
     .select("id, name, city, state, status, departments(id, name, code)")
     .neq("status", "suspended")
+    // The demo campus has its own one-click accounts; nobody signs up into it.
+    .eq("is_demo", false)
     .order("name");
   return (data ?? []).map((o) => ({
     id: o.id,
@@ -48,21 +51,32 @@ export async function listCampuses() {
   }));
 }
 
-export async function registerAccount(input: SignupInput): Promise<SignupResult> {
+/** `confirmTo`: when set, Supabase emails a confirmation link and the account can't sign in until it's opened. */
+export async function registerAccount(input: SignupInput, confirmTo?: string): Promise<SignupResult> {
   const db = createAdminClient();
 
-  const { data: dept } = await db.from("departments").select("id, org_id").eq("id", input.deptId).maybeSingle();
-  if (!dept || dept.org_id !== input.orgId) return { ok: false, error: "That department isn’t part of the campus you chose.", code: "deptMismatch", field: "deptId" };
+  const { data: dept } = await db.from("departments").select("id, org_id, org:organizations(is_demo)").eq("id", input.deptId).maybeSingle();
+  // The demo campus never takes sign-ups, even from a hand-made request.
+  if (!dept || dept.org_id !== input.orgId || dept.org?.is_demo) return { ok: false, error: "That department isn’t part of the campus you chose.", code: "deptMismatch", field: "deptId" };
 
   const { data: taken } = await db.from("profiles").select("id").eq("org_id", input.orgId).eq("roll_no", input.rollNo).maybeSingle();
   if (taken) return { ok: false, error: "An account with this roll number already exists. Sign in, or ask the admin office.", code: "rollTaken", field: "rollNo" };
 
-  const { data: created, error } = await db.auth.admin.createUser({
-    email: input.email,
-    password: input.password,
-    email_confirm: true,
-    user_metadata: { full_name: input.fullName },
-  });
+  const { data: created, error } = confirmTo
+    ? await (await createClient()).auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: { emailRedirectTo: confirmTo, data: { full_name: input.fullName } },
+      })
+    : await db.auth.admin.createUser({
+        email: input.email,
+        password: input.password,
+        email_confirm: true,
+        user_metadata: { full_name: input.fullName },
+      });
+  // With confirmation on, Supabase answers a taken email with a stand-in user that has no identities.
+  if (confirmTo && created.user && created.user.identities?.length === 0)
+    return { ok: false, error: "An account with this email already exists. Sign in instead.", code: "emailTaken", field: "email" };
   if (error || !created.user) {
     const exists = /already|registered|exists/i.test(error?.message ?? "");
     return exists
@@ -87,7 +101,7 @@ export async function registerAccount(input: SignupInput): Promise<SignupResult>
   }
 
   await announce(db, userId, input);
-  return { ok: true, email: input.email };
+  return { ok: true, email: input.email, confirm: !!confirmTo };
 }
 
 type Db = ReturnType<typeof createAdminClient>;
@@ -118,8 +132,9 @@ export async function completeProfile(userId: string, email: string, input: Prof
   const db = createAdminClient();
   const { data: existing } = await db.from("profiles").select("id").eq("id", userId).maybeSingle();
   if (existing) return { ok: true, email };
-  const { data: dept } = await db.from("departments").select("id, org_id").eq("id", input.deptId).maybeSingle();
-  if (!dept || dept.org_id !== input.orgId) return { ok: false, error: "That department isn’t part of the campus you chose.", code: "deptMismatch", field: "deptId" };
+  const { data: dept } = await db.from("departments").select("id, org_id, org:organizations(is_demo)").eq("id", input.deptId).maybeSingle();
+  // The demo campus never takes sign-ups, even from a hand-made request.
+  if (!dept || dept.org_id !== input.orgId || dept.org?.is_demo) return { ok: false, error: "That department isn’t part of the campus you chose.", code: "deptMismatch", field: "deptId" };
   const { data: taken } = await db.from("profiles").select("id").eq("org_id", input.orgId).eq("roll_no", input.rollNo).maybeSingle();
   if (taken) return { ok: false, error: "An account with this roll number already exists. Sign in, or ask the admin office.", code: "rollTaken", field: "rollNo" };
   const { error } = await db.from("profiles").insert({

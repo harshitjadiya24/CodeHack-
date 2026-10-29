@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { allow, clientIp } from "@/lib/rate-limit";
+import { emailConfirmation, siteOrigin } from "@/lib/site";
 import { completeProfile, profileSchema, registerAccount, signupSchema, type SignupInput } from "@/lib/services/accounts";
 
 export type SignupState = {
@@ -34,8 +35,9 @@ export async function signup(_prev: SignupState, formData: FormData): Promise<Si
 
   if (!(await allow("signup", await clientIp()))) return { error: t("rateLimited"), values };
 
-  const result = await registerAccount(parsed.data);
+  const result = await registerAccount(parsed.data, emailConfirmation() ? `${await siteOrigin()}/auth/confirm?next=/passport?welcome=1` : undefined);
   if (!result.ok) return result.field ? { fieldErrors: { [result.field]: t(result.code) }, values } : { error: t(result.code), values };
+  if (result.confirm) redirect("/login?check=1");
   // Sign the new account straight in.
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email: result.email, password: parsed.data.password });
