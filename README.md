@@ -101,11 +101,12 @@ Baanto installs as an app ("Add to Home screen"). Once you've opened your Trust 
   - waitlist order
   - calendar files (`.ics`)
   - academic years on the campus clock
+  - no-shows, deposit settlement and usage patterns
 - **Maps:** Leaflet with OpenStreetMap tiles, and geocoding from Nominatim. All free, no API keys.
 - **Languages:** next-intl, with the language kept in a cookie, so URLs are the same in English and Hindi. The rules explain themselves with message codes, so the same reason can be shown in either language.
 - **Installable app:** a web manifest and a hand-written service worker. No extra libraries.
-- **Background jobs** run inside Postgres with `pg_cron` every 10 minutes: overdue returns, reminders an hour before a slot, and closing stale waitlist entries. A weekly job sends owners their idle-equipment summary.
-- **AI (optional):** Gemini matches a free-text task ("I need to test a 12V motor driver") to resources. Without a key it falls back to keyword matching, and AI output is never a decision.
+- **Background jobs** run inside Postgres with `pg_cron` every 10 minutes: overdue returns, reminders an hour before a slot, and closing stale waitlist entries. A weekly job sends owners their idle-equipment summary, and a nightly one forgets old notifications and rate-limit counters.
+- **AI (optional):** Gemini matches a free-text task ("I need to test a 12V motor driver") to resources, drafts a listing from a photo and summarises incidents. It uses `gemini-3.5-flash` and tries `gemini-3.5-flash-lite` when that model is busy. Without a key, or if both fail, Discover falls back to keyword matching. AI output is never a decision.
 - **Design:** "Common Room". Mona Sans plus four pastel tags with fixed meaning: sage means cleared, butter means popular, rose means a problem, sky means information. Light and dark themes, reduced motion respected, built mobile-first.
 - **Motion:** Motion (Framer), GSAP SplitText, and Lenis smooth scroll.
 
@@ -137,7 +138,8 @@ npm run dev                  # http://localhost:3000
 | `NEXT_PUBLIC_SUPABASE_URL` | yes | Your Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | yes | Publishable (anon) key |
 | `SUPABASE_SECRET_KEY` | yes | Secret key, server only |
-| `GEMINI_API_KEY` | no | Turns on AI matching in Discover |
+| `GEMINI_API_KEY` | no | Turns on AI matching in Discover, listing drafts and incident summaries |
+| `GEMINI_MODEL` | no | Overrides the main Gemini model (default `gemini-3.5-flash`) |
 | `NEXT_PUBLIC_DEMO_MODE` | no | `1` lets check-in happen at any time, for demos |
 | `NEXT_PUBLIC_GOOGLE_AUTH` | no | `1` shows **Continue with Google** on sign-in and sign-up |
 | `NEXT_PUBLIC_SITE_URL` | prod | The public address, for email links, QR codes and calendar feeds |
@@ -163,6 +165,7 @@ npm run typecheck && npm run lint && npm test && npm run build
 NEXT_DIST_DIR=.next-prod npx next build && NEXT_DIST_DIR=.next-prod npx next start -p 3100 &
 npm run e2e
 E2E_JOURNEY=1 npm run e2e -- e2e/journey.spec.ts   # the whole lifecycle; writes bookings to the demo campus
+E2E_BASE_URL=https://baanto-eight.vercel.app npm run e2e   # the same tests against a deployment
 ```
 
 On the demo campus, check-in opens at any time so the whole journey can be tried whenever you test; real institutes keep the real window (30 minutes before the slot).
@@ -175,7 +178,7 @@ The demo campus and real colleges share one database. Every institute has an `is
 
 **Checklist**
 
-1. **Database:** apply every migration in `supabase/migrations`. The last one adds indexes, faster RLS and a nightly clean-up (notifications after six months, rate-limit counters after two days).
+1. **Database:** apply every migration in `supabase/migrations`, in order. They include the indexes and faster RLS policies for real traffic, and a nightly clean-up at 03:00 IST (notifications after six months, rate-limit counters after two days).
 2. **Vercel:** import the repo, set the variables above (never `NEXT_PUBLIC_DEMO_MODE` in production), and deploy. `vercel.json` pins the Mumbai region, next to the Supabase project, and schedules `/api/cron/retention` daily to delete handover photos after a year.
 3. **Supabase → Authentication → URL Configuration:** set the Site URL to your address, and add `https://<your address>/auth/confirm` and `/auth/callback` to the redirect URLs.
 4. **Email (needs a domain):** verify the domain in Resend (SPF and DKIM records), then in Supabase → Authentication → Emails → SMTP use host `smtp.resend.com`, port `465`, user `resend`, and a Resend API key as the password, sending from `no-reply@<your domain>`. Paste `supabase/templates/confirm.html` and `recovery.html` into the "Confirm signup" and "Reset password" templates, turn on **Confirm email**, and set `EMAIL_CONFIRMATION=1`.
@@ -195,6 +198,15 @@ The demo campus and real colleges share one database. Every institute has an `is
 - **Your data (DPDP Act 2023):** people can download everything Baanto holds about them from their profile, and delete their account there. Deletion removes their name, roll number, certificates, notifications and pending requests, and stops sign-in. Past bookings and the audit chain stay without their name, because the institution must keep them. It's refused, with the reason, while they still have open bookings or incidents, own resources, or are the institute's only admin.
 - **Offline copy:** the Trust Passport saved on a phone is wiped on sign-out.
 - **The audit log** can only be appended to, and anyone can check that it hasn't been tampered with.
+
+## Team
+
+| Name | Role | Contribution |
+|---|---|---|
+| Harshit Jadiya | Team leader | Research and backend |
+| Dhairya Singh | Team member | Frontend and UI |
+| Sharad Vyas | Team member | Database and rules |
+| Anmol Shrivastava | Team member | Testing and docs |
 
 ## What's next
 
