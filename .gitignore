@@ -46,3 +46,8 @@ next-env.d.ts
 # Playwright
 /test-results/
 /playwright-report/
+
+# AI agent skills (local tools, not part of the app)
+/.claude/
+/.agents/
+skills-lock.json
