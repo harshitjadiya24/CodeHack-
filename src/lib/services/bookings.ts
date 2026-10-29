@@ -7,6 +7,7 @@ import type { EligibilityCheck } from "@/lib/domain/eligibility";
 import { commitFor, newSeed, runDraw } from "@/lib/domain/draw";
 import { receipt, type DecisionReceipt } from "@/lib/domain/receipt";
 import { promotionOrder, renumber, type Queued } from "@/lib/domain/waitlist";
+import { NO_SHOW_GRACE_MINUTES, NO_SHOW_LOOKBACK_HOURS, noShows, worthOffering } from "@/lib/domain/noshow";
 import { formatCampus } from "@/lib/domain/time";
 import type { Enums, Json, Tables } from "@/lib/database.types";
 import { bookingHistory, eligibilityFor, loadResourceContext } from "./context";
@@ -553,4 +554,63 @@ async function closeQueueGaps(db: Db, resource: Tables<"resources">, start: stri
       link: `/bookings/${b.id}`,
     });
   }
+}
+
+/**
+ * Frees approved slots nobody turned up for, 15 minutes after the start, and offers the rest of the slot to the
+ * waitlist under the usual checks. Nothing is penalised automatically: a no-show is logged as an incident, and a
+ * manager decides whether it earns a strike. Safe to run often and from several places at once.
+ */
+export async function releaseNoShows(now = new Date()) {
+  const db = createAdminClient();
+  const { data: held } = await db
+    .from("bookings")
+    .select("*, resource:resources(*), handovers(phase)")
+    .eq("status", "approved")
+    .lte("starts_at", new Date(now.getTime() - NO_SHOW_GRACE_MINUTES * 60_000).toISOString())
+    .gt("starts_at", new Date(now.getTime() - NO_SHOW_LOOKBACK_HOURS * 3_600_000).toISOString())
+    .limit(50);
+  const rows = (held ?? []).map((b) => ({ ...b, startsAt: b.starts_at, endsAt: b.ends_at, checkedIn: b.handovers.some((h) => h.phase === "check_in") }));
+
+  let released = 0;
+  for (const b of noShows(rows, now)) {
+    const { error } = await transition(db, {
+      bookingId: b.id,
+      to: "cancelled",
+      actorId: null,
+      reason: `No-show: not checked in within ${NO_SHOW_GRACE_MINUTES} minutes of the start`,
+      receipt: receipt({
+        outcome: "cancelled",
+        headline: "Released: nobody checked in",
+        reasons: [
+          `Check-in hadn't started ${NO_SHOW_GRACE_MINUTES} minutes after the slot began, so it was offered to the next person.`,
+          "No strike is added automatically. A manager looks at no-shows and decides, and you can explain on the incident.",
+        ],
+        decidedBy: { kind: "system" },
+      }),
+      notify: { title: `Released: ${b.resource.name}`, body: `You didn't check in by ${formatCampus(new Date(new Date(b.starts_at).getTime() + NO_SHOW_GRACE_MINUTES * 60_000))}, so the slot went to the next person.` },
+    });
+    // Someone checked in or cancelled a moment ago: nothing to release.
+    if (error) continue;
+    released++;
+
+    await db.from("incidents").insert({
+      booking_id: b.id,
+      resource_id: b.resource_id,
+      reported_by: null,
+      type: "delay",
+      severity: "low",
+      description: `No-show: the slot was approved but nobody checked in within ${NO_SHOW_GRACE_MINUTES} minutes of the start.`,
+      proposed_action: "A reminder is usually enough. Consider a strike only if it keeps happening.",
+    });
+    await notify(db, {
+      userId: b.resource.owner_id,
+      kind: "booking.no_show",
+      title: `No-show, slot released: ${b.resource.name}`,
+      body: formatCampus(b.starts_at),
+      link: `/bookings/${b.id}`,
+    });
+    if (worthOffering(b, now)) await promoteWaitlist(db, b.resource, b.starts_at, b.ends_at);
+  }
+  return { released };
 }

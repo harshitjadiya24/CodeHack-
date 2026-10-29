@@ -8,7 +8,7 @@ export function register() {
     for (const w of warnings) console.warn(`[baanto] ${w}`);
     if (errors.length) throw new Error(`Baanto can't start:\n- ${errors.join("\n- ")}`);
   }
-  if (process.env.NEXT_RUNTIME === "nodejs" || process.env.NEXT_RUNTIME === "edge") Sentry.init(sentryOptions);
+  if (sentryOptions.enabled && (process.env.NEXT_RUNTIME === "nodejs" || process.env.NEXT_RUNTIME === "edge")) Sentry.init(sentryOptions);
 }
 
 export const onRequestError = Sentry.captureRequestError;

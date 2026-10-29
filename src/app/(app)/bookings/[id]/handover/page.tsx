@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { Card } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { DEMO_MODE, checkInWindow } from "@/lib/services/handovers";
+import { checkInWindow, relaxedCheckIn } from "@/lib/services/handovers";
 import { formatCampus } from "@/lib/domain/time";
 import { HandoverForm } from "./handover-form";
 
@@ -32,7 +32,8 @@ export default async function HandoverPage({ params, searchParams }: { params: P
       ? await supabase.from("handovers").select("checklist").eq("booking_id", id).eq("phase", "check_in").maybeSingle()
       : { data: null };
 
-  const window = checkInWindow(b.starts_at, b.ends_at);
+  const relaxed = relaxedCheckIn(user);
+  const window = checkInWindow(b.starts_at, b.ends_at, relaxed);
   const realWindowOpen = new Date() >= window.opens;
 
   return (
@@ -46,9 +47,9 @@ export default async function HandoverPage({ params, searchParams }: { params: P
         {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })}
       </p>
 
-      {phase === "check_in" && DEMO_MODE && !realWindowOpen && (
+      {phase === "check_in" && relaxed && !realWindowOpen && (
         <p role="note" className="mb-4 rounded-xl border border-saffron/40 bg-saffron-soft p-3 text-sm text-saffron">
-          Demo mode: check-in normally opens 30 minutes before the slot ({formatCampus(window.opens)}). It is unlocked early so judges can try the full flow, and the audit log records that.
+          Demo campus: check-in normally opens 30 minutes before the slot ({formatCampus(window.opens)}). It is unlocked early here so you can try the full journey, and the audit log records that. Real institutes always use the real window.
         </p>
       )}
       {phase === "check_in" && b.resource.requires_supervision && (

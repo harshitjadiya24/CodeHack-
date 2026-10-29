@@ -159,6 +159,16 @@ export type Database = {
           { foreignKeyName: "calendar_feeds_user_id_fkey"; columns: ["user_id"]; isOneToOne: true; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ]
       }
+      deposits: {
+        Row: { amount_inr: number; booking_id: string; collected_at: string; collected_by: string; method: string; reference: string; settle_reason: string | null; settled_at: string | null; settled_by: string | null; status: string; withheld_inr: number }
+        Insert: { amount_inr: number; booking_id: string; collected_at?: string; collected_by: string; method: string; reference?: string; settle_reason?: string | null; settled_at?: string | null; settled_by?: string | null; status?: string; withheld_inr?: number }
+        Update: { amount_inr?: number; booking_id?: string; collected_at?: string; collected_by?: string; method?: string; reference?: string; settle_reason?: string | null; settled_at?: string | null; settled_by?: string | null; status?: string; withheld_inr?: number }
+        Relationships: [
+          { foreignKeyName: "deposits_booking_id_fkey"; columns: ["booking_id"]; isOneToOne: true; referencedRelation: "bookings"; referencedColumns: ["id"] },
+          { foreignKeyName: "deposits_collected_by_fkey"; columns: ["collected_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "deposits_settled_by_fkey"; columns: ["settled_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ]
+      }
       departments: {
         Row: { code: string; id: string; name: string; org_id: string }
         Insert: { code: string; id?: string; name: string; org_id: string }

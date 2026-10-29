@@ -12,6 +12,8 @@ import { AuditTimeline } from "@/components/audit-timeline";
 import { CancelForm, DecisionForm } from "@/components/action-forms";
 import { ConfirmCheckInForm, ReportIncidentForm, VerifyReturnForm } from "@/components/handover-forms";
 import { ConditionRecord } from "@/components/condition-record";
+import { CollectDepositForm, SettleDepositForm } from "@/components/deposit-forms";
+import { COLLECTABLE, SETTLEABLE } from "@/lib/domain/deposit";
 import { DisputeForm, ExtendForm } from "@/components/booking-extras";
 import { Ticket } from "@/components/common-room/ticket";
 import { campusParts } from "@/lib/domain/time";
@@ -38,13 +40,13 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   // RLS decides visibility: requester, resource owner, attendants and staff of that campus.
   const { data: b } = await supabase
     .from("bookings")
-    .select("*, resource:resources(id, name, category, location, owner_id, requires_supervision, photo_slots), requester:profiles!bookings_user_id_fkey(full_name, roll_no)")
+    .select("*, resource:resources(id, name, category, location, owner_id, org_id, requires_supervision, photo_slots, deposit_inr), requester:profiles!bookings_user_id_fkey(full_name, roll_no)")
     .eq("id", id)
     .maybeSingle();
   if (!b?.resource) notFound();
 
   // The RLS read above already proved this user may see the booking, so signing photo URLs is safe.
-  const [{ data: timeline }, { data: incidents }, handovers, { data: feedback }] = await Promise.all([
+  const [{ data: timeline }, { data: incidents }, handovers, { data: feedback }, { data: deposit }] = await Promise.all([
     supabase
       .from("audit_log")
       .select("id, action, reason, created_at, hash, actor:profiles!audit_log_actor_id_fkey(full_name)")
@@ -53,9 +55,20 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
     supabase.from("incidents").select("id, type, severity, status, description, decision, borrower_response").eq("booking_id", id).order("created_at"),
     signedHandoverPhotos(id),
     supabase.from("booking_feedback").select("rating").eq("booking_id", id).maybeSingle(),
+    supabase
+      .from("deposits")
+      .select("*, collector:profiles!deposits_collected_by_fkey(full_name), settler:profiles!deposits_settled_by_fkey(full_name)")
+      .eq("booking_id", id)
+      .maybeSingle(),
   ]);
 
-  const [t, statusLabel, tf, locale] = await Promise.all([getTranslations("Booking"), getTranslations("Status"), getTranslations("Feedback"), getLocale().then(intlLocale)]);
+  const [t, statusLabel, tf, td, locale] = await Promise.all([
+    getTranslations("Booking"),
+    getTranslations("Status"),
+    getTranslations("Feedback"),
+    getTranslations("Deposit"),
+    getLocale().then(intlLocale),
+  ]);
   const fmt = (d: string, opts: Intl.DateTimeFormatOptions = {}) => formatCampus(d, opts, locale);
   const isRequester = b.user_id === user.id;
   const canManage = STAFF_ROLES.includes(user.role) || (OWNER_ROLES.includes(user.role) && b.resource.owner_id === user.id);
@@ -63,6 +76,10 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   const returned = handovers.find((h) => h.phase === "return");
   const awaitingAttendant = b.status === "approved" && b.resource.requires_supervision && !!checkIn && !checkIn.attendant_confirmed_at;
   const isAttendant = ["attendant", ...STAFF_ROLES].includes(user.role);
+  // Deposits: counter staff take and return them; keeping any part is the owner's or a manager's call.
+  const sameCampus = user.org_id === b.resource.org_id;
+  const atCounter = sameCampus && (b.resource.owner_id === user.id || isAttendant);
+  const rupees = (n: number) => `₹${n.toLocaleString("en-IN")}`;
   const status = { ...BOOKING_STATUS[b.status], label: statusLabel(b.status) };
   const receipt = b.decision_receipt as DecisionReceipt | null;
   const startsSoon = new Date(b.starts_at).getTime() - Date.now() < 24 * 3_600_000;
@@ -196,6 +213,43 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
             {t("printable")}
           </ButtonLink>
         </Card>
+
+        {b.resource.deposit_inr > 0 && (isRequester || atCounter || canManage) && (
+          <Card className="space-y-3 p-5 text-sm">
+            <h2 className="font-bold">{td("title")}</h2>
+            <p className="text-ink-2">{td("required", { amount: rupees(b.resource.deposit_inr) })}</p>
+            {!deposit && <p className="text-subtle">{td("notYet")}</p>}
+            {deposit && (
+              <p>
+                {td("collected", {
+                  amount: rupees(deposit.amount_inr),
+                  name: deposit.collector?.full_name ?? "—",
+                  date: fmt(deposit.collected_at),
+                  method: td(deposit.method as "cash"),
+                })}
+              </p>
+            )}
+            {deposit?.status === "refunded" && <p className="text-ok">{td("refunded", { name: deposit.settler?.full_name ?? "—", date: fmt(deposit.settled_at!) })}</p>}
+            {deposit?.status === "withheld" && (
+              <>
+                <p className="text-danger">
+                  {td("withheld", {
+                    kept: rupees(deposit.withheld_inr),
+                    back: rupees(deposit.amount_inr - deposit.withheld_inr),
+                    name: deposit.settler?.full_name ?? "—",
+                    date: fmt(deposit.settled_at!),
+                  })}
+                </p>
+                <p className="text-ink-2">{td("why", { reason: deposit.settle_reason ?? "" })}</p>
+                {isRequester && <p className="text-subtle">{td("contest")}</p>}
+              </>
+            )}
+            {!deposit && atCounter && COLLECTABLE.includes(b.status) && <CollectDepositForm bookingId={b.id} amount={rupees(b.resource.deposit_inr)} />}
+            {deposit?.status === "held" && atCounter && SETTLEABLE.includes(b.status) && (
+              <SettleDepositForm bookingId={b.id} max={deposit.amount_inr} canKeep={sameCampus && canManage} />
+            )}
+          </Card>
+        )}
 
         <Card className="p-5">
           <h2 className="mb-4 font-bold">{t("history")}</h2>

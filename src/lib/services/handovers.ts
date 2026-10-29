@@ -30,12 +30,17 @@ async function apply(db: Db, bookingId: string, to: Enums<"booking_status">, act
   });
 }
 
-/** Opens the check-in window 30 minutes before the slot (relaxed in demo mode). */
-export function checkInWindow(startsAt: string, endsAt: string, now = new Date()) {
+/**
+ * Opens the check-in window 30 minutes before the slot. `relaxed` (the demo campus, or DEMO_MODE) opens it at any
+ * time, so a judge can walk the whole journey whenever they test; real institutes always get the real window.
+ */
+export function checkInWindow(startsAt: string, endsAt: string, relaxed = false, now = new Date()) {
   const opens = new Date(new Date(startsAt).getTime() - CHECK_IN_EARLY_MIN * 60_000);
   const closes = new Date(endsAt);
-  return { open: DEMO_MODE || (now >= opens && now < closes), opens };
+  return { open: relaxed || (now >= opens && now < closes), opens };
 }
+
+export const relaxedCheckIn = (user: Pick<CurrentUser, "isDemo">) => DEMO_MODE || user.isDemo;
 
 async function uploadPhotos(db: Db, bookingId: string, phase: Phase, photos: File[]) {
   const paths: string[] = [];
@@ -64,7 +69,7 @@ export async function recordHandover(
 
   if (input.phase === "check_in") {
     if (b.status !== "approved") return { ok: false, error: "Only approved bookings can be checked in." };
-    const window = checkInWindow(b.starts_at, b.ends_at);
+    const window = checkInWindow(b.starts_at, b.ends_at, relaxedCheckIn(user));
     if (!window.open) return { ok: false, error: `Check-in opens at ${formatCampus(window.opens)}.` };
   } else if (!["checked_in", "overdue"].includes(b.status)) {
     return { ok: false, error: "This booking is not checked in." };
@@ -110,7 +115,7 @@ export async function recordHandover(
     entity: "booking",
     entityId: b.id,
     reason: input.notes || (failed.length ? `Issues: ${failed.join(", ")}` : "All checklist items OK"),
-    payload: asJson({ handover_id: handover.id, photos: photoPaths.length, failed_items: failed, demo_mode: DEMO_MODE }),
+    payload: asJson({ handover_id: handover.id, photos: photoPaths.length, failed_items: failed, demo_mode: relaxedCheckIn(user) }),
   });
 
   if (input.phase === "check_in") {

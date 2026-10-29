@@ -63,3 +63,14 @@ test("demo accounts are told they're in the demo, and can't change the shared pa
   await page.goto("/account/password");
   await expect(page).toHaveURL(/\/profile/);
 });
+
+// Guards a Next.js 15 pitfall: with app/(app)/loading.tsx present, server actions on pages with an async
+// generateMetadata never delivered their result, so buttons stayed on "Saving…". Keep that file out.
+test("server actions finish on pages with translated titles", async ({ page }) => {
+  await signInAs(page, /Meera/);
+  await openResource(page, /Rigol/);
+  await page.locator("header").getByRole("button", { name: /View in Hindi/ }).click();
+  await expect(page.getByRole("navigation", { name: "Main" })).toContainText("खोजें");
+  await page.locator("header").getByRole("button", { name: /View in English/ }).click();
+  await expect(page.getByRole("navigation", { name: "Main" })).toContainText("Discover");
+});

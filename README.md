@@ -62,6 +62,8 @@ Tap **हिन्दी** in the header or on the sign-in page. The app shell, 
 ## Bookings that look after themselves
 
 - **Waitlist:** when someone cancels a held slot, the next person in line is moved in automatically, but only after the same eligibility and fair-use checks as a new request. Anyone passed over is told why. Everyone behind moves up a place and gets a notification. Entries whose slot has passed are closed by the database's own sweep job.
+- **No-shows free the slot:** if nobody has started check-in 15 minutes after an approved slot begins, the slot is released and offered down the waitlist under the usual checks. Nothing is penalised automatically: the no-show becomes an incident, and a manager decides whether it earns a strike.
+- **Security deposits on the record:** the counter records each deposit taken (cash, UPI or card, with a reference). After the return, staff hand it back in full, or the owner or a manager keeps part of it with a written reason the borrower sees and can contest. Every step is in the booking's audit history.
 - **Calendar:** every booking has **Add to calendar** (an `.ics` file with a 30-minute reminder), and **My bookings** exports them all at once. Waitlisted slots come in as tentative, so they don't block your day.
 - **NAAC report:** admin offices get a printable report for any academic year (July to June), arranged around NAAC Criterion IV (Infrastructure and Learning Resources). It covers the facilities and how much each is used, the procedures for maintaining and using them (counted from records), month-by-month use, equitable access and sharing with partner institutes. A CSV of the facility table is included for IQAC's data templates.
 
@@ -155,7 +157,10 @@ npm run typecheck && npm run lint && npm test && npm run build
 ```bash
 NEXT_DIST_DIR=.next-prod npx next build && NEXT_DIST_DIR=.next-prod npx next start -p 3100 &
 npm run e2e
+E2E_JOURNEY=1 npm run e2e -- e2e/journey.spec.ts   # the whole lifecycle; writes bookings to the demo campus
 ```
+
+On the demo campus, check-in opens at any time so the whole journey can be tried whenever you test; real institutes keep the real window (30 minutes before the slot).
 
 CI runs them too, once the repository has the three Supabase secrets.
 

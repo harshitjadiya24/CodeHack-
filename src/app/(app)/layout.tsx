@@ -9,6 +9,7 @@ import { Wordmark } from "@/components/wordmark";
 import { LanguageToggle } from "@/components/language-toggle";
 import { getTranslations } from "next-intl/server";
 import { isPlatformStaff } from "@/lib/services/review";
+import { sweepNoShowsSoon } from "@/lib/services/no-show-sweep";
 
 // Labels are message keys under Shell.nav (messages/*.json).
 type NavKey = "discover" | "bookings" | "passport" | "requests" | "myResources" | "catalogue" | "handovers" | "reviewDesk" | "audit" | "insights" | "people" | "resources" | "institutes";
@@ -50,6 +51,7 @@ const NAV: Record<Role, { href: string; label: NavKey }[]> = {
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  sweepNoShowsSoon();
   const supabase = await createClient();
   const [{ count: unread }, reviewer] = await Promise.all([
     supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),

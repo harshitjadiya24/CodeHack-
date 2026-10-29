@@ -175,7 +175,10 @@
     "handover_attendant_confirmed": "अटेंडेंट ने हैंडओवर की पुष्टि की",
     "incident_reported": "घटना दर्ज",
     "incident_decided": "घटना पर फ़ैसला",
-    "incident_disputed": "उधार लेने वाले ने घटना पर आपत्ति की"
+    "incident_disputed": "उधार लेने वाले ने घटना पर आपत्ति की",
+    "deposit_collected": "डिपॉज़िट लिया गया",
+    "deposit_refunded": "डिपॉज़िट पूरा लौटाया गया",
+    "deposit_withheld": "डिपॉज़िट का कुछ हिस्सा रखा गया"
   },
   "Eligibility": {
     "yes": "हाँ, हर शर्त पूरी है।",
@@ -573,5 +576,29 @@
     "home": "शुरुआत पर लौटें",
     "reference": "रेफ़रेंस",
     "tag": "आपकी गलती नहीं"
+  },
+  "Deposit": {
+    "title": "सिक्योरिटी डिपॉज़िट",
+    "required": "{amount} वापसी योग्य डिपॉज़िट, जो लेते समय काउंटर पर दिया जाता है।",
+    "notYet": "अभी लिया नहीं गया।",
+    "collected": "{amount} {name} ने {date} को लिया ({method})।",
+    "refunded": "{name} ने {date} को पूरा लौटा दिया।",
+    "withheld": "{name} ने {date} को {kept} रखा और {back} लौटाया।",
+    "why": "वजह: {reason}",
+    "contest": "सहमत नहीं हैं? इस बुकिंग पर समस्या रिपोर्ट करें, एक मैनेजर इसे देखेगा।",
+    "method": "कैसे दिया गया",
+    "reference": "रसीद या UPI रेफ़रेंस (वैकल्पिक)",
+    "collect": "{amount} मिलना दर्ज करें",
+    "collecting": "दर्ज हो रहा है…",
+    "returnFull": "पूरा लौटाएँ",
+    "keepPart": "कुछ हिस्सा रखें",
+    "keepAmount": "रखी जाने वाली रकम (₹)",
+    "keepReason": "वजह (उधार लेने वाले को दिखेगी)",
+    "settle": "निपटारा दर्ज करें",
+    "settling": "दर्ज हो रहा है…",
+    "cash": "नकद",
+    "upi": "UPI",
+    "card": "कार्ड",
+    "other": "अन्य"
   }
 }

@@ -175,7 +175,10 @@
     "handover_attendant_confirmed": "Attendant confirmed handover",
     "incident_reported": "Incident reported",
     "incident_decided": "Incident decided",
-    "incident_disputed": "Borrower contested the incident"
+    "incident_disputed": "Borrower contested the incident",
+    "deposit_collected": "Deposit collected",
+    "deposit_refunded": "Deposit returned in full",
+    "deposit_withheld": "Part of the deposit kept"
   },
   "Eligibility": {
     "yes": "Yes, every requirement is met.",
@@ -573,5 +576,29 @@
     "home": "Back to the start",
     "reference": "Reference",
     "tag": "Not your fault"
+  },
+  "Deposit": {
+    "title": "Security deposit",
+    "required": "{amount} refundable deposit, paid at the counter at pick-up.",
+    "notYet": "Not collected yet.",
+    "collected": "{amount} collected by {name} on {date} ({method}).",
+    "refunded": "Returned in full by {name} on {date}.",
+    "withheld": "{kept} kept and {back} returned by {name} on {date}.",
+    "why": "Why: {reason}",
+    "contest": "Disagree? Report a problem on this booking and a manager reviews it.",
+    "method": "How it was paid",
+    "reference": "Receipt or UPI reference (optional)",
+    "collect": "Record {amount} received",
+    "collecting": "Recording…",
+    "returnFull": "Return in full",
+    "keepPart": "Keep part of it",
+    "keepAmount": "Amount to keep (₹)",
+    "keepReason": "Why (the borrower sees this)",
+    "settle": "Record settlement",
+    "settling": "Recording…",
+    "cash": "Cash",
+    "upi": "UPI",
+    "card": "Card",
+    "other": "Other"
   }
 }
