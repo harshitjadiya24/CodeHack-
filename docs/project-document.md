@@ -183,8 +183,10 @@ Architecture diagram: [docs/workflow.png](workflow.png).
 
 | Name | Role | Contribution |
 |---|---|---|
-| _Name_ | _Role_ | _What they built or did_ |
-| _Name_ | _Role_ | _What they built or did_ |
+| Harshit Jadiya | Team leader | Research and backend |
+| Dhairya Singh | Team member | Frontend and UI |
+| Sharad Vyas | Team member | Database and rules |
+| Anmol Shrivastava | Team member | Testing and docs |
 
 ## 13. Disclosure of pre-existing code and assets
 
