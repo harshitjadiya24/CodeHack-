@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Enums, Tables } from "@/lib/database.types";
 
 export type Role = Enums<"user_role">;
-export type CurrentUser = Tables<"profiles"> & { email: string };
+export type CurrentUser = Tables<"profiles"> & { email: string; orgStatus: string };
 
 export const STAFF_ROLES: Role[] = ["manager", "admin"];
 export const OWNER_ROLES: Role[] = ["owner", "manager", "admin"];
@@ -18,13 +18,17 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-  return profile ? { ...profile, email: user.email ?? "" } : null;
+  const { data } = await supabase.from("profiles").select("*, org:organizations(status)").eq("id", user.id).single();
+  if (!data) return null;
+  const { org, ...profile } = data;
+  return { ...profile, email: user.email ?? "", orgStatus: org?.status ?? "active" };
 });
 
+/** Signed in, and their institute isn't suspended. A suspended institute's people see /suspended instead. */
 export async function requireUser(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (user.orgStatus === "suspended") redirect("/suspended");
   return user;
 }
 
@@ -39,6 +43,7 @@ export class ForbiddenError extends Error {
 export async function requireRole(roles: Role[]): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) throw new ForbiddenError("Please sign in again.");
+  if (user.orgStatus === "suspended") throw new ForbiddenError("Your institute’s account is paused.");
   if (!roles.includes(user.role)) throw new ForbiddenError();
   return user;
 }

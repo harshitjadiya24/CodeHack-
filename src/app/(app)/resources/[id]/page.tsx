@@ -11,6 +11,7 @@ import { creditsUsedThisWeek } from "@/lib/domain/fairness";
 import { campusParts, formatCampus } from "@/lib/domain/time";
 import { inr } from "@/lib/utils";
 import { RequestForm } from "./request-form";
+import { EndorsementRequestForm } from "@/components/governance-forms";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -30,6 +31,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
   const { resource: r } = ctx;
 
   const isBorrower = BORROWER_ROLES.includes(user.role);
+  const guest = user.org_id !== r.org_id;
   const canManage = OWNER_ROLES.includes(user.role) && (r.owner_id === user.id || user.role !== "owner");
 
   const [eligibility, history, { data: busy }, { data: owner }] = await Promise.all([
@@ -45,6 +47,14 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
       .order("starts_at"),
     db.from("profiles").select("full_name").eq("id", r.owner_id).single(),
   ]);
+  // A guest whose endorsement hasn't been granted yet: have they asked already?
+  const needsEndorsement = isBorrower && guest && !eligibility.checks.find((c) => c.id === "org")?.passed;
+  const [{ data: host }, { data: asked }] = needsEndorsement
+    ? await Promise.all([
+        db.from("organizations").select("id, name").eq("id", r.org_id).single(),
+        db.from("endorsements").select("created_at").eq("user_id", user.id).eq("host_org_id", r.org_id).eq("status", "requested").maybeSingle(),
+      ])
+    : [{ data: null }, { data: null }];
 
   const used = creditsUsedThisWeek(history, new Date());
   const checklist = (r.checklist as string[]) ?? [];
@@ -157,7 +167,16 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
                 {Math.max(0, ctx.config.weeklyCredits - used)} / {ctx.config.weeklyCredits} credits left this week
               </span>
             </div>
-            {eligibility.eligible ? (
+            {needsEndorsement && host ? (
+              asked ? (
+                <p className="tone-butter rounded-2xl px-4 py-3 text-sm">
+                  <b>Waiting for your admin office.</b> You asked on {formatCampus(asked.created_at)} to be endorsed for {host.name}. You’ll get a
+                  notification when they decide.
+                </p>
+              ) : (
+                <EndorsementRequestForm hostOrgId={host.id} hostName={host.name} />
+              )
+            ) : eligibility.eligible ? (
               <RequestForm resourceId={r.id} maxHours={r.max_hours} minDate={minDate} openWeekdays={[...new Set(ctx.rules.availability.map((w) => w.weekday))]} />
             ) : (
               <div className="space-y-3 text-sm text-ink-2">

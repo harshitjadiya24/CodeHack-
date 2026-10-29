@@ -207,6 +207,53 @@ export type Database = {
         Update: { attempts?: number; code_hash?: string; email?: string; expires_at?: string; last_sent_at?: string; user_id?: string }
         Relationships: []
       }
+      endorsements: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
+          home_org_id: string
+          host_org_id: string
+          id: string
+          purpose: string
+          status: "requested" | "approved" | "declined" | "revoked"
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          home_org_id: string
+          host_org_id: string
+          id?: string
+          purpose: string
+          status?: "requested" | "approved" | "declined" | "revoked"
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          home_org_id?: string
+          host_org_id?: string
+          id?: string
+          purpose?: string
+          status?: "requested" | "approved" | "declined" | "revoked"
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "endorsements_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "endorsements_home_org_id_fkey"; columns: ["home_org_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "endorsements_host_org_id_fkey"; columns: ["host_org_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "endorsements_decided_by_fkey"; columns: ["decided_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ]
+      }
       fairness_config: {
         Row: {
           cooldown_hours: number
@@ -371,6 +418,12 @@ export type Database = {
         Row: { lat: number | null; lng: number | null; aishe_code: string | null; city: string | null; created_at: string; created_by: string | null; email_domain: string | null; id: string; kind: string; name: string; slug: string; state: string | null; status: string; website: string | null }
         Insert: { lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name: string; slug: string; state?: string | null; status?: string; website?: string | null }
         Update: { lat?: number | null; lng?: number | null; aishe_code?: string | null; city?: string | null; created_at?: string; created_by?: string | null; email_domain?: string | null; id?: string; kind?: string; name?: string; slug?: string; state?: string | null; status?: string; website?: string | null }
+        Relationships: []
+      }
+      platform_staff: {
+        Row: { added_at: string; user_id: string }
+        Insert: { added_at?: string; user_id: string }
+        Update: { added_at?: string; user_id?: string }
         Relationships: []
       }
       profiles: {

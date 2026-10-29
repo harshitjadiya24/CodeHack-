@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { checkEligibility, type EligibilityResult } from "@/lib/domain/eligibility";
 import type { FairnessConfig, PastBooking, ResourceRules } from "@/lib/domain/fairness";
 import type { Tables } from "@/lib/database.types";
+import { activeEndorsement } from "./endorsements";
 
 type Db = ReturnType<typeof createAdminClient>;
 
@@ -50,9 +51,22 @@ export async function eligibilityFor(
   user: Pick<Tables<"profiles">, "id" | "verified" | "strikes" | "org_id">,
   ctx: ResourceContext,
 ): Promise<EligibilityResult> {
-  const { data: badges } = await db.from("user_badges").select("badge_id, status, expires_at").eq("user_id", user.id);
+  const guest = user.org_id !== ctx.resource.org_id;
+  const [{ data: badges }, endorsement] = await Promise.all([
+    db.from("user_badges").select("badge_id, status, expires_at, badge:skill_badges(name)").eq("user_id", user.id),
+    guest ? activeEndorsement(db, user.id, ctx.resource.org_id) : Promise.resolve(null),
+  ]);
+  // A guest's training is from their home campus. Count it where the host asks for a badge of the same name
+  // (both campuses start from the same templates); anything else they still need to do at the host.
+  const byName = new Map((badges ?? []).map((b) => [b.badge?.name.trim().toLowerCase(), b]));
+  const carried = endorsement
+    ? ctx.requiredBadges.flatMap((req) => {
+        const own = byName.get(req.name.trim().toLowerCase());
+        return own ? [{ badge_id: req.id, status: own.status, expires_at: own.expires_at }] : [];
+      })
+    : [];
   return checkEligibility({
-    user: { verified: user.verified, strikes: user.strikes, orgId: user.org_id },
+    user: { verified: user.verified, strikes: user.strikes, orgId: user.org_id, endorsedUntil: endorsement?.valid_until ?? null },
     resource: {
       orgId: ctx.resource.org_id,
       status: ctx.resource.status,
@@ -60,7 +74,7 @@ export async function eligibilityFor(
       depositInr: ctx.resource.deposit_inr,
     },
     requiredBadges: ctx.requiredBadges,
-    userBadges: (badges ?? []).map((b) => ({ badgeId: b.badge_id, status: b.status, expiresAt: b.expires_at })),
+    userBadges: [...(badges ?? []), ...carried].map((b) => ({ badgeId: b.badge_id, status: b.status, expiresAt: b.expires_at })),
   });
 }
 

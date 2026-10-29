@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { decideBadge, decideIncident, disputeIncident, requestBadge, setUserRole, setUserVerified } from "@/lib/services/governance";
+import { decideEndorsement, requestEndorsement, revokeEndorsement } from "@/lib/services/endorsements";
 
 export type GovState = { ok?: boolean; error?: string; message?: string };
 
@@ -70,5 +71,37 @@ export async function setRoleAction(_prev: GovState, formData: FormData): Promis
     reason: String(formData.get("reason") ?? ""),
   });
   revalidatePath("/admin/people");
+  return result.ok ? { ok: true, message: result.message } : { error: result.error };
+}
+
+export async function requestEndorsementAction(_prev: GovState, formData: FormData): Promise<GovState> {
+  const user = await requireUser();
+  const result = await requestEndorsement(user, {
+    hostOrgId: z.guid().parse(formData.get("hostOrgId")),
+    purpose: String(formData.get("purpose") ?? "").slice(0, 500),
+  });
+  revalidatePath("/resources", "layout");
+  return result.ok ? { ok: true, message: result.message } : { error: result.error };
+}
+
+export async function decideEndorsementAction(_prev: GovState, formData: FormData): Promise<GovState> {
+  const user = await requireUser();
+  const result = await decideEndorsement(user, {
+    endorsementId: z.guid().parse(formData.get("endorsementId")),
+    approve: formData.get("decision") === "approve",
+    reason: String(formData.get("reason") ?? ""),
+    days: Number(formData.get("days") ?? 0),
+  });
+  revalidatePath("/manager");
+  return result.ok ? { ok: true, message: result.message } : { error: result.error };
+}
+
+export async function revokeEndorsementAction(_prev: GovState, formData: FormData): Promise<GovState> {
+  const user = await requireUser();
+  const result = await revokeEndorsement(user, {
+    endorsementId: z.guid().parse(formData.get("endorsementId")),
+    reason: String(formData.get("reason") ?? ""),
+  });
+  revalidatePath("/manager");
   return result.ok ? { ok: true, message: result.message } : { error: result.error };
 }

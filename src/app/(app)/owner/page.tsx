@@ -23,7 +23,7 @@ export default async function OwnerQueuePage() {
   const { data: rows } = ids.length
     ? await db
         .from("bookings")
-        .select("*, resource:resources(name, demand, requires_supervision), requester:profiles!bookings_user_id_fkey(full_name, roll_no, strikes)")
+        .select("*, resource:resources(name, demand, requires_supervision), requester:profiles!bookings_user_id_fkey(full_name, roll_no, strikes, org_id)")
         .in("resource_id", ids)
         .in("status", ["requested", "in_draw", "approved", "checked_in", "overdue", "returned"])
         .gte("ends_at", new Date(Date.now() - 7 * 24 * 3_600_000).toISOString())
@@ -31,6 +31,18 @@ export default async function OwnerQueuePage() {
     : { data: [] };
 
   const bookings = rows ?? [];
+
+  // Guests from partner campuses: show who vouched for them and until when.
+  const guestIds = [...new Set(bookings.filter((b) => b.requester && b.requester.org_id !== user.org_id).map((b) => b.user_id))];
+  const { data: guestEndorsements } = guestIds.length
+    ? await db
+        .from("endorsements")
+        .select("user_id, valid_until, home:organizations!endorsements_home_org_id_fkey(name)")
+        .eq("host_org_id", user.org_id)
+        .eq("status", "approved")
+        .in("user_id", guestIds)
+    : { data: [] };
+  const guestOf = new Map((guestEndorsements ?? []).map((e) => [e.user_id, e]));
   const pending = bookings.filter((b) => b.status === "requested");
   const inDraw = bookings.filter((b) => b.status === "in_draw");
   const upcoming = bookings.filter((b) => ["approved", "checked_in", "overdue", "returned"].includes(b.status));
@@ -133,6 +145,11 @@ export default async function OwnerQueuePage() {
                       </Link>
                       {b.resource?.requires_supervision && <Pill tone="info">Supervised</Pill>}
                       {rivals.length > 0 && <Pill tone="warn">Competes with {rivals.length} other request{rivals.length > 1 ? "s" : ""}</Pill>}
+                      {guestOf.get(b.user_id) && (
+                        <Pill tone="ok">
+                          Guest from {guestOf.get(b.user_id)?.home?.name}, endorsed until {guestOf.get(b.user_id)?.valid_until}
+                        </Pill>
+                      )}
                     </div>
                     <p className="text-sm text-subtle">
                       {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} ·{" "}

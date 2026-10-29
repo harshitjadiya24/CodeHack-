@@ -24,7 +24,11 @@ async function signIn(email: string, password: string, next?: string): Promise<L
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.user) return { error: "Email or password is incorrect." };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("role, org:organizations(status)").eq("id", data.user.id).single();
+  if (profile?.org?.status === "suspended") {
+    await supabase.auth.signOut();
+    return { error: "Your institute’s account is paused by the Saajha team. Ask your admin office, or write to the Saajha team." };
+  }
   redirect(safeNext(next, profile?.role ?? "student"));
 }
 

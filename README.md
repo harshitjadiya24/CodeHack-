@@ -28,7 +28,8 @@ Open `/login` and use any demo account (password for all: `Saajha@2026`), or cli
 2. **Aarav** (student, missing a badge): the same resource tells him exactly which training he lacks.
 3. **Dr. Priya Nair** (lab owner): decide requests with the priority score shown, or run a Fair Draw on a contested slot.
 4. **Ravi** (attendant): confirm a supervised pick-up with photos.
-5. **IQAC Office** (admin): campus insights, fairness, the accreditation report, and a check that the audit chain is intact.
+5. **IQAC Office** (admin): campus insights, fairness, the accreditation report, and a check that the audit chain is intact. This account is also on the Saajha review team, so it sees **Institutes** (`/ops`), where new institutes are approved or suspended.
+6. **Zoya** (student at the partner campus, Riverside) and **Riverside Admin Office**: borrowing across campuses. Zoya asks her own institute to endorse her for Northfield. Riverside's admin office endorses her for 30, 90 or 180 days, with a reason. She can then request Northfield's equipment, and Northfield's owners see "Guest from Riverside, endorsed until …" on her requests.
 
 Every demo account is at the fictional *Northfield Institute of Technology, Pune*. Zoya is at the partner campus, Riverside.
 
@@ -43,7 +44,9 @@ Any college can register at `/institutions/new` in a few minutes:
 
 - Choose the institute type, and its departments, starter training badges and fair-use policy are set up for it.
 - New institutes work for their own campus straight away.
-- An institute stays **pending review** and isn't shown to other campuses until it has been checked.
+- An institute stays **pending review** and isn't shown to other campuses until the Saajha team has checked it. That check happens in the review console, against the institute's website and AISHE code.
+- A suspended institute's people can't sign in, and see why.
+- **Cross-campus endorsements:** a student borrows from a partner campus only when their home institute vouches for them, for a purpose and a set period. Their training carries over wherever the host has a badge of the same name. Both campuses' audit logs record it.
 - Students sign up at `/signup`, pick their institute and roll number, and can browse at once. The admin office verifies them before they can borrow.
 - **Discover** can widen from *My campus* to *My city* or *My state*, and shows verified institutes nearby on the map.
 
@@ -99,6 +102,15 @@ npm run dev                  # http://localhost:3000
 npm run typecheck && npm run lint && npm test && npm run build
 ```
 
+**End-to-end smoke tests** (Playwright). They sign in with the demo accounts and only read data:
+
+```bash
+NEXT_DIST_DIR=.next-prod npx next build && NEXT_DIST_DIR=.next-prod npx next start -p 3100 &
+npm run e2e
+```
+
+CI runs them too, once the repository has the three Supabase secrets.
+
 ## Security and privacy
 
 - **Abuse limits:** sign-up, sign-in and institute registration are rate-limited per IP (and per email for sign-in). The counts are kept in Postgres, so they hold across server instances.
@@ -110,8 +122,6 @@ npm run typecheck && npm run lint && npm test && npm run build
 
 ## What's next
 
-- A review console for pending institutes.
-- Cross-campus endorsements, so you can borrow from a partner college.
 - Hindi and regional languages.
 - Install as an app, with the passport QR working offline.
 - WhatsApp and email reminders.

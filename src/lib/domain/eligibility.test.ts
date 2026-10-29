@@ -56,6 +56,14 @@ describe("checkEligibility", () => {
     expect(r.eligible).toBe(false);
   });
 
+  it("lets an endorsed partner-campus user through until the endorsement's last day", () => {
+    const guest = (endorsedUntil: string) => input({ user: { verified: true, strikes: 0, orgId: "org-2", endorsedUntil } });
+    expect(checkEligibility(guest("2026-10-28")).eligible).toBe(true);
+    const lapsed = checkEligibility(guest("2026-10-27"));
+    expect(lapsed.eligible).toBe(false);
+    expect(check(lapsed, "org").reason).toMatch(/ended/);
+  });
+
   it("asks partner-campus users for an endorsement", () => {
     const r = checkEligibility(input({ user: { verified: true, strikes: 0, orgId: "org-2" } }));
     expect(r.eligible).toBe(false);

@@ -1,0 +1,29 @@
+import { expect, test } from "@playwright/test";
+import { openResource, signInAs } from "./helpers";
+
+test("Meera finds the closest open slots and can book what her passport unlocks", async ({ page }) => {
+  await signInAs(page, /Meera/);
+  await page.goto("/resources");
+  await expect(page.getByRole("heading", { name: "Closest open slots" })).toBeVisible();
+  await expect(page.locator(".map-pin").first()).toBeVisible();
+
+  const nearest = page.locator('section[aria-labelledby="nearby-heading"] ol li a').first();
+  await expect(nearest).toContainText(/km|m/);
+  await openResource(page, /Sony A7 IV/);
+  await expect(page.getByText("Yes, every requirement is met.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Request a slot" })).toBeVisible();
+});
+
+test("Aarav is told exactly which training he is missing", async ({ page }) => {
+  await signInAs(page, /Aarav/);
+  await page.goto("/resources?q=Laser");
+  await openResource(page, /Laser Cutter/);
+  await expect(page.getByText("Not yet. Here is exactly what is missing.")).toBeVisible();
+  await expect(page.getByText(/Laser Cutter Certification/).first()).toBeVisible();
+});
+
+test("a partner-campus student is asked for an endorsement, not refused", async ({ page }) => {
+  await signInAs(page, /Zoya/);
+  await page.goto("/resources?where=city");
+  await expect(page.getByText(/Northfield Institute of Technology: endorsement needed|You can book this/).first()).toBeVisible();
+});

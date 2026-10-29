@@ -77,7 +77,8 @@ with demo (id, email, full_name, roll_no, role, org, dept) as (values
   ('33333333-0000-0000-0000-000000000005'::uuid, 'ravi@northfield.demo',   'Ravi Kulkarni',    null,         'attendant'::public.user_role,  '11111111-0000-0000-0000-000000000001'::uuid, '22222222-0000-0000-0000-000000000001'::uuid),
   ('33333333-0000-0000-0000-000000000006'::uuid, 'sharma@northfield.demo', 'Prof. Anil Sharma','',           'manager'::public.user_role,    '11111111-0000-0000-0000-000000000001'::uuid, null::uuid),
   ('33333333-0000-0000-0000-000000000007'::uuid, 'admin@northfield.demo',  'IQAC Office',      null,         'admin'::public.user_role,      '11111111-0000-0000-0000-000000000001'::uuid, null::uuid),
-  ('33333333-0000-0000-0000-000000000008'::uuid, 'zoya@riverside.demo',    'Zoya Khan',        'RCE23ME088', 'student'::public.user_role,    '11111111-0000-0000-0000-000000000002'::uuid, '22222222-0000-0000-0000-000000000005'::uuid)
+  ('33333333-0000-0000-0000-000000000008'::uuid, 'zoya@riverside.demo',    'Zoya Khan',        'RCE23ME088', 'student'::public.user_role,    '11111111-0000-0000-0000-000000000002'::uuid, '22222222-0000-0000-0000-000000000005'::uuid),
+  ('33333333-0000-0000-0000-000000000009'::uuid, 'admin@riverside.demo',   'Riverside Admin Office', null,  'admin'::public.user_role,      '11111111-0000-0000-0000-000000000002'::uuid, null::uuid)
 ), users as (
   insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
     raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
@@ -97,6 +98,9 @@ with demo (id, email, full_name, roll_no, role, org, dept) as (values
 )
 insert into public.profiles (id, org_id, dept_id, full_name, roll_no, role, verified)
 select id, org, dept, full_name, nullif(roll_no, ''), role, true from demo;
+
+-- The IQAC demo account doubles as the Saajha review team, so judges can see the institute review console.
+insert into public.platform_staff (user_id) values ('33333333-0000-0000-0000-000000000007');
 
 -- ── Trust Passport badges ─────────────────────────────────────────────────────
 insert into public.skill_badges (id, org_id, code, name, description, validity_days) values

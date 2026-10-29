@@ -40,7 +40,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
     orgIds = [...new Set([user.org_id, ...(nearby ?? []).map((o) => o.id)])];
   }
 
-  const [{ data: resources }, { data: myBadges }] = await Promise.all([
+  const [{ data: resources }, { data: myBadges }, { data: myEndorsements }] = await Promise.all([
     supabase
       .from("resources")
       .select("*, requirements:resource_requirements(badge:skill_badges(id, name)), org:organizations(name, lat, lng), windows:availability_windows(weekday, start_time, end_time)")
@@ -48,7 +48,8 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
       .in("org_id", orgIds)
       .order("demand", { ascending: false })
       .order("name"),
-    supabase.from("user_badges").select("badge_id, status, expires_at").eq("user_id", user.id),
+    supabase.from("user_badges").select("badge_id, status, expires_at, badge:skill_badges(name)").eq("user_id", user.id),
+    supabase.from("endorsements").select("host_org_id, valid_until").eq("user_id", user.id).eq("status", "approved"),
   ]);
 
   // Booking rows are private, so usage is aggregated with the server client: counts only, no names.
@@ -72,24 +73,28 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
     .in("status", ["approved", "checked_in", "overdue"])
     .gt("ends_at", now.toISOString())
     .lt("starts_at", new Date(now.getTime() + 9 * 24 * 3_600_000).toISOString());
-  const held = new Set(
-    (myBadges ?? []).filter((b) => b.status === "verified" && (!b.expires_at || new Date(b.expires_at) > now)).map((b) => b.badge_id),
-  );
+  const valid = (myBadges ?? []).filter((b) => b.status === "verified" && (!b.expires_at || new Date(b.expires_at) > now));
+  const held = new Set(valid.map((b) => b.badge_id));
+  // At a campus that has endorsed you, your training counts where its badge has the same name.
+  const heldNames = new Set(valid.map((b) => b.badge?.name.trim().toLowerCase()));
+  const today = now.toISOString().slice(0, 10);
+  const endorsedAt = new Set((myEndorsements ?? []).filter((e) => (e.valid_until ?? "") >= today).map((e) => e.host_org_id));
 
   const all = (resources ?? []).map((r) => {
     const required = r.requirements.flatMap((x) => (x.badge ? [x.badge] : []));
-    const missing = required.filter((b) => !held.has(b.id));
     const sameOrg = r.org_id === user.org_id;
+    const endorsed = !sameOrg && endorsedAt.has(r.org_id);
+    const missing = required.filter((b) => !held.has(b.id) && !(endorsed && heldNames.has(b.name.trim().toLowerCase())));
     const open = nextOpenSlot(
       r.windows.map((w) => ({ weekday: w.weekday, startTime: w.start_time, endTime: w.end_time })),
       (ahead ?? []).filter((b) => b.resource_id === r.id).map((b) => ({ startsAt: b.starts_at, endsAt: b.ends_at })),
       now,
     );
-    return { ...r, required, missing, canUse: sameOrg && missing.length === 0, hours: hoursByResource.get(r.id) ?? 0, open };
+    return { ...r, required, missing, canUse: (sameOrg || endorsed) && missing.length === 0, endorsed, hours: hoursByResource.get(r.id) ?? 0, open };
   });
 
   const copilot = ask.trim() ? await matchResources(ask.trim(), all) : null;
-  const info = new Map(all.map((r) => [r.id, { id: r.id, name: r.name, canUse: r.canUse, missing: r.missing, partner: r.org_id !== user.org_id }]));
+  const info = new Map(all.map((r) => [r.id, { id: r.id, name: r.name, canUse: r.canUse, missing: r.missing, partner: r.org_id !== user.org_id && !r.endorsed }]));
 
   const categories = [...new Set(all.map((r) => r.category))].sort();
   const needle = q.trim().toLowerCase();
@@ -113,7 +118,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
       id: r.id,
       name: r.name,
       canUse: r.canUse,
-      note: r.canUse ? "You can book this" : r.org_id !== user.org_id ? "Needs your institute’s endorsement" : `Needs: ${r.missing.map((m) => m.name).join(", ")}`,
+      note: r.canUse ? "You can book this" : r.org_id !== user.org_id && !r.endorsed ? "Needs your institute’s endorsement" : `Needs: ${r.missing.map((m) => m.name).join(", ")}`,
       opensAt: r.open?.startsAt.toISOString() ?? null,
       opensLabel: r.open ? slotLabel(r.open, now) : null,
     });
@@ -207,7 +212,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
                         <Pill tone="ok">
                           <ShieldCheck className="size-3" aria-hidden /> You can book this
                         </Pill>
-                      ) : r.org_id !== user.org_id ? (
+                      ) : r.org_id !== user.org_id && !r.endorsed ? (
                         <Pill tone="info">{r.org?.name ?? "Another institute"}: endorsement needed</Pill>
                       ) : (
                         <Pill tone="warn">Needs: {r.missing.map((m) => m.name).join(", ")}</Pill>

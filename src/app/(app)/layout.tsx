@@ -7,6 +7,7 @@ import { ROLE_LABEL } from "@/lib/demo";
 import { logout } from "@/app/login/actions";
 import { NavLink } from "./nav-link";
 import { Wordmark } from "@/components/wordmark";
+import { isPlatformStaff } from "@/lib/services/review";
 
 const NAV: Record<Role, { href: string; label: string }[]> = {
   student: [
@@ -47,7 +48,11 @@ const NAV: Record<Role, { href: string; label: string }[]> = {
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   const supabase = await createClient();
-  const { count: unread } = await supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null);
+  const [{ count: unread }, reviewer] = await Promise.all([
+    supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
+    isPlatformStaff(user.id),
+  ]);
+  const nav = reviewer ? [...NAV[user.role], { href: "/ops", label: "Institutes" }] : NAV[user.role];
 
   return (
     <div className="min-h-screen">
@@ -58,12 +63,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         Skip to content
       </a>
       <header className="sticky top-0 z-30 border-b border-rule bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 md:px-8">
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 md:px-8">
           <Link href="/" className="flex items-center gap-2.5 text-xl font-extrabold leading-none text-ink">
             <Wordmark />
           </Link>
           <nav aria-label="Main" className="order-3 flex w-full gap-1 overflow-x-auto md:order-none md:w-auto">
-            {NAV[user.role].map((item) => (
+            {nav.map((item) => (
               <NavLink key={item.href} href={item.href}>
                 {item.label}
               </NavLink>
@@ -72,8 +77,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
             <LiveBell userId={user.id} initial={unread ?? 0} />
-            <Link href="/profile" className="hidden rounded-xl px-2 py-1 text-right leading-tight hover:bg-paper-2 sm:block">
-              <span className="block text-[15px] font-bold text-ink">{user.full_name}</span>
+            <Link href="/profile" className="hidden max-w-36 rounded-xl px-2 py-1 text-right leading-tight hover:bg-paper-2 sm:block">
+              <span className="block truncate text-[15px] font-bold text-ink">{user.full_name}</span>
               <span className="block text-[13px] text-subtle">{ROLE_LABEL[user.role]}</span>
             </Link>
             <form action={logout}>

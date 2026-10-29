@@ -19,7 +19,8 @@ export type EligibilityResult = {
 };
 
 export type EligibilityInput = {
-  user: { verified: boolean; strikes: number; orgId: string };
+  /** `endorsedUntil`: the last day (YYYY-MM-DD) the home institute vouches for them at this resource's campus. */
+  user: { verified: boolean; strikes: number; orgId: string; endorsedUntil?: string | null };
   resource: {
     orgId: string;
     status: "active" | "maintenance" | "retired";
@@ -45,15 +46,22 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
   });
 
   const sameOrg = input.user.orgId === input.resource.orgId;
+  const until = input.user.endorsedUntil;
+  // An endorsement covers its whole last day on the campus clock (UTC+5:30).
+  const endorsed = !sameOrg && !!until && new Date(`${until}T23:59:59+05:30`) >= now;
   checks.push({
     id: "org",
-    label: "Member of the owning institution",
-    passed: sameOrg,
+    label: sameOrg ? "Member of the owning institution" : "Endorsed by your institution",
+    passed: sameOrg || endorsed,
     blocking: true,
     reason: sameOrg
       ? "This resource belongs to your institution."
-      : "This resource belongs to a partner institution.",
-    howToFix: sameOrg ? undefined : "Request a cross-campus endorsement from your home institution.",
+      : endorsed
+        ? `Your institution has endorsed you at this campus until ${until}.`
+        : until
+          ? `Your endorsement for this campus ended on ${until}.`
+          : "This resource belongs to a partner institution.",
+    howToFix: sameOrg || endorsed ? undefined : "Request a cross-campus endorsement from your home institution.",
   });
 
   const active = input.resource.status === "active";

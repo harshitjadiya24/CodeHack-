@@ -2,6 +2,9 @@
   "name": "saajha",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +12,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@google/genai": "^2.31.0",
@@ -42,6 +46,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@emnapi/core": "^1.11.3",
+    "@emnapi/runtime": "^1.11.3",
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4",

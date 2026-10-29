@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, EmptyState, PageHeader, Pill } from "@/components/ui";
-import { BadgeDecisionForm, IncidentDecisionForm } from "@/components/governance-forms";
+import { BadgeDecisionForm, EndorsementDecisionForm, EndorsementRevokeForm, IncidentDecisionForm } from "@/components/governance-forms";
 import { STAFF_ROLES, requirePageRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCampus } from "@/lib/domain/time";
@@ -12,7 +12,7 @@ export default async function ManagerPage() {
   const user = await requirePageRole(STAFF_ROLES);
   const db = createAdminClient();
 
-  const [{ data: badges }, { data: incidents }, { data: recent }] = await Promise.all([
+  const [{ data: badges }, { data: incidents }, { data: recent }, { data: endorsements }] = await Promise.all([
     db
       .from("user_badges")
       .select("id, note, evidence_path, created_at, user:profiles!user_badges_user_id_fkey(full_name, roll_no, org_id), badge:skill_badges(name, validity_days)")
@@ -29,7 +29,17 @@ export default async function ManagerPage() {
       .eq("status", "resolved")
       .order("decided_at", { ascending: false })
       .limit(5),
+    db
+      .from("endorsements")
+      .select(
+        "id, purpose, status, valid_until, created_at, decision_reason, person:profiles!endorsements_user_id_fkey(full_name, roll_no, verified, strikes), host:organizations!endorsements_host_org_id_fkey(name, city)",
+      )
+      .eq("home_org_id", user.org_id)
+      .in("status", ["requested", "approved"])
+      .order("created_at"),
   ]);
+  const asked = (endorsements ?? []).filter((e) => e.status === "requested");
+  const live = (endorsements ?? []).filter((e) => e.status === "approved");
 
   const myBadges = (badges ?? []).filter((b) => b.user?.org_id === user.org_id);
   const myIncidents = (incidents ?? []).filter((i) => i.resource?.org_id === user.org_id);
@@ -46,6 +56,58 @@ export default async function ManagerPage() {
       <p className="-mt-4 mb-8 max-w-2xl text-ink-2">
         Saajha never issues a badge or applies a penalty on its own. Everything that affects someone’s access lands here for a person to decide, and every decision is recorded with its reason.
       </p>
+
+      <section aria-labelledby="endorsements-title" id="endorsements" className="mb-10 scroll-mt-24">
+        <h2 id="endorsements-title" className="mb-1 text-base font-bold text-ink">
+          Cross-campus endorsements ({asked.length})
+        </h2>
+        <p className="mb-3 max-w-2xl text-sm text-subtle">
+          Your students asking to use another institute’s equipment. Endorsing says your institute knows them and vouches for them there; the other campus
+          still decides each booking.
+        </p>
+        {asked.length === 0 ? (
+          <EmptyState title="No one is waiting">Requests from your students to use partner campuses appear here.</EmptyState>
+        ) : (
+          <div className="space-y-3">
+            {asked.map((e) => (
+              <Card key={e.id} className="space-y-3 p-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p>
+                    <span className="font-medium">{e.person?.full_name}</span> <span className="text-sm text-subtle">{e.person?.roll_no}</span>
+                  </p>
+                  <Pill tone="info">
+                    {e.host?.name}
+                    {e.host?.city && `, ${e.host.city}`}
+                  </Pill>
+                </div>
+                <p className="text-sm text-ink-2">“{e.purpose}”</p>
+                <p className="text-sm text-subtle">
+                  {e.person?.verified ? "Roll number verified" : "Roll number not verified yet"} · {e.person?.strikes ?? 0} of 3 strikes · asked{" "}
+                  {formatCampus(e.created_at)}
+                </p>
+                <EndorsementDecisionForm endorsementId={e.id} />
+              </Card>
+            ))}
+          </div>
+        )}
+        {live.length > 0 && (
+          <details className="mt-4">
+            <summary className="cursor-pointer text-sm font-semibold">Live endorsements ({live.length})</summary>
+            <ul className="mt-3 space-y-3">
+              {live.map((e) => (
+                <li key={e.id}>
+                  <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
+                    <p className="text-sm">
+                      <span className="font-medium">{e.person?.full_name}</span> at {e.host?.name}, until {e.valid_until}
+                    </p>
+                    <EndorsementRevokeForm endorsementId={e.id} />
+                  </Card>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </section>
 
       <section aria-labelledby="badges" className="mb-10">
         <h2 id="badges" className="mb-3 text-base font-bold text-ink">
