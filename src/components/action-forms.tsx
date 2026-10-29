@@ -78,13 +78,14 @@ export function DecisionForm({ bookingId }: { bookingId: string }) {
 
 export function RunDrawForm({ drawId, entrants }: { drawId: string; entrants: number }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(runDrawAction, {});
+  const t = useTranslations("Owner");
   useToast(state);
   if (state.ok) return <p className="text-sm text-ok">{state.message}</p>;
   return (
     <form action={action}>
       <input type="hidden" name="drawId" value={drawId} />
       <Button disabled={pending} className="bg-saffron">
-        {pending ? "Drawing…" : `Run Fair Draw (${entrants} entrants)`}
+        {pending ? t("drawing") : t("runDraw", { count: entrants })}
       </Button>
     </form>
   );

@@ -7,8 +7,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatCampus } from "@/lib/domain/time";
 import type { PriorityBreakdownItem } from "@/lib/domain/fairness";
 import { BOOKING_STATUS } from "@/lib/status";
+import { getLocale, getTranslations } from "next-intl/server";
+import { intlLocale } from "@/i18n/config";
 
-export const metadata: Metadata = { title: "Requests" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("Owner"))("title") };
+}
 
 export default async function OwnerQueuePage() {
   const user = await requirePageRole(OWNER_ROLES);
@@ -53,17 +57,19 @@ export default async function OwnerQueuePage() {
     ? await db.from("draw_windows").select("id, commit_hash, slot_start, slot_end").in("id", [...draws.keys()])
     : { data: [] };
 
+  const [t, statusLabel, locale] = await Promise.all([getTranslations("Owner"), getTranslations("Status"), getLocale().then(intlLocale)]);
+  const fmt = (d: string, opts: Intl.DateTimeFormatOptions = {}) => formatCampus(d, opts, locale);
   const overlaps = (a: (typeof bookings)[number], b: (typeof bookings)[number]) =>
     a.id !== b.id && a.resource_id === b.resource_id && a.starts_at < b.ends_at && b.starts_at < a.ends_at;
 
   return (
     <>
-      <PageHeader eyebrow={isStaff ? "All campus resources" : `${ids.length} resources you own`} title="Requests to review" />
+      <PageHeader eyebrow={isStaff ? t("eyebrowStaff") : t("eyebrowOwn", { count: ids.length })} title={t("title")} />
 
       {drawRows && drawRows.length > 0 && (
         <section aria-labelledby="draws" className="mb-10">
           <h2 id="draws" className="mb-3 text-base font-bold text-saffron">
-            Fair Draws ready
+            {t("drawsReady")}
           </h2>
           <div className="space-y-4">
             {drawRows.map((d) => {
@@ -75,10 +81,10 @@ export default async function OwnerQueuePage() {
                     <div>
                       <p className="font-medium">{entrants[0]?.resource?.name}</p>
                       <p className="text-sm text-subtle">
-                        {formatCampus(d.slot_start, { weekday: "short" })} – {formatCampus(d.slot_end, { day: undefined, month: undefined })}
+                        {fmt(d.slot_start, { weekday: "short" })} – {fmt(d.slot_end, { day: undefined, month: undefined })}
                       </p>
                       <p className="mt-1 text-xs text-subtle">
-                        Seed committed: <Mono>{d.commit_hash.slice(0, 20)}…</Mono>
+                        {t("seed")} <Mono>{d.commit_hash.slice(0, 20)}…</Mono>
                       </p>
                     </div>
                     <RunDrawForm drawId={d.id} entrants={entrants.length} />
@@ -86,9 +92,9 @@ export default async function OwnerQueuePage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-xs text-subtle">
-                        <th className="pb-1 font-normal">Entrant</th>
-                        <th className="pb-1 font-normal">Priority</th>
-                        <th className="pb-1 text-right font-normal">Chance of winning</th>
+                        <th className="pb-1 font-normal">{t("entrant")}</th>
+                        <th className="pb-1 font-normal">{t("priority")}</th>
+                        <th className="pb-1 text-right font-normal">{t("chance")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -116,7 +122,7 @@ export default async function OwnerQueuePage() {
                     </tbody>
                   </table>
                   <p className="mt-3 text-xs text-subtle">
-                    Odds are approximate for weighted sampling with one winner. Everyone keeps a chance; heavy recent users simply have less of one.
+                    {t("odds")}
                   </p>
                 </Card>
               );
@@ -127,10 +133,10 @@ export default async function OwnerQueuePage() {
 
       <section aria-labelledby="pending" className="mb-10">
         <h2 id="pending" className="mb-3 text-base font-bold text-ink">
-          Awaiting your decision ({pending.length})
+          {t("awaiting", { count: pending.length })}
         </h2>
         {pending.length === 0 ? (
-          <EmptyState title="You're all caught up">New requests appear here with their priority breakdown.</EmptyState>
+          <EmptyState title={t("caughtUp")}>{t("caughtUpBody")}</EmptyState>
         ) : (
           <div className="space-y-3">
             {pending.map((b) => {
@@ -143,22 +149,22 @@ export default async function OwnerQueuePage() {
                       <Link href={`/bookings/${b.id}`} className="font-medium hover:underline">
                         {b.resource?.name}
                       </Link>
-                      {b.resource?.requires_supervision && <Pill tone="info">Supervised</Pill>}
-                      {rivals.length > 0 && <Pill tone="warn">Competes with {rivals.length} other request{rivals.length > 1 ? "s" : ""}</Pill>}
+                      {b.resource?.requires_supervision && <Pill tone="info">{t("supervised")}</Pill>}
+                      {rivals.length > 0 && <Pill tone="warn">{t("competes", { count: rivals.length })}</Pill>}
                       {guestOf.get(b.user_id) && (
                         <Pill tone="ok">
-                          Guest from {guestOf.get(b.user_id)?.home?.name}, endorsed until {guestOf.get(b.user_id)?.valid_until}
+                          {t("guest", { home: guestOf.get(b.user_id)?.home?.name ?? "", until: guestOf.get(b.user_id)?.valid_until ?? "" })}
                         </Pill>
                       )}
                     </div>
                     <p className="text-sm text-subtle">
-                      {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} ·{" "}
+                      {fmt(b.starts_at, { weekday: "short" })} – {fmt(b.ends_at, { day: undefined, month: undefined })} ·{" "}
                       {b.requester?.full_name} {b.requester?.roll_no && `(${b.requester.roll_no})`}
                     </p>
                     <p className="mt-2 text-sm text-ink-2">“{b.purpose}”</p>
-                    {b.deadline_note && <p className="mt-1 text-sm text-ink-2">Deadline: {b.deadline_note}</p>}
+                    {b.deadline_note && <p className="mt-1 text-sm text-ink-2">{t("deadline", { note: b.deadline_note })}</p>}
                     <details className="mt-3 text-sm">
-                      <summary className="cursor-pointer text-accent">Priority {b.priority_score} — why</summary>
+                      <summary className="cursor-pointer text-accent">{t("why", { score: Number(b.priority_score ?? 0) })}</summary>
                       <ul className="mt-2 space-y-0.5">
                         {breakdown.map((x) => (
                           <li key={x.label} className="flex justify-between gap-4">
@@ -182,19 +188,19 @@ export default async function OwnerQueuePage() {
 
       <section aria-labelledby="upcoming">
         <h2 id="upcoming" className="mb-3 text-base font-bold text-ink">
-          Approved and in use
+          {t("upcoming")}
         </h2>
         {upcoming.length === 0 ? (
-          <EmptyState title="No upcoming bookings" />
+          <EmptyState title={t("noUpcoming")} />
         ) : (
           <Card className="divide-y divide-rule">
             {upcoming.map((b) => (
               <Link key={b.id} href={`/bookings/${b.id}`} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-sm hover:bg-paper-2">
                 <span>
                   <span className="font-medium">{b.resource?.name}</span>
-                  <span className="text-subtle"> · {b.requester?.full_name} · {formatCampus(b.starts_at, { weekday: "short" })}</span>
+                  <span className="text-subtle"> · {b.requester?.full_name} · {fmt(b.starts_at, { weekday: "short" })}</span>
                 </span>
-                <Pill tone={BOOKING_STATUS[b.status].tone}>{BOOKING_STATUS[b.status].label}</Pill>
+                <Pill tone={BOOKING_STATUS[b.status].tone}>{statusLabel(b.status)}</Pill>
               </Link>
             ))}
           </Card>

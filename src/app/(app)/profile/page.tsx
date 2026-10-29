@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, PageHeader, Pill } from "@/components/ui";
-import { requireUser } from "@/lib/auth";
+import { BORROWER_ROLES, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { ROLE_LABEL } from "@/lib/demo";
 import { MAX_STRIKES } from "@/lib/domain/eligibility";
@@ -10,6 +10,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { bookingHistory } from "@/lib/services/context";
 import { deletionBlocker } from "@/lib/services/privacy";
 import { DeleteAccount } from "./delete-account";
+import { CalendarFeed } from "@/components/operations/calendar-feed";
+import { calendarToken } from "@/lib/services/operations";
+import { siteOrigin } from "@/lib/site";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = { title: "Profile" };
 
@@ -24,11 +28,15 @@ const VISIBILITY = [
 export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createClient();
-  const [{ data: org }, { data: cfg }, history, blocker] = await Promise.all([
+  const borrower = BORROWER_ROLES.includes(user.role);
+  const [{ data: org }, { data: cfg }, history, blocker, token, origin, tc] = await Promise.all([
     supabase.from("organizations").select("name").eq("id", user.org_id).single(),
     supabase.from("fairness_config").select("weekly_credits").eq("org_id", user.org_id).single(),
     bookingHistory(createAdminClient(), user.id),
     deletionBlocker(user),
+    borrower ? calendarToken(user.id) : Promise.resolve(null),
+    siteOrigin(),
+    getTranslations("CalendarFeed"),
   ]);
   const used = creditsUsedThisWeek(history, new Date());
 
@@ -83,6 +91,15 @@ export default async function ProfilePage() {
           </p>
         </Card>
       </div>
+
+      {token && (
+        <section aria-labelledby="calendar-title" className="mt-10 max-w-2xl rounded-[22px] border border-rule p-5 sm:p-6">
+          <h2 id="calendar-title" className="type-h3 mb-2 text-xl">
+            {tc("title")}
+          </h2>
+          <CalendarFeed url={`${origin}/calendar/${token}.ics`} />
+        </section>
+      )}
 
       <section aria-labelledby="delete-title" className="mt-10 max-w-2xl rounded-[22px] border border-rule p-5 sm:p-6">
         <h2 id="delete-title" className="type-h3 text-xl">

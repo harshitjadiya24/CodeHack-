@@ -18,10 +18,11 @@ export async function loadResourceContext(db: Db, resourceId: string): Promise<R
   const { data: resource } = await db.from("resources").select("*").eq("id", resourceId).maybeSingle();
   if (!resource) return null;
 
-  const [{ data: reqs }, { data: windows }, { data: cfg }] = await Promise.all([
+  const [{ data: reqs }, { data: windows }, { data: cfg }, { data: downtime }] = await Promise.all([
     db.from("resource_requirements").select("badge:skill_badges(id, name, code)").eq("resource_id", resourceId),
     db.from("availability_windows").select("weekday, start_time, end_time").eq("resource_id", resourceId),
     db.from("fairness_config").select("*").eq("org_id", resource.org_id).single(),
+    db.from("maintenance_windows").select("starts_at, ends_at, reason").eq("resource_id", resourceId).gt("ends_at", new Date().toISOString()).order("starts_at"),
   ]);
 
   return {
@@ -33,6 +34,7 @@ export async function loadResourceContext(db: Db, resourceId: string): Promise<R
       creditRate: resource.credit_rate,
       maxHours: resource.max_hours,
       availability: (windows ?? []).map((w) => ({ weekday: w.weekday, startTime: w.start_time, endTime: w.end_time })),
+      downtime: (downtime ?? []).map((d) => ({ startsAt: d.starts_at, endsAt: d.ends_at, reason: d.reason })),
     },
     config: {
       weeklyCredits: cfg?.weekly_credits ?? 20,
@@ -72,6 +74,7 @@ export async function eligibilityFor(
       status: ctx.resource.status,
       requiresSupervision: ctx.resource.requires_supervision,
       depositInr: ctx.resource.deposit_inr,
+      openToPartners: ctx.resource.open_to_partners,
     },
     requiredBadges: ctx.requiredBadges,
     userBadges: [...(badges ?? []), ...carried].map((b) => ({ badgeId: b.badge_id, status: b.status, expiresAt: b.expires_at })),

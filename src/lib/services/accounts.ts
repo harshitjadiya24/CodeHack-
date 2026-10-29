@@ -86,7 +86,15 @@ export async function registerAccount(input: SignupInput): Promise<SignupResult>
     return { ok: false, error: "We couldn’t create the account just now. Try again in a minute.", code: "failed" };
   }
 
-  await audit(db, { orgId: input.orgId, actorId: userId, action: "user.registered", entity: "profile", entityId: userId, payload: { role: input.role } });
+  await announce(db, userId, input);
+  return { ok: true, email: input.email };
+}
+
+type Db = ReturnType<typeof createAdminClient>;
+
+/** Record the sign-up and tell the admin office someone is waiting for verification. */
+async function announce(db: Db, userId: string, input: Pick<SignupInput, "orgId" | "fullName" | "rollNo" | "role">, via?: string) {
+  await audit(db, { orgId: input.orgId, actorId: userId, action: "user.registered", entity: "profile", entityId: userId, payload: { role: input.role, ...(via ? { via } : {}) } });
 
   const { data: admins } = await db.from("profiles").select("id").eq("org_id", input.orgId).eq("role", "admin");
   await Promise.all(
@@ -100,5 +108,30 @@ export async function registerAccount(input: SignupInput): Promise<SignupResult>
       }),
     ),
   );
-  return { ok: true, email: input.email };
+}
+
+// Signing in with a college Google account: the login exists already, only the campus details are missing.
+export const profileSchema = signupSchema.pick({ fullName: true, orgId: true, deptId: true, rollNo: true, role: true, consent: true });
+export type ProfileInput = z.infer<typeof profileSchema>;
+
+export async function completeProfile(userId: string, email: string, input: ProfileInput): Promise<SignupResult> {
+  const db = createAdminClient();
+  const { data: existing } = await db.from("profiles").select("id").eq("id", userId).maybeSingle();
+  if (existing) return { ok: true, email };
+  const { data: dept } = await db.from("departments").select("id, org_id").eq("id", input.deptId).maybeSingle();
+  if (!dept || dept.org_id !== input.orgId) return { ok: false, error: "That department isn’t part of the campus you chose.", code: "deptMismatch", field: "deptId" };
+  const { data: taken } = await db.from("profiles").select("id").eq("org_id", input.orgId).eq("roll_no", input.rollNo).maybeSingle();
+  if (taken) return { ok: false, error: "An account with this roll number already exists. Sign in, or ask the admin office.", code: "rollTaken", field: "rollNo" };
+  const { error } = await db.from("profiles").insert({
+    id: userId,
+    org_id: input.orgId,
+    dept_id: input.deptId,
+    full_name: input.fullName,
+    roll_no: input.rollNo,
+    role: input.role,
+    verified: false,
+  });
+  if (error) return { ok: false, error: "We couldn’t create the account just now. Try again in a minute.", code: "failed" };
+  await announce(db, userId, input, "google");
+  return { ok: true, email };
 }

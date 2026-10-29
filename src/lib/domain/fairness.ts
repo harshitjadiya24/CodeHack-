@@ -33,10 +33,12 @@ export type ResourceRules = {
   creditRate: number;
   maxHours: number;
   availability: { weekday: number; startTime: string; endTime: string }[];
+  /** Planned maintenance: nothing can be booked inside these windows. */
+  downtime?: { startsAt: string; endsAt: string; reason: string }[];
 };
 
 /** `rule` doubles as the message key (messages/*.json, Rules); `values` fill its placeholders. */
-export type RuleViolation = { rule: string; reason: string; values?: Record<string, number> };
+export type RuleViolation = { rule: string; reason: string; values?: Record<string, string | number> };
 
 const HOUR = 3_600_000;
 const COUNTS_TOWARDS_USAGE = new Set(["requested", "in_draw", "approved", "checked_in", "overdue", "returned", "closed"]);
@@ -105,6 +107,10 @@ export function checkUsageRules(args: {
   }
   if (!withinAvailability(slot, resource)) {
     violations.push({ rule: "availability", reason: "The slot falls outside the resource's opening hours." });
+  }
+  const down = resource.downtime?.find((d) => new Date(d.startsAt) < slot.endsAt && new Date(d.endsAt) > slot.startsAt);
+  if (down) {
+    violations.push({ rule: "maintenance", reason: `The resource is closed for maintenance then: ${down.reason}`, values: { reason: down.reason } });
   }
 
   const cost = creditCost(slot, resource);

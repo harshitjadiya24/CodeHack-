@@ -64,3 +64,8 @@ test("the app switches to Hindi and back, and remembers the choice @phone", asyn
   await page.getByRole("button", { name: /View in English/ }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en-IN");
 });
+
+test("a calendar feed with an unknown token is not found", async ({ request }) => {
+  const res = await request.get("/calendar/not-a-real-token");
+  expect(res.status()).toBe(404);
+});

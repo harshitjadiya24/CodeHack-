@@ -67,6 +67,16 @@ export type Database = {
           { foreignKeyName: "availability_windows_resource_id_fkey"; columns: ["resource_id"]; isOneToOne: false; referencedRelation: "resources"; referencedColumns: ["id"] },
         ]
       }
+      booking_feedback: {
+        Row: { booking_id: string; comment: string | null; created_at: string; rating: number; resource_id: string; user_id: string }
+        Insert: { booking_id: string; comment?: string | null; created_at?: string; rating: number; resource_id: string; user_id: string }
+        Update: { booking_id?: string; comment?: string | null; created_at?: string; rating?: number; resource_id?: string; user_id?: string }
+        Relationships: [
+          { foreignKeyName: "booking_feedback_booking_id_fkey"; columns: ["booking_id"]; isOneToOne: true; referencedRelation: "bookings"; referencedColumns: ["id"] },
+          { foreignKeyName: "booking_feedback_resource_id_fkey"; columns: ["resource_id"]; isOneToOne: false; referencedRelation: "resources"; referencedColumns: ["id"] },
+          { foreignKeyName: "booking_feedback_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ]
+      }
       bookings: {
         Row: {
           checked_in_at: string | null
@@ -139,6 +149,14 @@ export type Database = {
           { foreignKeyName: "bookings_draw_id_fkey"; columns: ["draw_id"]; isOneToOne: false; referencedRelation: "draw_windows"; referencedColumns: ["id"] },
           { foreignKeyName: "bookings_resource_id_fkey"; columns: ["resource_id"]; isOneToOne: false; referencedRelation: "resources"; referencedColumns: ["id"] },
           { foreignKeyName: "bookings_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ]
+      }
+      calendar_feeds: {
+        Row: { created_at: string; token: string; user_id: string }
+        Insert: { created_at?: string; token?: string; user_id: string }
+        Update: { created_at?: string; token?: string; user_id?: string }
+        Relationships: [
+          { foreignKeyName: "calendar_feeds_user_id_fkey"; columns: ["user_id"]; isOneToOne: true; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ]
       }
       departments: {
@@ -406,6 +424,15 @@ export type Database = {
           { foreignKeyName: "incidents_resource_id_fkey"; columns: ["resource_id"]; isOneToOne: false; referencedRelation: "resources"; referencedColumns: ["id"] },
         ]
       }
+      maintenance_windows: {
+        Row: { created_at: string; created_by: string | null; ends_at: string; id: string; reason: string; resource_id: string; starts_at: string }
+        Insert: { created_at?: string; created_by?: string | null; ends_at: string; id?: string; reason: string; resource_id: string; starts_at: string }
+        Update: { created_at?: string; created_by?: string | null; ends_at?: string; id?: string; reason?: string; resource_id?: string; starts_at?: string }
+        Relationships: [
+          { foreignKeyName: "maintenance_windows_created_by_fkey"; columns: ["created_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "maintenance_windows_resource_id_fkey"; columns: ["resource_id"]; isOneToOne: false; referencedRelation: "resources"; referencedColumns: ["id"] },
+        ]
+      }
       notifications: {
         Row: { body: string; created_at: string; id: string; kind: string; link: string | null; read_at: string | null; title: string; user_id: string }
         Insert: { body?: string; created_at?: string; id?: string; kind: string; link?: string | null; read_at?: string | null; title: string; user_id: string }
@@ -493,6 +520,7 @@ export type Database = {
           location: string
           max_hours: number
           name: string
+          open_to_partners: boolean
           org_id: string
           owner_id: string
           photo_slots: Json
@@ -520,6 +548,7 @@ export type Database = {
           location: string
           max_hours?: number
           name: string
+          open_to_partners?: boolean
           org_id: string
           owner_id: string
           photo_slots?: Json
@@ -547,6 +576,7 @@ export type Database = {
           location?: string
           max_hours?: number
           name?: string
+          open_to_partners?: boolean
           org_id?: string
           owner_id?: string
           photo_slots?: Json
@@ -653,6 +683,7 @@ export type Database = {
         Args: never
         Returns: { broken_at: number | null; checked: number; ok: boolean }[]
       }
+      weekly_nudges: { Args: never; Returns: Json }
     }
     Enums: {
       badge_status: "pending" | "verified" | "rejected" | "expired"

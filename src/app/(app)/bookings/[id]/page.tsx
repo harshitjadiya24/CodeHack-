@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ButtonLink, Card, DownloadLink, Pill } from "@/components/ui";
 import { CalendarPlus } from "lucide-react";
+import { FeedbackForm } from "@/components/operations/feedback-form";
 import { getLocale, getTranslations } from "next-intl/server";
 import { intlLocale } from "@/i18n/config";
 import { ResourceIcon } from "@/components/resource-icon";
@@ -43,7 +44,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
   if (!b?.resource) notFound();
 
   // The RLS read above already proved this user may see the booking, so signing photo URLs is safe.
-  const [{ data: timeline }, { data: incidents }, handovers] = await Promise.all([
+  const [{ data: timeline }, { data: incidents }, handovers, { data: feedback }] = await Promise.all([
     supabase
       .from("audit_log")
       .select("id, action, reason, created_at, hash, actor:profiles!audit_log_actor_id_fkey(full_name)")
@@ -51,9 +52,10 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
       .order("id"),
     supabase.from("incidents").select("id, type, severity, status, description, decision, borrower_response").eq("booking_id", id).order("created_at"),
     signedHandoverPhotos(id),
+    supabase.from("booking_feedback").select("rating").eq("booking_id", id).maybeSingle(),
   ]);
 
-  const [t, statusLabel, locale] = await Promise.all([getTranslations("Booking"), getTranslations("Status"), getLocale().then(intlLocale)]);
+  const [t, statusLabel, tf, locale] = await Promise.all([getTranslations("Booking"), getTranslations("Status"), getTranslations("Feedback"), getLocale().then(intlLocale)]);
   const fmt = (d: string, opts: Intl.DateTimeFormatOptions = {}) => formatCampus(d, opts, locale);
   const isRequester = b.user_id === user.id;
   const canManage = STAFF_ROLES.includes(user.role) || (OWNER_ROLES.includes(user.role) && b.resource.owner_id === user.id);
@@ -115,6 +117,13 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
                 </li>
               ))}
             </ul>
+          </Card>
+        )}
+
+        {isRequester && ["returned", "closed"].includes(b.status) && (
+          <Card className="p-5">
+            <h2 className="mb-3 font-bold">{tf("title")}</h2>
+            {feedback ? <p className="text-sm text-ink-2">{tf("yours", { rating: feedback.rating })}</p> : <FeedbackForm bookingId={b.id} />}
           </Card>
         )}
 

@@ -78,4 +78,12 @@ describe("checkEligibility", () => {
     expect(check(r, "supervision").blocking).toBe(false);
     expect(check(r, "deposit").reason).toContain("₹2,000");
   });
+
+  it("blocks an endorsed guest when the owner keeps the resource to their own campus", () => {
+    const r = checkEligibility(
+      input({ user: { verified: true, strikes: 0, orgId: "org-2", endorsedUntil: "2027-01-01" }, resource: { orgId: ORG, status: "active", requiresSupervision: false, depositInr: 0, openToPartners: false } }),
+    );
+    expect(r.eligible).toBe(false);
+    expect(check(r, "org")).toMatchObject({ passed: false, code: "org_closed", fixCode: "org_closed" });
+  });
 });

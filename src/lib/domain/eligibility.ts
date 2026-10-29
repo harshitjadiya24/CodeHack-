@@ -31,6 +31,8 @@ export type EligibilityInput = {
     status: "active" | "maintenance" | "retired";
     requiresSupervision: boolean;
     depositInr: number;
+    /** The owner can keep a resource to their own campus; endorsed guests can't book it then. Default true. */
+    openToPartners?: boolean;
   };
   requiredBadges: { id: string; name: string }[];
   userBadges: { badgeId: string; status: "pending" | "verified" | "rejected" | "expired"; expiresAt: string | null }[];
@@ -56,7 +58,8 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
   const sameOrg = input.user.orgId === input.resource.orgId;
   const until = input.user.endorsedUntil;
   // An endorsement covers its whole last day on the campus clock (UTC+5:30).
-  const endorsed = !sameOrg && !!until && new Date(`${until}T23:59:59+05:30`) >= now;
+  const closed = !sameOrg && input.resource.openToPartners === false;
+  const endorsed = !sameOrg && !closed && !!until && new Date(`${until}T23:59:59+05:30`) >= now;
   checks.push({
     id: "org",
     label: sameOrg ? "Member of the owning institution" : "Endorsed by your institution",
@@ -64,15 +67,17 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
     blocking: true,
     reason: sameOrg
       ? "This resource belongs to your institution."
-      : endorsed
+      : closed
+        ? "Its owner keeps this resource to their own campus for now."
+        : endorsed
         ? `Your institution has endorsed you at this campus until ${until}.`
         : until
           ? `Your endorsement for this campus ended on ${until}.`
           : "This resource belongs to a partner institution.",
-    howToFix: sameOrg || endorsed ? undefined : "Request a cross-campus endorsement from your home institution.",
+    howToFix: sameOrg || endorsed ? undefined : closed ? "Look for a similar resource that is open to partner campuses." : "Request a cross-campus endorsement from your home institution.",
     labelKey: sameOrg ? "orgSame" : "orgGuest",
-    code: sameOrg ? "org_same" : endorsed ? "org_endorsed" : until ? "org_ended" : "org_partner",
-    fixCode: sameOrg || endorsed ? undefined : "org",
+    code: sameOrg ? "org_same" : closed ? "org_closed" : endorsed ? "org_endorsed" : until ? "org_ended" : "org_partner",
+    fixCode: sameOrg || endorsed ? undefined : closed ? "org_closed" : "org",
     values: until ? { until } : undefined,
   });
 

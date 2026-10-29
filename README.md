@@ -57,13 +57,24 @@ Any college can register at `/institutions/new` in a few minutes:
 
 ## In Hindi
 
-Tap **हिन्दी** in the header or on the sign-in page. The app shell, sign-in, sign-up, Discover (with the map), each resource page with its eligibility reasons, your bookings and the Trust Passport switch to Hindi, and the choice is remembered on that device. Hindi text uses Noto Sans Devanagari with looser line spacing, so the matras aren't clipped. Strings live in `messages/en.json` and `messages/hi.json`, and a unit test fails if a key or a `{placeholder}` is missing from either file.
+Tap **हिन्दी** in the header or on the sign-in page. The app shell, sign-in, sign-up, Discover (with the map), each resource page with its eligibility reasons, your bookings, the Trust Passport, the owner's request queue and the admin office's People page switch to Hindi, and the choice is remembered on that device. Hindi text uses Noto Sans Devanagari with looser line spacing, so the matras aren't clipped. Strings live in `messages/en.json` and `messages/hi.json`, and a unit test fails if a key or a `{placeholder}` is missing from either file.
 
 ## Bookings that look after themselves
 
 - **Waitlist:** when someone cancels a held slot, the next person in line is moved in automatically, but only after the same eligibility and fair-use checks as a new request. Anyone passed over is told why. Everyone behind moves up a place and gets a notification. Entries whose slot has passed are closed by the database's own sweep job.
 - **Calendar:** every booking has **Add to calendar** (an `.ics` file with a 30-minute reminder), and **My bookings** exports them all at once. Waitlisted slots come in as tentative, so they don't block your day.
 - **NAAC report:** admin offices get a printable report for any academic year (July to June), arranged around NAAC Criterion IV (Infrastructure and Learning Resources). It covers the facilities and how much each is used, the procedures for maintaining and using them (counted from records), month-by-month use, equitable access and sharing with partner institutes. A CSV of the facility table is included for IQAC's data templates.
+
+## Running a real college
+
+- **Import from spreadsheets** (`/admin/import`): upload the stock register as CSV and every row is checked first, with the exact problem and line number for anything wrong. Nothing is listed until you confirm. A second upload, the college's student register, verifies everyone whose roll number matches, and leaves anyone whose name clearly differs for a manual check. Templates with the right columns are one click away.
+- **Idle equipment gets a nudge:** the admin office sees what was used for under 10% of its open hours in the last four weeks, with the one change most likely to help (turn on instant approval, open it to partner campuses, lower its demand level). One tap applies it and tells the owner. Every Monday morning the database also sends owners a summary of their quietest resources.
+- **Next week's forecast:** what is already booked, or the recent weekly trend if that's higher. A resource full for weeks running is the case for buying a second one.
+- **Planned maintenance:** owners block out downtime with a reason. New requests in that window are refused with the reason, Discover counts it as busy, and anyone already booked is told, with the next free slot.
+- **Ratings:** after a return, the borrower rates the equipment and the handover. The resource page shows the average and recent comments, and a low rating tells the owner straight away.
+- **Calendar feed:** subscribe once from your profile in Google Calendar, Apple Calendar or Outlook, and bookings stay up to date there. The link is private and can be replaced at any time.
+- **Partner sharing per resource:** an owner can keep a resource for their own campus only. It's then hidden from partner campuses' Discover, and any request from outside is refused with the reason.
+- **Sign in with Google** (optional): turn it on and new people finish sign-up by picking their institute and roll number, as usual.
 
 ## On phones
 
@@ -86,7 +97,7 @@ Baanto installs as an app ("Add to Home screen"). Once you've opened your Trust 
 - **Maps:** Leaflet with OpenStreetMap tiles, and geocoding from Nominatim. All free, no API keys.
 - **Languages:** next-intl, with the language kept in a cookie, so URLs are the same in English and Hindi. The rules explain themselves with message codes, so the same reason can be shown in either language.
 - **Installable app:** a web manifest and a hand-written service worker. No extra libraries.
-- **Background jobs** run inside Postgres with `pg_cron` every 10 minutes: overdue returns, reminders an hour before a slot, and closing stale waitlist entries.
+- **Background jobs** run inside Postgres with `pg_cron` every 10 minutes: overdue returns, reminders an hour before a slot, and closing stale waitlist entries. A weekly job sends owners their idle-equipment summary.
 - **AI (optional):** Gemini matches a free-text task ("I need to test a 12V motor driver") to resources. Without a key it falls back to keyword matching, and AI output is never a decision.
 - **Design:** "Common Room". Mona Sans plus four pastel tags with fixed meaning: sage means cleared, butter means popular, rose means a problem, sky means information. Light and dark themes, reduced motion respected, built mobile-first.
 - **Motion:** Motion (Framer), GSAP SplitText, and Lenis smooth scroll.
@@ -121,6 +132,9 @@ npm run dev                  # http://localhost:3000
 | `SUPABASE_SECRET_KEY` | yes | Secret key, server only |
 | `GEMINI_API_KEY` | no | Turns on AI matching in Discover |
 | `NEXT_PUBLIC_DEMO_MODE` | no | `1` lets check-in happen at any time, for demos |
+| `NEXT_PUBLIC_GOOGLE_AUTH` | no | `1` shows **Continue with Google** on sign-in and sign-up |
+
+**Google sign-in:** in Google Cloud Console, create an OAuth client (Web application) with the redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`. In Supabase, open Authentication → Sign In / Providers → Google, paste the client ID and secret, and add `http://localhost:3000/auth/callback` (and your deployed URL's `/auth/callback`) to Authentication → URL Configuration → Redirect URLs. Then set `NEXT_PUBLIC_GOOGLE_AUTH=1`.
 
 **Database:** apply `supabase/migrations/*` in order, then run `supabase/seed.sql` for the demo campus (with the Supabase CLI: `supabase db reset`), and `supabase/seed-institutes.sql` for six more fictional institutes across Pune, Mumbai, Ahmedabad, Bengaluru, Hyderabad and Guwahati (one waits in the review console). Their lab in-charges sign in as `owner@<slug>.demo` and their admin offices as `admin@<slug>.demo`, all with the same password.
 
@@ -151,7 +165,6 @@ CI runs them too, once the repository has the three Supabase secrets.
 
 ## What's next
 
-- Hindi for every remaining screen (the landing page, owner and admin pages, the check-in flow, and the reasons stored in decision receipts), then other Indian languages.
-- WhatsApp and email reminders.
-- A calendar feed you subscribe to once, instead of downloading files.
+- Hindi for every remaining screen (the landing page, the remaining admin pages, the check-in flow, and the reasons stored in decision receipts), then other Indian languages.
+- WhatsApp and email reminders (these need a provider account; WhatsApp also needs Meta business verification).
 - Deposits over UPI.

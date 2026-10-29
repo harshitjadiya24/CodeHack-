@@ -53,6 +53,14 @@ describe("availability uses the campus clock", () => {
 });
 
 describe("checkUsageRules", () => {
+  it("refuses a slot that overlaps planned maintenance, and names the reason", () => {
+    const down = { ...printer, downtime: [{ startsAt: "2026-10-29T05:30:00Z", endsAt: "2026-10-29T06:30:00Z", reason: "Nozzle replacement" }] };
+    const v = checkUsageRules({ config, resource: down, slot: slot("2026-10-29", "10:00", "12:00"), history: [], now });
+    expect(rules(v)).toEqual(["maintenance"]);
+    expect(v[0].values).toEqual({ reason: "Nozzle replacement" });
+    expect(checkUsageRules({ config, resource: down, slot: slot("2026-10-29", "13:00", "15:00"), history: [], now })).toEqual([]);
+  });
+
   it("allows a valid first request", () => {
     expect(checkUsageRules({ config, resource: printer, slot: slot("2026-10-29", "10:00", "12:00"), history: [], now })).toEqual([]);
   });

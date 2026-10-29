@@ -186,7 +186,8 @@
       "strikes_ok": "{count} of {max} strikes used.",
       "strikes_over": "Booking is paused after {max} strikes.",
       "supervision": "A lab attendant must confirm your check-in in person.",
-      "deposit": "{amount} deposit is collected at check-in and refunded after a clean return."
+      "deposit": "{amount} deposit is collected at check-in and refunded after a clean return.",
+      "org_closed": "Its owner keeps this resource to their own campus for now."
     },
     "fixes": {
       "verified": "Ask the admin office to verify your roll number.",
@@ -196,7 +197,8 @@
       "badge_pending": "No action needed. You will be notified once it is reviewed.",
       "badge_rejected": "Re-attend the induction and upload fresh evidence.",
       "badge_expired": "Book a refresher induction to renew it.",
-      "strikes": "Speak to the lab manager to review your strikes."
+      "strikes": "Speak to the lab manager to review your strikes.",
+      "org_closed": "Look for a similar resource that is open to partner campuses."
     }
   },
   "Rules": {
@@ -206,7 +208,8 @@
     "availability": "The slot falls outside the resource’s opening hours.",
     "credits": "This needs {cost} credits but only {left} of your {weekly} weekly credits are left.",
     "max_active": "High-demand resource: you already hold {count} upcoming booking(s); the limit is {limit}.",
-    "cooldown": "High-demand resource: bookings by the same person must be {hours} h apart so others get a turn."
+    "cooldown": "High-demand resource: bookings by the same person must be {hours} h apart so others get a turn.",
+    "maintenance": "The resource is closed for maintenance then: {reason}"
   },
   "Resource": {
     "kinds": {
@@ -455,6 +458,88 @@
       "failed": "We couldn’t create the account just now. Try again in a minute.",
       "bot": "Something went wrong. Reload the page and try again.",
       "rateLimited": "Too many attempts from here. Wait a few minutes and try again."
-    }
+    },
+    "googleAs": "Signed in with Google as {email}. Add your campus details to finish.",
+    "google": "Continue with Google",
+    "googleNote": "Use your college Google account. No password to remember.",
+    "or": "or",
+    "completeTitle": "One more step"
+  },
+  "Feedback": {
+    "title": "How was it?",
+    "question": "Rate the equipment and the handover",
+    "stars": "{count} out of 5",
+    "comment": "Comment",
+    "placeholder": "Anything the next person or the owner should know (optional)",
+    "send": "Send rating",
+    "sending": "Sending…",
+    "thanks": "Thanks. Your rating helps the next person.",
+    "pickStars": "Pick 1 to 5 stars.",
+    "yours": "You rated this {rating}/5."
+  },
+  "CalendarFeed": {
+    "title": "Your bookings in your calendar",
+    "explain": "Subscribe once in Google Calendar, Apple Calendar or Outlook, and your approved and waitlisted bookings appear there and stay up to date.",
+    "linkLabel": "Your private calendar link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "subscribe": "Open in my calendar app",
+    "reset": "Make a new link",
+    "resetDone": "New link made. The old one stopped working.",
+    "private": "Anyone with this link can see your booking times. If you shared it by mistake, make a new link."
+  },
+  "Ratings": {
+    "summary": "{average} out of 5 from {count} ratings",
+    "none": "No ratings yet"
+  },
+  "Maintenance": {
+    "planned": "Planned maintenance",
+    "closed": "Closed for maintenance"
+  },
+  "Owner": {
+    "eyebrowStaff": "All campus resources",
+    "eyebrowOwn": "{count} resources you own",
+    "title": "Requests to review",
+    "drawsReady": "Fair Draws ready",
+    "seed": "Seed committed:",
+    "entrant": "Entrant",
+    "priority": "Priority",
+    "chance": "Chance of winning",
+    "odds": "Odds are approximate for weighted sampling with one winner. Everyone keeps a chance; heavy recent users simply have less of one.",
+    "awaiting": "Awaiting your decision ({count})",
+    "caughtUp": "You're all caught up",
+    "caughtUpBody": "New requests appear here with their priority breakdown.",
+    "supervised": "Supervised",
+    "competes": "Clashes with other requests: {count}",
+    "guest": "Guest from {home}, endorsed until {until}",
+    "deadline": "Deadline: {note}",
+    "why": "Priority {score}: why",
+    "upcoming": "Approved and in use",
+    "noUpcoming": "No upcoming bookings",
+    "runDraw": "Run Fair Draw ({count} entrants)",
+    "drawing": "Drawing…"
+  },
+  "People": {
+    "eyebrow": "Identity and standing",
+    "title": "People",
+    "intro": "Unverified accounts can browse but cannot request anything. Lab in-charges sign up themselves; verify them, then make them owners here. Every change needs a reason and is written to the audit chain.",
+    "fromRegister": "Verify from the college register",
+    "name": "Name",
+    "role": "Role",
+    "badges": "Badges",
+    "strikes": "Strikes",
+    "identity": "Identity",
+    "action": "Action",
+    "staff": "Staff",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "saved": "Saved",
+    "reason": "Reason",
+    "whyPause": "Why pause?",
+    "checked": "ID card checked at desk",
+    "verify": "Verify",
+    "unverify": "Unverify",
+    "roleReason": "Why? e.g. In-charge of the PCB lab",
+    "change": "Change"
   }
 }

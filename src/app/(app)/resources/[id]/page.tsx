@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CalendarClock, Coins, IndianRupee, MapPin, Timer } from "lucide-react";
+import { CalendarClock, Coins, IndianRupee, MapPin, Star, Timer, Wrench } from "lucide-react";
+import { ratingFor } from "@/lib/services/operations";
 import { ButtonLink, Card, Pill } from "@/components/ui";
 import { ResourceIcon } from "@/components/resource-icon";
 import { EligibilityPanel } from "@/components/eligibility-panel";
@@ -38,7 +39,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
   const guest = user.org_id !== r.org_id;
   const canManage = OWNER_ROLES.includes(user.role) && (r.owner_id === user.id || user.role !== "owner");
 
-  const [eligibility, history, { data: busy }, { data: owner }] = await Promise.all([
+  const [eligibility, history, { data: busy }, { data: owner }, rating] = await Promise.all([
     eligibilityFor(db, user, ctx),
     bookingHistory(db, user.id),
     db
@@ -50,7 +51,9 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
       .lte("starts_at", new Date(Date.now() + 7 * 24 * 3_600_000).toISOString())
       .order("starts_at"),
     db.from("profiles").select("full_name").eq("id", r.owner_id).single(),
+    ratingFor(r.id),
   ]);
+  const downtime = (ctx.rules.downtime ?? []).filter((d) => new Date(d.startsAt).getTime() < Date.now() + 7 * 24 * 3_600_000);
   // A guest whose endorsement hasn't been granted yet: have they asked already?
   const needsEndorsement = isBorrower && guest && !eligibility.checks.find((c) => c.id === "org")?.passed;
   const [{ data: host }, { data: asked }] = needsEndorsement
@@ -60,7 +63,13 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
       ])
     : [{ data: null }, { data: null }];
 
-  const [t, te, locale] = await Promise.all([getTranslations("Resource"), getTranslations("Eligibility"), getLocale().then(intlLocale)]);
+  const [t, te, tr, tm, locale] = await Promise.all([
+    getTranslations("Resource"),
+    getTranslations("Eligibility"),
+    getTranslations("Ratings"),
+    getTranslations("Maintenance"),
+    getLocale().then(intlLocale),
+  ]);
   const WEEKDAYS = weekdayNames(locale);
   const used = creditsUsedThisWeek(history, new Date());
   const checklist = (r.checklist as string[]) ?? [];
@@ -89,11 +98,24 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
               {r.demand === "high" && <Pill tone="saffron">{t("highDemand")}</Pill>}
               {r.requires_supervision && <Pill tone="info">{t("supervised")}</Pill>}
               {r.auto_approve && !r.requires_supervision && <Pill tone="accent">{t("instant")}</Pill>}
+              <Pill tone="neutral">
+                <Star className="size-3" aria-hidden />{" "}
+                {rating.average ? tr("summary", { average: rating.average.toFixed(1), count: rating.count }) : tr("none")}
+              </Pill>
             </div>
           </div>
         </div>
 
         <p className="text-ink-2">{r.description}</p>
+        {rating.recent.length > 0 && (
+          <ul className="space-y-2">
+            {rating.recent.map((c) => (
+              <li key={c.created_at} className="rounded-2xl border border-rule px-4 py-3 text-sm text-ink-2">
+                <span className="tab font-semibold text-ink">{"★".repeat(c.rating)}</span> “{c.comment}”
+              </li>
+            ))}
+          </ul>
+        )}
 
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
@@ -138,6 +160,19 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
           <h2 className="mb-3 flex items-center gap-2 font-bold">
             <CalendarClock className="size-4" aria-hidden /> {t("next7")}
           </h2>
+          {downtime.length > 0 && (
+            <ul className="mb-3 space-y-2">
+              {downtime.map((d) => (
+                <li key={d.startsAt} className="tone-rose flex gap-2 rounded-xl px-3 py-2 text-sm">
+                  <Wrench className="mt-0.5 size-4 shrink-0" aria-hidden />
+                  <span>
+                    <b>{tm("closed")}</b> · {formatCampus(d.startsAt, { weekday: "short" }, locale)} – {formatCampus(d.endsAt, {}, locale)}
+                    <span className="block">{d.reason}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
           {busy?.length ? (
             <ul className="divide-y divide-rule text-sm">
               {busy.map((b, i) => (

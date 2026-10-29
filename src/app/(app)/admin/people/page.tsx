@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Card, PageHeader, Pill } from "@/components/ui";
+import { ButtonLink, Card, PageHeader, Pill } from "@/components/ui";
 import { requirePageRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ROLE_LABEL } from "@/lib/demo";
 import { VerifyUserForm } from "./verify-form";
 import { RoleForm } from "./role-form";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "People" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("People"))("title") };
+}
 
 export default async function PeoplePage() {
   const admin = await requirePageRole(["admin"]);
@@ -15,26 +17,31 @@ export default async function PeoplePage() {
     db.from("profiles").select("id, full_name, roll_no, role, verified, strikes, dept:departments(code)").eq("org_id", admin.org_id).order("role").order("full_name"),
     db.from("user_badges").select("user_id, status, expires_at").eq("status", "verified"),
   ]);
+  const [t, roles] = await Promise.all([getTranslations("People"), getTranslations("Shell.roles")]);
   const now = new Date();
   const live = new Map<string, number>();
   for (const b of badges ?? []) if (!b.expires_at || new Date(b.expires_at) > now) live.set(b.user_id, (live.get(b.user_id) ?? 0) + 1);
 
   return (
     <>
-      <PageHeader eyebrow="Identity and standing" title="People" />
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")}>
+        <ButtonLink href="/admin/import#register" variant="secondary">
+          {t("fromRegister")}
+        </ButtonLink>
+      </PageHeader>
       <p className="-mt-4 mb-6 max-w-2xl text-ink-2">
-        Unverified accounts can browse but cannot request anything. Lab in-charges sign up themselves; verify them, then make them owners here. Every change needs a reason and is written to the audit chain.
+        {t("intro")}
       </p>
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[1040px] text-sm">
           <thead className="border-b border-rule text-left text-xs text-subtle">
             <tr>
-              <th className="px-4 py-2 font-normal">Name</th>
-              <th className="px-4 py-2 font-normal">Role</th>
-              <th className="px-4 py-2 font-normal">Badges</th>
-              <th className="px-4 py-2 font-normal">Strikes</th>
-              <th className="px-4 py-2 font-normal">Identity</th>
-              <th className="px-4 py-2 font-normal">Action</th>
+              <th className="px-4 py-2 font-normal">{t("name")}</th>
+              <th className="px-4 py-2 font-normal">{t("role")}</th>
+              <th className="px-4 py-2 font-normal">{t("badges")}</th>
+              <th className="px-4 py-2 font-normal">{t("strikes")}</th>
+              <th className="px-4 py-2 font-normal">{t("identity")}</th>
+              <th className="px-4 py-2 font-normal">{t("action")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-rule">
@@ -43,14 +50,14 @@ export default async function PeoplePage() {
                 <td className="px-4 py-2">
                   {p.full_name}
                   <span className="block text-xs text-subtle">
-                    {p.roll_no ?? "Staff"} {p.dept?.code && `· ${p.dept.code}`}
+                    {p.roll_no ?? t("staff")} {p.dept?.code && `· ${p.dept.code}`}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-ink-2">{p.id === admin.id ? ROLE_LABEL[p.role] : <RoleForm userId={p.id} role={p.role} />}</td>
+                <td className="px-4 py-2 text-ink-2">{p.id === admin.id ? roles(p.role) : <RoleForm userId={p.id} role={p.role} />}</td>
                 <td className="px-4 py-2 font-mono">{live.get(p.id) ?? 0}</td>
                 <td className="px-4 py-2 font-mono">{p.strikes}</td>
                 <td className="px-4 py-2">
-                  <Pill tone={p.verified ? "ok" : "warn"}>{p.verified ? "Verified" : "Unverified"}</Pill>
+                  <Pill tone={p.verified ? "ok" : "warn"}>{p.verified ? t("verified") : t("unverified")}</Pill>
                 </td>
                 <td className="px-4 py-2">{p.id !== admin.id && <VerifyUserForm userId={p.id} verified={p.verified} />}</td>
               </tr>

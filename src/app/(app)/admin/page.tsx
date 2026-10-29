@@ -4,6 +4,8 @@ import { Heatmap, Stat, UtilisationBar } from "@/components/insight-views";
 import { requirePageRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { campusInsights } from "@/lib/services/insights";
+import { operationsInsights } from "@/lib/services/operations";
+import { NudgeButton } from "@/components/operations/nudge-button";
 import { inr } from "@/lib/utils";
 import { FairnessForm } from "./fairness-form";
 
@@ -12,8 +14,9 @@ export const metadata: Metadata = { title: "Insights" };
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
   const user = await requirePageRole(["admin"]);
   const { welcome } = await searchParams;
-  const [ins, { data: config }, { data: org }] = await Promise.all([
+  const [ins, ops, { data: config }, { data: org }] = await Promise.all([
     campusInsights(user.org_id),
+    operationsInsights(user.org_id),
     createAdminClient().from("fairness_config").select("*").eq("org_id", user.org_id).single(),
     createAdminClient().from("organizations").select("name, status, city, state").eq("id", user.org_id).single(),
   ]);
@@ -23,9 +26,14 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader eyebrow={`Last ${ins.weeks} weeks · ${org?.name ?? "Your institute"}`} title="Campus insights">
-        <ButtonLink href="/admin/report" variant="secondary">
-          NAAC report
-        </ButtonLink>
+        <div className="flex flex-wrap gap-2">
+          <ButtonLink href="/admin/import" variant="secondary">
+            Import from spreadsheets
+          </ButtonLink>
+          <ButtonLink href="/admin/report" variant="secondary">
+            NAAC report
+          </ButtonLink>
+        </div>
       </PageHeader>
 
       {org?.status === "pending" && (
@@ -60,6 +68,61 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <Stat label="Hours shared" value={String(Math.round(ins.totals.hours))} note={`${ins.totals.bookings} completed bookings`} />
         <Stat label="People served" value={`${ins.totals.uniqueUsers}/${ins.totals.borrowers}`} note="Borrowers with at least one session" />
         <Stat label="Mostly idle resources" value={String(ins.totals.idleResources)} note="Under 10% utilisation" />
+      </div>
+
+      <div className="mb-8 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+        <Card id="idle" className="scroll-mt-24 p-5">
+          <h2 className="font-bold">Mostly idle this month</h2>
+          <p className="mb-4 text-sm text-subtle">Used for under 10% of open hours in the last four weeks. Each change below is the one most likely to help, and the owner is told.</p>
+          {ops.idle.length ? (
+            <ul className="divide-y divide-rule">
+              {ops.idle.slice(0, 8).map((r) => (
+                <li key={r.id} className="py-3">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <a href={`/resources/${r.id}`} className="font-semibold hover:underline">
+                      {r.name}
+                    </a>
+                    <span className="tab text-sm text-subtle">
+                      {r.hours} h of 180 · {Math.round(r.utilisation * 100)}%
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {r.actions.length ? (
+                      r.actions.map((a) => <NudgeButton key={a} resourceId={r.id} action={a} />)
+                    ) : (
+                      <span className="text-sm text-subtle">Already as open as it can be. Tell students it exists: print its QR tag for the lab door.</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-ok">Nothing idle. Every resource was used for at least a tenth of its open hours.</p>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-bold">Next week</h2>
+          <p className="mb-4 text-sm text-subtle">What is already booked, or recent weeks’ trend if that is higher. Full for weeks running is the case for buying a second one.</p>
+          {ops.forecast.length ? (
+            <ul className="space-y-3">
+              {ops.forecast.slice(0, 6).map((f) => (
+                <li key={f.id}>
+                  <div className="flex items-baseline justify-between gap-2 text-sm">
+                    <span className="font-semibold">{f.name}</span>
+                    <Pill tone={f.level === "full" ? "danger" : "warn"}>{f.level === "full" ? "Likely full" : "Busy"}</Pill>
+                  </div>
+                  <UtilisationBar value={f.utilisation} />
+                  <p className="text-xs text-subtle">
+                    ~{f.hours} h of 45 · {f.booked ? `${Math.round(f.booked)} h already booked` : "from recent weeks"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-subtle">Nothing looks busy next week.</p>
+          )}
+        </Card>
       </div>
 
       <div className="mb-8 grid gap-6 lg:grid-cols-[1.3fr_1fr]">

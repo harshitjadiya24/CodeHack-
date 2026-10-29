@@ -7,6 +7,7 @@ import { listCampuses } from "@/lib/services/accounts";
 import { SignupForm } from "./signup-form";
 import { Wordmark } from "@/components/wordmark";
 import { LanguageToggle } from "@/components/language-toggle";
+import { GoogleButton } from "@/components/google-button";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,7 +34,8 @@ export default async function SignupPage() {
         </div>
         <h1 className="type-h2">{t("title")}</h1>
         <p className="mb-8 mt-3 max-w-[50ch] text-ink-2">{t("lede")}</p>
-        <Card className="p-5 sm:p-7">
+        <Card className="space-y-5 p-5 sm:p-7">
+          <GoogleButton />
           <SignupForm campuses={campuses} />
         </Card>
         <p className="mt-6 text-[15px] text-subtle">

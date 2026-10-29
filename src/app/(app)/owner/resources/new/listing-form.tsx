@@ -22,6 +22,7 @@ export type ListingDraft = Partial<{
   rentalValue: number;
   requiresSupervision: boolean;
   autoApprove: boolean;
+  openToPartners?: boolean;
   badgeIds: string[];
   point: Point | null;
 }>;
@@ -115,6 +116,9 @@ export function ListingForm({
           </label>
           <label className="flex items-center gap-2">
             <input type="checkbox" name="autoApprove" defaultChecked={draft?.autoApprove} className="accent-[var(--accent)]" /> Approve instantly when eligible and uncontested
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" name="openToPartners" defaultChecked={draft?.openToPartners ?? true} className="accent-[var(--accent)]" /> Open to endorsed students from partner campuses
           </label>
         </div>
       </Card>

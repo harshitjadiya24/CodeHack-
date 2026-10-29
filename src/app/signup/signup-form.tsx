@@ -7,12 +7,13 @@ import { useTranslations } from "next-intl";
 import { Button, Field, inputClass } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { groupDepartments } from "@/lib/departments";
-import { signup, type SignupState } from "./actions";
+import { completeSignup, signup, type SignupState } from "./actions";
 
 type Campus = { id: string; name: string; city: string | null; state: string | null; verified: boolean; departments: { id: string; name: string; code: string }[] };
 
-export function SignupForm({ campuses }: { campuses: Campus[] }) {
-  const [state, action, pending] = useActionState<SignupState, FormData>(signup, {});
+/** `google` is set when someone signed in with Google and only their campus details are missing. */
+export function SignupForm({ campuses, google }: { campuses: Campus[]; google?: { name: string; email: string } }) {
+  const [state, action, pending] = useActionState<SignupState, FormData>(google ? completeSignup : signup, {});
   const t = useTranslations("Signup");
   const roles = useTranslations("Shell.roles");
   const v = state.values ?? {};
@@ -41,7 +42,7 @@ export function SignupForm({ campuses }: { campuses: Campus[] }) {
       </div>
 
       <Field label={t("fullName")} error={e.fullName}>
-        <input name="fullName" autoComplete="name" required defaultValue={v.fullName} aria-invalid={!!e.fullName} aria-describedby={errorId("fullName")} className={inputClass} />
+        <input name="fullName" autoComplete="name" required defaultValue={v.fullName ?? google?.name} aria-invalid={!!e.fullName} aria-describedby={errorId("fullName")} className={inputClass} />
       </Field>
 
       <fieldset className="space-y-3 rounded-[22px] border border-rule p-4">
@@ -123,6 +124,10 @@ export function SignupForm({ campuses }: { campuses: Campus[] }) {
         </fieldset>
       </div>
 
+      {google ? (
+        <p className="rounded-xl bg-paper-2 px-3 py-2.5 text-[15px] text-ink-2">{t("googleAs", { email: google.email })}</p>
+      ) : (
+        <>
       <Field label={t("email")} hint={t("emailHint")} error={e.email}>
         <input name="email" type="email" autoComplete="email" required defaultValue={v.email} aria-invalid={!!e.email} className={inputClass} />
       </Field>
@@ -141,6 +146,8 @@ export function SignupForm({ campuses }: { campuses: Campus[] }) {
           </button>
         </span>
       </Field>
+        </>
+      )}
 
       <label className="flex cursor-pointer gap-3 text-[15px] text-ink-2">
         <input type="checkbox" name="consent" className="mt-1 size-4 shrink-0 accent-[var(--ink)]" aria-invalid={!!e.consent} />

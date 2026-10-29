@@ -40,3 +40,22 @@ test("the NAAC report covers an academic year and exports CSV", async ({ page })
   expect(csv.status()).toBe(200);
   expect(await csv.text()).toContain('"Academic year","Facility"');
 });
+
+test("the admin office sees idle resources and next week's forecast", async ({ page }) => {
+  await signInAs(page, /IQAC/);
+  await page.goto("/admin");
+  await expect(page.getByRole("heading", { name: "Mostly idle this month" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Next week" })).toBeVisible();
+});
+
+test("an inventory sheet is checked row by row before anything is listed", async ({ page }) => {
+  await signInAs(page, /IQAC/);
+  await page.goto("/admin/import");
+  const template = await page.request.get("/admin/import/template?kind=inventory");
+  expect(template.status()).toBe(200);
+  const card = page.locator("#inventory");
+  await card.locator("input[type=file]").setInputFiles({ name: "stock.csv", mimeType: "text/csv", buffer: Buffer.from(await template.body()) });
+  await card.getByRole("button", { name: "Check the file" }).click();
+  // Preview only: the confirm button appears, and this test never presses it.
+  await expect(card.getByRole("button", { name: /^List \d+ resources?$/ })).toBeVisible();
+});

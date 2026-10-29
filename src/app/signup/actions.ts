@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { allow, clientIp } from "@/lib/rate-limit";
-import { registerAccount, signupSchema, type SignupInput } from "@/lib/services/accounts";
+import { completeProfile, profileSchema, registerAccount, signupSchema, type SignupInput } from "@/lib/services/accounts";
 
 export type SignupState = {
   error?: string;
@@ -40,4 +40,29 @@ export async function signup(_prev: SignupState, formData: FormData): Promise<Si
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email: result.email, password: parsed.data.password });
   redirect(error ? "/login?created=1" : "/passport?welcome=1");
+}
+
+/** After "Continue with Google": the login exists, so only the campus details are asked for. */
+export async function completeSignup(_prev: SignupState, formData: FormData): Promise<SignupState> {
+  const t = await getTranslations("Signup.errors");
+  const raw = Object.fromEntries(formData) as Record<string, string>;
+  const values = { fullName: raw.fullName, orgId: raw.orgId, deptId: raw.deptId, rollNo: raw.rollNo, role: raw.role };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) redirect("/login");
+
+  const parsed = profileSchema.safeParse(raw);
+  if (!parsed.success) {
+    const fieldErrors: SignupState["fieldErrors"] = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0] as keyof SignupInput;
+      fieldErrors[key] ??= t.has(issue.message) ? t(issue.message) : issue.message;
+    }
+    return { fieldErrors, values };
+  }
+  const result = await completeProfile(user.id, user.email, parsed.data);
+  if (!result.ok) return result.field ? { fieldErrors: { [result.field]: t(result.code) }, values } : { error: t(result.code), values };
+  redirect("/passport?welcome=1");
 }

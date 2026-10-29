@@ -52,6 +52,8 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
       .select("*, requirements:resource_requirements(badge:skill_badges(id, name)), org:organizations(name, lat, lng), windows:availability_windows(weekday, start_time, end_time)")
       .eq("status", "active")
       .in("org_id", orgIds)
+      // Other campuses' resources show only when their owners share them.
+      .or(`org_id.eq.${user.org_id},open_to_partners.eq.true`)
       .order("demand", { ascending: false })
       .order("name"),
     supabase.from("user_badges").select("badge_id, status, expires_at, badge:skill_badges(name)").eq("user_id", user.id),
@@ -79,6 +81,12 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
     .in("status", ["approved", "checked_in", "overdue"])
     .gt("ends_at", now.toISOString())
     .lt("starts_at", new Date(now.getTime() + 9 * 24 * 3_600_000).toISOString());
+  // Planned maintenance counts as busy when looking for the next free hour.
+  const { data: downtime } = await createAdminClient()
+    .from("maintenance_windows")
+    .select("resource_id, starts_at, ends_at")
+    .in("resource_id", (resources ?? []).map((r) => r.id))
+    .gt("ends_at", now.toISOString());
   const valid = (myBadges ?? []).filter((b) => b.status === "verified" && (!b.expires_at || new Date(b.expires_at) > now));
   const held = new Set(valid.map((b) => b.badge_id));
   // At a campus that has endorsed you, your training counts where its badge has the same name.
@@ -93,7 +101,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
     const missing = required.filter((b) => !held.has(b.id) && !(endorsed && heldNames.has(b.name.trim().toLowerCase())));
     const open = nextOpenSlot(
       r.windows.map((w) => ({ weekday: w.weekday, startTime: w.start_time, endTime: w.end_time })),
-      (ahead ?? []).filter((b) => b.resource_id === r.id).map((b) => ({ startsAt: b.starts_at, endsAt: b.ends_at })),
+      [...(ahead ?? []), ...(downtime ?? [])].filter((b) => b.resource_id === r.id).map((b) => ({ startsAt: b.starts_at, endsAt: b.ends_at })),
       now,
     );
     return { ...r, required, missing, canUse: (sameOrg || endorsed) && missing.length === 0, endorsed, hours: hoursByResource.get(r.id) ?? 0, open };

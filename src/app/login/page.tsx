@@ -10,6 +10,8 @@ import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo";
 import { LoginForm } from "./login-form";
 import { loginAsDemo } from "./actions";
 import { Wordmark } from "@/components/wordmark";
+import { GoogleButton } from "@/components/google-button";
+import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("Login"))("submit") };
@@ -18,6 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; created?: string; deleted?: string }> }) {
   const user = await getCurrentUser();
   if (user) redirect(homeFor(user.role));
+  // Signed in with Google but never finished sign-up: send them to finish it rather than show sign-in again.
+  const { data: auth } = await (await createClient()).auth.getUser();
+  if (auth.user) redirect("/signup/complete");
   const { next, created, deleted } = await searchParams;
   const t = await getTranslations("Login");
   const tr = await getTranslations("Shell.roles");
@@ -45,7 +50,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             {t("deleted")}
           </p>
         )}
-        <Card className="p-6">
+        <Card className="space-y-4 p-6">
+          <GoogleButton next={next} />
           <LoginForm next={next} />
         </Card>
         <p className="mt-6 text-[15px] text-subtle">

@@ -1,12 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { academicYear } from "@/lib/domain/time";
 import { accreditationReport } from "@/lib/services/insights";
-
-// A cell that Excel opens safely: quoted, and never read as a formula.
-const cell = (v: string | number) => {
-  const s = String(v);
-  return `"${(/^[=+\-@]/.test(s) ? `'${s}` : s).replace(/"/g, '""')}"`;
-};
+import { csvCell as cell } from "@/lib/domain/csv";
 
 /** The facility table of the NAAC report as CSV, for IQAC's data templates. */
 export async function GET(request: Request) {

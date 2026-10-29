@@ -42,6 +42,7 @@ export async function createListingAction(_prev: ListingState, formData: FormDat
     ...Object.fromEntries(formData),
     requiresSupervision: formData.get("requiresSupervision") === "on",
     autoApprove: formData.get("autoApprove") === "on",
+    openToPartners: formData.get("openToPartners") === "on",
     badgeIds: formData.getAll("badgeIds"),
   });
   if (!parsed.success) {
@@ -60,6 +61,7 @@ export async function updateListingAction(_prev: ListingState, formData: FormDat
     ...Object.fromEntries(formData),
     requiresSupervision: formData.get("requiresSupervision") === "on",
     autoApprove: formData.get("autoApprove") === "on",
+    openToPartners: formData.get("openToPartners") === "on",
     badgeIds: formData.getAll("badgeIds"),
   });
   if (!parsed.success) {
