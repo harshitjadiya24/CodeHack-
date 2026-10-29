@@ -142,7 +142,7 @@
   --color-ok-soft: var(--ok-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
-  --font-sans: var(--font-mona), system-ui, sans-serif;
+  --font-sans: var(--font-mona), var(--font-deva-src), system-ui, sans-serif;
   --font-deva: var(--font-deva-src), var(--font-mona), sans-serif;
   --font-display: var(--font-mona), system-ui, sans-serif;
   /* Hashes and record IDs only. System mono, nothing extra to download. */
@@ -177,7 +177,8 @@ body {
   min-height: 100dvh;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-mona), system-ui, sans-serif;
+  /* Devanagari falls through to Noto Sans Devanagari; Latin stays in Mona Sans. */
+  font-family: var(--font-mona), var(--font-deva-src), system-ui, sans-serif;
   font-size: 1.0625rem;
   line-height: 1.55;
   transition: background-color 0.3s, color 0.3s;
@@ -240,6 +241,16 @@ body {
   line-height: 1.05;
   letter-spacing: -0.03em;
 }
+/* Devanagari hangs its matras above and below the headline, and its letters join along the shirorekha:
+   give it room and never squeeze the tracking. */
+:lang(hi) :is(.type-display, .type-h1, .type-h2, .type-h3, .font-display) {
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+:lang(hi) body {
+  line-height: 1.65;
+}
+
 /* Big figures: wide and heavy. */
 .readout {
   font-weight: 850;

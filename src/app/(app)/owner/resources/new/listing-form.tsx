@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 import { createListingAction, updateListingAction, type ListingState } from "../actions";
+import { LocationPicker } from "@/components/location-picker";
+import type { Point } from "@/lib/domain/nearby";
 
 export type ListingDraft = Partial<{
   name: string;
@@ -21,10 +23,21 @@ export type ListingDraft = Partial<{
   requiresSupervision: boolean;
   autoApprove: boolean;
   badgeIds: string[];
+  point: Point | null;
 }>;
 
 /** One form for listing and for editing; `resourceId` switches it to edit mode. */
-export function ListingForm({ badges, draft, resourceId }: { badges: { id: string; name: string }[]; draft?: ListingDraft; resourceId?: string }) {
+export function ListingForm({
+  badges,
+  draft,
+  resourceId,
+  campus,
+}: {
+  badges: { id: string; name: string }[];
+  draft?: ListingDraft;
+  resourceId?: string;
+  campus?: Point | null;
+}) {
   const [state, action, pending] = useActionState<ListingState, FormData>(resourceId ? updateListingAction : createListingAction, {});
   return (
     <form action={action} className="space-y-6">
@@ -50,6 +63,10 @@ export function ListingForm({ badges, draft, resourceId }: { badges: { id: strin
         <Field label="Location">
           <input name="location" required defaultValue={draft?.location} className={inputClass} placeholder="Central Makerspace, Bay 4" />
         </Field>
+        <div className="md:col-span-2">
+          <p className="mb-1.5 text-[15px] font-semibold text-ink">On the map (optional)</p>
+          <LocationPicker initial={draft?.point} campus={campus} />
+        </div>
         <div className="md:col-span-2">
           <Field label="Description">
             <textarea name="description" required minLength={10} rows={3} defaultValue={draft?.description} className={inputClass} />

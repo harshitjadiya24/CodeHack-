@@ -5,11 +5,14 @@ import { Card, PageHeader, Pill } from "@/components/ui";
 import { BadgeRequestForm } from "@/components/governance-forms";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatCampus } from "@/lib/domain/time";
 import { MAX_STRIKES } from "@/lib/domain/eligibility";
 import { siteOrigin } from "@/lib/site";
+import { PassportOffline } from "@/components/passport-offline";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Trust Passport" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("Passport"))("title") };
+}
 
 export default async function PassportPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
   const { welcome } = await searchParams;
@@ -24,15 +27,18 @@ export default async function PassportPage({ searchParams }: { searchParams: Pro
   const qrUrl = `${await siteOrigin()}/verify/passport/${user.id}`;
   const qrSvg = await QRCode.toString(qrUrl, { type: "svg", margin: 0, color: { dark: "#1d1b16", light: "#00000000" } });
   const now = new Date();
+  const t = await getTranslations("Passport");
+  const dateLocale = (await getLocale()) === "hi" ? "hi-IN" : "en-IN";
 
   return (
     <>
-      <PageHeader eyebrow="Your verified skills" title="Trust Passport" />
+      <PassportOffline />
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")} />
       {welcome && (
         <div role="status" className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] border border-rule bg-board-soft px-5 py-4">
-          <span className="board-chip chart-code rounded-full px-2 py-0.5 text-sm">Welcome</span>
+          <span className="board-chip chart-code rounded-full px-2 py-0.5 text-sm">{t("welcomeTag")}</span>
           <p className="flex-1 text-[15px] text-ink">
-            Your account is ready, {user.full_name.split(" ")[0]}. Next, add your training below. The admin office will verify your roll number; until then you can browse everything.
+            {t("welcome", { name: user.full_name.split(" ")[0] })}
           </p>
         </div>
       )}
@@ -51,24 +57,28 @@ export default async function PassportPage({ searchParams }: { searchParams: Pro
                     <h2 className="font-bold">{badge.name}</h2>
                     {state === "verified" && (
                       <Pill tone="ok">
-                        <BadgeCheck className="size-3" aria-hidden /> Verified
+                        <BadgeCheck className="size-3" aria-hidden /> {t("verified")}
                       </Pill>
                     )}
                     {state === "pending" && (
                       <Pill tone="warn">
-                        <Clock className="size-3" aria-hidden /> Under review
+                        <Clock className="size-3" aria-hidden /> {t("review")}
                       </Pill>
                     )}
                     {(state === "rejected" || state === "expired") && (
                       <Pill tone="danger">
-                        <XCircle className="size-3" aria-hidden /> {state === "expired" ? "Expired" : "Not accepted"}
+                        <XCircle className="size-3" aria-hidden /> {state === "expired" ? t("expired") : t("rejected")}
                       </Pill>
                     )}
                   </div>
                   <p className="mt-1 text-sm text-ink-2">{badge.description}</p>
-                  {opens.length > 0 && <p className="mt-2 text-xs text-subtle">Unlocks: {opens.join(", ")}</p>}
-                  {state === "verified" && held?.expires_at && <p className="mt-2 text-xs text-ok">Valid until {formatCampus(held.expires_at, { hour: undefined, minute: undefined, year: "numeric" })}</p>}
-                  {state === "rejected" && held?.note && <p className="mt-2 text-sm text-danger">Reviewer: {held.note}</p>}
+                  {opens.length > 0 && <p className="mt-2 text-xs text-subtle">{t("unlocks", { list: opens.join(", ") })}</p>}
+                  {state === "verified" && held?.expires_at && <p className="mt-2 text-xs text-ok">
+                      {t("validUntil", {
+                        date: new Intl.DateTimeFormat(dateLocale, { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" }).format(new Date(held.expires_at)),
+                      })}
+                    </p>}
+                  {state === "rejected" && held?.note && <p className="mt-2 text-sm text-danger">{t("reviewer", { note: held.note })}</p>}
                   {["none", "rejected", "expired"].includes(state) && <BadgeRequestForm badgeId={badge.id} />}
                 </Card>
               </li>
@@ -79,19 +89,19 @@ export default async function PassportPage({ searchParams }: { searchParams: Pro
         <aside className="space-y-4">
           <figure className="overflow-hidden rounded-[22px] border border-rule bg-card text-center">
             <figcaption className="chart-code flex justify-between bg-board px-4 py-3 text-[15px] text-board-ink">
-              <span>Lab pass</span>
+              <span>{t("labPass")}</span>
               <span className="tab">{user.roll_no}</span>
             </figcaption>
             <div className="p-5">
               <div className="mx-auto w-44 rounded-xl bg-white p-2" dangerouslySetInnerHTML={{ __html: qrSvg }} />
               <p className="type-h3 mt-4">{user.full_name}</p>
-              <p className="mt-2 text-sm text-subtle">An attendant scans this to see your current badges. Nothing else about you is shown.</p>
+              <p className="mt-2 text-sm text-subtle">{t("scanNote")}</p>
             </div>
           </figure>
           <Card className="p-5">
-            <h2 className="font-bold">Standing</h2>
+            <h2 className="font-bold">{t("standing")}</h2>
             <p className="mt-1 text-sm text-ink-2">
-              {user.strikes} of {MAX_STRIKES} strikes. Strikes are only ever added by a manager after reviewing an incident, with a written reason.
+              {t("strikes", { count: user.strikes, max: MAX_STRIKES })}
             </p>
           </Card>
         </aside>

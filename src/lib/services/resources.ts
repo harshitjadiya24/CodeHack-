@@ -12,6 +12,10 @@ const lines = (s: string) =>
     .map((l) => l.trim())
     .filter(Boolean);
 
+// An optional map pin. The hidden inputs send "" when there is no pin, which must not become 0.
+const coord = (min: number, max: number) =>
+  z.preprocess((v) => (v === "" || v == null ? undefined : Number(v)), z.number().min(min).max(max).optional());
+
 export const listingSchema = z.object({
   name: z.string().trim().min(3).max(120),
   kind: z.enum(["equipment", "space"]),
@@ -29,6 +33,8 @@ export const listingSchema = z.object({
   checklist: z.string().default(""),
   photoSlots: z.string().default(""),
   badgeIds: z.array(z.guid()).default([]),
+  lat: coord(-90, 90),
+  lng: coord(-180, 180),
 });
 
 export type ListingInput = z.infer<typeof listingSchema>;
@@ -67,6 +73,8 @@ export async function updateResource(owner: CurrentUser, resourceId: string, inp
       auto_approve: input.autoApprove,
       checklist: checklist as unknown as Json,
       photo_slots: photoSlots as unknown as Json,
+      lat: input.lat ?? null,
+      lng: input.lng ?? null,
     })
     .eq("id", r.id);
   if (error) return { ok: false, error: error.message };
@@ -122,6 +130,8 @@ export async function createResource(owner: CurrentUser, input: ListingInput): P
       auto_approve: input.autoApprove,
       checklist: checklist as unknown as Json,
       photo_slots: photoSlots as unknown as Json,
+      lat: input.lat ?? null,
+      lng: input.lng ?? null,
     })
     .select("id")
     .single();

@@ -63,16 +63,25 @@ export function formatDistance(km: number): string {
   return km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`;
 }
 
-/** "Open now until 17:00", "Today 14:00", "Tomorrow 09:00", "Thu 5 Nov, 09:00". */
-export function slotLabel(slot: OpenSlot, now: Date): string {
+export type SlotWords = { openNow: (time: string) => string; today: (time: string) => string; tomorrow: (time: string) => string; locale: string };
+
+const ENGLISH: SlotWords = {
+  openNow: (t) => `Open now until ${t}`,
+  today: (t) => `Today ${t}`,
+  tomorrow: (t) => `Tomorrow ${t}`,
+  locale: "en-IN",
+};
+
+/** "Open now until 17:00", "Today 14:00", "Tomorrow 09:00", "Thu 5 Nov, 09:00" (or the same in `words`). */
+export function slotLabel(slot: OpenSlot, now: Date, words: SlotWords = ENGLISH): string {
   const time = (d: Date) => {
     const m = campusParts(d).minutes;
     return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
   };
-  if (slot.startsAt.getTime() - now.getTime() <= 15 * MIN) return `Open now until ${time(slot.endsAt)}`;
+  if (slot.startsAt.getTime() - now.getTime() <= 15 * MIN) return words.openNow(time(slot.endsAt));
   const days = Math.round((campusInstant(isoDate(slot.startsAt), "00:00").getTime() - campusInstant(isoDate(now), "00:00").getTime()) / DAY);
-  if (days === 0) return `Today ${time(slot.startsAt)}`;
-  if (days === 1) return `Tomorrow ${time(slot.startsAt)}`;
-  const date = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short" }).format(slot.startsAt);
+  if (days === 0) return words.today(time(slot.startsAt));
+  if (days === 1) return words.tomorrow(time(slot.startsAt));
+  const date = new Intl.DateTimeFormat(words.locale, { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short" }).format(slot.startsAt);
   return `${date}, ${time(slot.startsAt)}`;
 }

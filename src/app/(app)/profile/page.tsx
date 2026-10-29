@@ -8,6 +8,8 @@ import { MAX_STRIKES } from "@/lib/domain/eligibility";
 import { creditsUsedThisWeek } from "@/lib/domain/fairness";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { bookingHistory } from "@/lib/services/context";
+import { deletionBlocker } from "@/lib/services/privacy";
+import { DeleteAccount } from "./delete-account";
 
 export const metadata: Metadata = { title: "Profile" };
 
@@ -22,10 +24,11 @@ const VISIBILITY = [
 export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createClient();
-  const [{ data: org }, { data: cfg }, history] = await Promise.all([
+  const [{ data: org }, { data: cfg }, history, blocker] = await Promise.all([
     supabase.from("organizations").select("name").eq("id", user.org_id).single(),
     supabase.from("fairness_config").select("weekly_credits").eq("org_id", user.org_id).single(),
     bookingHistory(createAdminClient(), user.id),
+    deletionBlocker(user),
   ]);
   const used = creditsUsedThisWeek(history, new Date());
 
@@ -80,6 +83,29 @@ export default async function ProfilePage() {
           </p>
         </Card>
       </div>
+
+      <section aria-labelledby="delete-title" className="mt-10 max-w-2xl rounded-[22px] border border-rule p-5 sm:p-6">
+        <h2 id="delete-title" className="type-h3 text-xl">
+          Delete your account
+        </h2>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-2">
+          <li>Removed: your name, roll number and department, your certificate uploads, your notifications and pending requests. You can’t sign in again.</li>
+          <li>
+            Kept without your name, because your institute needs them: past bookings, handover photos and condition records (deleted after one academic
+            year), and the audit log, which notes that an account was deleted.
+          </li>
+          <li>Download your data first if you want a copy.</li>
+        </ul>
+        <div className="mt-4">
+          {blocker ? (
+            <p className="tone-butter rounded-2xl px-4 py-3 text-sm">
+              <b>Not yet.</b> {blocker}
+            </p>
+          ) : (
+            <DeleteAccount email={user.email} />
+          )}
+        </div>
+      </section>
     </>
   );
 }

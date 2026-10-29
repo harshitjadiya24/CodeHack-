@@ -30,3 +30,29 @@ test("signed-out visitors are sent to sign in", async ({ page }) => {
   await page.goto("/resources");
   await expect(page).toHaveURL(/\/login/);
 });
+
+test("the app is installable: manifest, icons and a never-stale service worker", async ({ request }) => {
+  const manifest = await (await request.get("/manifest.webmanifest")).json();
+  expect(manifest.short_name).toBe("Saajha");
+  expect(manifest.display).toBe("standalone");
+  expect(manifest.icons.some((i: { purpose?: string }) => i.purpose === "maskable")).toBe(true);
+  for (const icon of manifest.icons) expect((await request.get(icon.src)).ok()).toBe(true);
+
+  const sw = await request.get("/sw.js");
+  expect(sw.ok()).toBe(true);
+  expect(sw.headers()["cache-control"]).toContain("no-store");
+  expect((await request.get("/offline")).ok()).toBe(true);
+});
+
+test("the app switches to Hindi and back, and remembers the choice @phone", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: /View in Hindi/ }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "hi-IN");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("अपने कैंपस में साइन इन करें");
+
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("अपने कैंपस में साइन इन करें");
+
+  await page.getByRole("button", { name: /View in English/ }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en-IN");
+});

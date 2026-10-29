@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Button, inputClass } from "@/components/ui";
 import {
   decideBadgeAction,
@@ -62,18 +63,19 @@ export function IncidentDecisionForm({ incidentId, proposed }: { incidentId: str
 
 export function BadgeRequestForm({ badgeId }: { badgeId: string }) {
   const [state, action, pending] = useActionState<GovState, FormData>(requestBadgeAction, {});
+  const t = useTranslations("Badge");
   useToast(state);
   if (state.ok) return <p className="text-sm text-ok">{state.message}</p>;
   return (
     <form action={action} className="mt-3 space-y-2">
       <input type="hidden" name="badgeId" value={badgeId} />
       <label className="block text-sm">
-        <span className="font-medium">Certificate or attendance slip</span>
+        <span className="font-medium">{t("evidence")}</span>
         <input type="file" name="evidence" accept="image/*,application/pdf" required className="mt-1 block w-full text-sm file:mr-3 file:rounded file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-accent" />
       </label>
-      <input name="note" placeholder="e.g. Attended induction batch 9 on 21 Oct" className={inputClass} />
+      <input name="note" placeholder={t("notePlaceholder")} className={inputClass} />
       <Button disabled={pending} variant="secondary" className="w-full">
-        {pending ? "Uploading…" : "Request verification"}
+        {pending ? t("submitting") : t("submit")}
       </Button>
     </form>
   );

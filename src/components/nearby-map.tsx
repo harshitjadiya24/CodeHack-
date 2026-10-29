@@ -8,8 +8,9 @@ import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { distanceKm, formatDistance, type Point } from "@/lib/domain/nearby";
+import { useTranslations } from "next-intl";
 
-export type NearbyItem = { id: string; name: string; canUse: boolean; note: string; opensAt: string | null; opensLabel: string | null };
+export type NearbyItem = { id: string; name: string; canUse: boolean; note: string; opensAt: string | null; opensLabel: string | null; openNow: boolean };
 export type NearbyPlace = { id: string; lat: number; lng: number; title: string; org: string; items: NearbyItem[] };
 
 const SHOWN = 6;
@@ -27,6 +28,7 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
   const [selected, setSelected] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
+  const t = useTranslations("Nearby");
 
   // Every open resource with its distance from wherever "here" is, nearest first, then soonest.
   const rows = useMemo(() => {
@@ -75,7 +77,7 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
   }, [selected]);
 
   async function useMyLocation() {
-    if (!("geolocation" in navigator)) return setLocateError("This browser can’t share a location.");
+    if (!("geolocation" in navigator)) return setLocateError(t("noGeo"));
     setLocating(true);
     setLocateError(null);
     navigator.geolocation.getCurrentPosition(
@@ -101,7 +103,7 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
       },
       (err) => {
         setLocating(false);
-        setLocateError(err.code === err.PERMISSION_DENIED ? "Location is blocked for this site. Distances stay measured from your campus." : "Couldn’t find your location. Try again.");
+        setLocateError(err.code === err.PERMISSION_DENIED ? t("geoBlocked") : t("geoFailed"));
       },
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
     );
@@ -112,14 +114,14 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 id="nearby-heading" className="type-h3">
-            Closest open slots
+            {t("title")}
           </h2>
           <p className="text-[15px] text-subtle">
-            {origin.you ? "Distances from where you are now." : `Distances from ${origin.label}.`} Each pin shows how many things there have a free hour this week.
+            {origin.you ? t("fromYou") : t("fromPlace", { place: origin.label })} {t("pinNote")}
           </p>
         </div>
         <Button type="button" variant="secondary" onClick={useMyLocation} disabled={locating}>
-          <LocateFixed className="size-4" aria-hidden /> {locating ? "Finding you…" : origin.you ? "Update my location" : "Use my location"}
+          <LocateFixed className="size-4" aria-hidden /> {locating ? t("finding") : origin.you ? t("updateLocation") : t("useLocation")}
         </Button>
       </div>
       {locateError && (
@@ -132,7 +134,7 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
         <div
           ref={el}
           role="region"
-          aria-label="Map of places with open slots. The list beside it has the same information."
+          aria-label={t("mapLabel")}
           className="nearby-map relative z-0 h-[300px] overflow-hidden rounded-[22px] border border-rule bg-paper-2 sm:h-[400px]"
         />
 
@@ -141,13 +143,13 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
             <p className="mb-2 flex items-center justify-between gap-2 text-[15px]">
               <span className="font-semibold">{places.find((p) => p.id === selected)?.title}</span>
               <button type="button" onClick={() => setSelected(null)} className="min-h-11 px-2 font-semibold underline underline-offset-4">
-                Show all
+                {t("showAll")}
               </button>
             </p>
           )}
           {shown.length === 0 ? (
             <p className="rounded-[22px] border border-rule bg-card p-5 text-[15px] text-ink-2">
-              Nothing here has a free hour in the next week. Try a wider area, or request a slot and join the queue.
+              {t("none")}
             </p>
           ) : (
             <ol className="divide-y divide-rule overflow-hidden rounded-[22px] border border-rule bg-card">
@@ -167,7 +169,7 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
                       </span>
                     </span>
                     <span className="text-right">
-                      <span className={cn("tab block text-sm font-bold", r.opensLabel?.startsWith("Open now") ? "text-ok" : "text-ink")}>{r.opensLabel}</span>
+                      <span className={cn("tab block text-sm font-bold", r.openNow ? "text-ok" : "text-ink")}>{r.opensLabel}</span>
                       <span className="tab block text-sm text-subtle">{formatDistance(r.km)}</span>
                     </span>
                     <span className={cn("col-span-2 mt-1 text-sm", r.canUse ? "text-ok" : "text-subtle")}>{r.note}</span>
@@ -176,8 +178,8 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
               ))}
             </ol>
           )}
-          {!selected && rows.length > SHOWN && <p className="mt-2 text-sm text-subtle">{rows.length - SHOWN} more with open slots below.</p>}
-          {closed > 0 && <p className="mt-1 text-sm text-subtle">{closed} fully booked or closed this week.</p>}
+          {!selected && rows.length > SHOWN && <p className="mt-2 text-sm text-subtle">{t("more", { count: rows.length - SHOWN })}</p>}
+          {closed > 0 && <p className="mt-1 text-sm text-subtle">{t("closed", { count: closed })}</p>}
         </div>
       </div>
     </section>

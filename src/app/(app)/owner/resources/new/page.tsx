@@ -10,11 +10,14 @@ export const metadata: Metadata = { title: "List a resource" };
 export default async function NewListingPage() {
   const user = await requirePageRole(OWNER_ROLES);
   const supabase = await createClient();
-  const { data: badges } = await supabase.from("skill_badges").select("id, name").eq("org_id", user.org_id).order("name");
+  const [{ data: badges }, { data: org }] = await Promise.all([
+    supabase.from("skill_badges").select("id, name").eq("org_id", user.org_id).order("name"),
+    supabase.from("organizations").select("lat, lng").eq("id", user.org_id).single(),
+  ]);
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader eyebrow="Owner" title="List a resource" />
-      <NewListing badges={badges ?? []} aiOn={aiEnabled()} />
+      <NewListing badges={badges ?? []} aiOn={aiEnabled()} campus={org?.lat != null && org.lng != null ? { lat: org.lat, lng: org.lng } : null} />
     </div>
   );
 }

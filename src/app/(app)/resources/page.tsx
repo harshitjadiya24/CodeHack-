@@ -10,23 +10,29 @@ import { Sparkles } from "lucide-react";
 import { matchResources } from "@/lib/ai";
 import { CopilotResults } from "@/components/copilot-results";
 import { NearbyMap, type NearbyPlace } from "@/components/nearby-map";
-import { nextOpenSlot, slotLabel } from "@/lib/domain/nearby";
+import { nextOpenSlot, slotLabel, type SlotWords } from "@/lib/domain/nearby";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Discover" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("Shell.nav"))("discover") };
+}
 
 type Search = { q?: string; category?: string; eligible?: string; ask?: string; where?: string };
 
 // How far to look. Other institutes appear only once they are verified; a pending one stays on its own campus.
-const SCOPES = [
-  { key: "campus", label: "My campus" },
-  { key: "city", label: "My city" },
-  { key: "state", label: "My state" },
-] as const;
+const SCOPES = [{ key: "campus" }, { key: "city" }, { key: "state" }] as const;
 
 export default async function ResourcesPage({ searchParams }: { searchParams: Promise<Search> }) {
   const user = await requireUser();
   const { q = "", category = "", eligible = "", ask = "", where = "campus" } = await searchParams;
   const scope = SCOPES.some((s) => s.key === where) ? where : "campus";
+  const [t, tn, locale] = await Promise.all([getTranslations("Discover"), getTranslations("Nearby"), getLocale()]);
+  const words: SlotWords = {
+    openNow: (time) => tn("openNow", { time }),
+    today: (time) => tn("today", { time }),
+    tomorrow: (time) => tn("tomorrow", { time }),
+    locale: locale === "hi" ? "hi-IN" : "en-IN",
+  };
   const supabase = await createClient();
 
   const { data: home } = await supabase.from("organizations").select("name, city, state, lat, lng").eq("id", user.org_id).single();
@@ -118,22 +124,26 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
       id: r.id,
       name: r.name,
       canUse: r.canUse,
-      note: r.canUse ? "You can book this" : r.org_id !== user.org_id && !r.endorsed ? "Needs your institute’s endorsement" : `Needs: ${r.missing.map((m) => m.name).join(", ")}`,
+      note: r.canUse ? tn("canBook") : r.org_id !== user.org_id && !r.endorsed ? tn("needsEndorsement") : tn("needs", { list: r.missing.map((m) => m.name).join(", ") }),
       opensAt: r.open?.startsAt.toISOString() ?? null,
-      opensLabel: r.open ? slotLabel(r.open, now) : null,
+      opensLabel: r.open ? slotLabel(r.open, now, words) : null,
+      openNow: !!r.open && r.open.startsAt.getTime() - now.getTime() <= 15 * 60_000,
     });
     places.set(key, place);
   }
 
   // ~45 open hours a week → ~190 a month. Good enough for a demand signal, not billing.
-  const demandLabel = (hours: number) => (hours > 60 ? "High demand" : hours > 15 ? "Moderate" : "Mostly idle");
+  const demandLabel = (hours: number) => t(hours > 60 ? "demand.high" : hours > 15 ? "demand.moderate" : "demand.idle");
 
   return (
     <>
-      <PageHeader eyebrow={`${all.length} resources · ${new Set(all.map((r) => r.location.split(",")[0])).size} buildings`} title="Discover what your campus can lend" />
+      <PageHeader
+        eyebrow={t("eyebrow", { resources: all.length, buildings: new Set(all.map((r) => r.location.split(",")[0])).size })}
+        title={t("title")}
+      />
 
       <form className="mb-4 flex gap-2" aria-label="Ask Saajha Copilot">
-        <label className="sr-only" htmlFor="ask">Describe what you need</label>
+        <label className="sr-only" htmlFor="ask">{t("askLabel")}</label>
         <div className="relative flex-1">
           <Sparkles className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle" aria-hidden />
           <input
@@ -141,15 +151,15 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
             name="ask"
             defaultValue={ask}
             className={`${inputClass} pl-9`}
-            placeholder="Describe your task: “I need to test a 12V motor driver circuit next week”"
+            placeholder={t("askPlaceholder")}
           />
         </div>
-        <Button>Ask Copilot</Button>
+        <Button>{t("ask")}</Button>
       </form>
 
       {copilot && <CopilotResults ask={ask} result={copilot} info={info} />}
 
-      <nav aria-label="How far to look" className="mb-4 flex flex-wrap items-center gap-2">
+      <nav aria-label={t("scopeLabel")} className="mb-4 flex flex-wrap items-center gap-2">
         {SCOPES.map((s) => (
           <Link
             key={s.key}
@@ -157,32 +167,32 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
             aria-current={scope === s.key ? "page" : undefined}
             className={`inline-flex min-h-11 items-center rounded-xl border px-4 text-[15px] transition-colors ${scope === s.key ? "border-ink bg-accent font-semibold text-accent-ink" : "border-rule bg-card hover:border-subtle"}`}
           >
-            {s.label}
+            {t(`scopes.${s.key}`)}
           </Link>
         ))}
         {scope !== "campus" && home && (
           <span className="text-[15px] text-subtle">
-            Verified institutes in {scope === "city" ? home.city : home.state}. Using another campus’s equipment needs your institute’s endorsement.
+            {t("scopeNote", { place: (scope === "city" ? home.city : home.state) ?? "" })}
           </span>
         )}
       </nav>
 
       <form className="mb-8 grid gap-3 md:grid-cols-[1fr_220px_auto_auto]" role="search">
         <input type="hidden" name="where" value={scope} />
-        <label className="sr-only" htmlFor="q">Search</label>
-        <input id="q" name="q" defaultValue={q} placeholder="Search oscilloscope, camera, 3D printer…" className={inputClass} />
-        <label className="sr-only" htmlFor="category">Category</label>
+        <label className="sr-only" htmlFor="q">{t("searchLabel")}</label>
+        <input id="q" name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className={inputClass} />
+        <label className="sr-only" htmlFor="category">{t("category")}</label>
         <select id="category" name="category" defaultValue={category} className={inputClass}>
-          <option value="">All categories</option>
+          <option value="">{t("allCategories")}</option>
           {categories.map((c) => (
             <option key={c}>{c}</option>
           ))}
         </select>
         <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-rule bg-card px-3 text-[15px]">
           <input type="checkbox" name="eligible" value="1" defaultChecked={!!eligible} className="size-4 accent-[var(--ink)]" />
-          Only what I can use
+          {t("eligibleOnly")}
         </label>
-        <Button variant="secondary">Apply</Button>
+        <Button variant="secondary">{t("apply")}</Button>
       </form>
 
       {home?.lat != null && home.lng != null && places.size > 0 && (
@@ -190,7 +200,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
       )}
 
       {shown.length === 0 ? (
-        <EmptyState title="Nothing matches those filters">Try clearing the search or the eligibility toggle.</EmptyState>
+        <EmptyState title={t("emptyTitle")}>{t("emptyBody")}</EmptyState>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {shown.map((r) => (
@@ -201,7 +211,7 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <h2 className="font-bold text-ink">{r.name}</h2>
-                      {r.demand === "high" && <Pill tone="saffron">High demand · Fair Draw</Pill>}
+                      {r.demand === "high" && <Pill tone="saffron">{t("highDemand")}</Pill>}
                     </div>
                     <p className="mt-1 flex items-center gap-1 text-sm text-subtle">
                       <MapPin className="size-3.5" aria-hidden /> {r.location}
@@ -210,19 +220,19 @@ export default async function ResourcesPage({ searchParams }: { searchParams: Pr
                     <div className="mt-3 flex flex-wrap gap-2">
                       {r.canUse ? (
                         <Pill tone="ok">
-                          <ShieldCheck className="size-3" aria-hidden /> You can book this
+                          <ShieldCheck className="size-3" aria-hidden /> {t("canBook")}
                         </Pill>
                       ) : r.org_id !== user.org_id && !r.endorsed ? (
-                        <Pill tone="info">{r.org?.name ?? "Another institute"}: endorsement needed</Pill>
+                        <Pill tone="info">{t("endorsementNeeded", { org: r.org?.name ?? t("anotherInstitute") })}</Pill>
                       ) : (
-                        <Pill tone="warn">Needs: {r.missing.map((m) => m.name).join(", ")}</Pill>
+                        <Pill tone="warn">{t("needs", { list: r.missing.map((m) => m.name).join(", ") })}</Pill>
                       )}
                       {r.requires_supervision && (
                         <Pill>
-                          <Users className="size-3" aria-hidden /> Supervised
+                          <Users className="size-3" aria-hidden /> {t("supervised")}
                         </Pill>
                       )}
-                      {r.auto_approve && !r.requires_supervision && <Pill tone="accent">Instant approval</Pill>}
+                      {r.auto_approve && !r.requires_supervision && <Pill tone="accent">{t("instant")}</Pill>}
                       <Pill>{demandLabel(r.hours)}</Pill>
                     </div>
                   </div>

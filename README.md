@@ -50,6 +50,14 @@ Any college can register at `/institutions/new` in a few minutes:
 - Students sign up at `/signup`, pick their institute and roll number, and can browse at once. The admin office verifies them before they can borrow.
 - **Discover** can widen from *My campus* to *My city* or *My state*, and shows verified institutes nearby on the map.
 
+## In Hindi
+
+Tap **हिन्दी** in the header or on the sign-in page. The app shell, sign-in, Discover (with the map) and the Trust Passport switch to Hindi, and the choice is remembered on that device. Hindi text uses Noto Sans Devanagari with looser line spacing, so the matras aren't clipped. Strings live in `messages/en.json` and `messages/hi.json`, and a unit test fails if a key or a `{placeholder}` is missing from either file.
+
+## On phones
+
+Saajha installs as an app ("Add to Home screen"). Once you've opened your Trust Passport on a phone, its QR still shows at the lab desk with no signal. The saved copy is removed as soon as you sign out. Every other page shows a clear offline notice instead of an error.
+
 ## How it's built
 
 - **Next.js 15** (App Router, server actions, TypeScript strict) and **Tailwind CSS v4**.
@@ -122,8 +130,7 @@ CI runs them too, once the repository has the three Supabase secrets.
 
 ## What's next
 
-- Hindi and regional languages.
-- Install as an app, with the passport QR working offline.
+- Hindi for every remaining screen (the landing page, owner and admin pages, and the reasons in decision receipts), then other Indian languages.
 - WhatsApp and email reminders.
 - Calendar export.
 - Deposits over UPI.

@@ -37,6 +37,7 @@ export const ACTION_LABEL: Record<string, string> = {
   "user.role_changed": "Role changed",
   "user.email_confirmed": "Email confirmed",
   "org.registered": "Institute registered",
+  "user.deleted": "Account deleted by its owner",
   "org.approved": "Institute approved by Saajha",
   "org.suspended": "Institute suspended by Saajha",
   "org.reactivated": "Institute reactivated by Saajha",

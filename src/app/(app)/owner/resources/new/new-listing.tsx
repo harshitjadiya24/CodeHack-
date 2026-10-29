@@ -5,8 +5,9 @@ import { Camera, Sparkles } from "lucide-react";
 import { Button, Card } from "@/components/ui";
 import { draftListingAction, type DraftState } from "../actions";
 import { ListingForm } from "./listing-form";
+import type { Point } from "@/lib/domain/nearby";
 
-export function NewListing({ badges, aiOn }: { badges: { id: string; name: string }[]; aiOn: boolean }) {
+export function NewListing({ badges, aiOn, campus }: { badges: { id: string; name: string }[]; aiOn: boolean; campus: Point | null }) {
   const [state, action, pending] = useActionState<DraftState, FormData>(draftListingAction, {});
   return (
     <div className="space-y-6">
@@ -39,7 +40,7 @@ export function NewListing({ badges, aiOn }: { badges: { id: string; name: strin
           </p>
         )}
       </Card>
-      <ListingForm key={state.draft?.name ?? "blank"} badges={badges} draft={state.draft} />
+      <ListingForm key={state.draft?.name ?? "blank"} badges={badges} draft={state.draft} campus={campus} />
     </div>
   );
 }

@@ -27,3 +27,11 @@ test("a partner-campus student is asked for an endorsement, not refused", async 
   await page.goto("/resources?where=city");
   await expect(page.getByText(/Northfield Institute of Technology: endorsement needed|You can book this/).first()).toBeVisible();
 });
+
+test("someone with open bookings is told why they can't delete their account yet", async ({ page }) => {
+  await signInAs(page, /Meera/);
+  await page.goto("/profile");
+  await expect(page.getByRole("heading", { name: "Delete your account" })).toBeVisible();
+  await expect(page.getByText(/still open\. Cancel or return/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Delete my account" })).toHaveCount(0);
+});

@@ -14,9 +14,10 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
   const db = createAdminClient();
   const { data: r } = await db.from("resources").select("*").eq("id", id).maybeSingle();
   if (!r || r.org_id !== user.org_id || (user.role === "owner" && r.owner_id !== user.id)) notFound();
-  const [{ data: badges }, { data: reqs }] = await Promise.all([
+  const [{ data: badges }, { data: reqs }, { data: org }] = await Promise.all([
     db.from("skill_badges").select("id, name").eq("org_id", user.org_id).order("name"),
     db.from("resource_requirements").select("badge_id").eq("resource_id", id),
+    db.from("organizations").select("lat, lng").eq("id", user.org_id).single(),
   ]);
 
   return (
@@ -26,6 +27,7 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
         <ListingForm
           resourceId={r.id}
           badges={badges ?? []}
+          campus={org?.lat != null && org.lng != null ? { lat: org.lat, lng: org.lng } : null}
           draft={{
             name: r.name,
             category: r.category,
@@ -43,6 +45,7 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
             checklist: ((r.checklist as string[]) ?? []).join("\n"),
             photoSlots: ((r.photo_slots as string[]) ?? []).join("\n"),
             badgeIds: (reqs ?? []).map((x) => x.badge_id),
+            point: r.lat != null && r.lng != null ? { lat: r.lat, lng: r.lng } : null,
           }}
         />
       </div>
