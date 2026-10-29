@@ -76,7 +76,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <p className="mb-4 text-sm text-subtle">Used for under 10% of open hours in the last four weeks. Each change below is the one most likely to help, and the owner is told.</p>
           {ops.idle.length ? (
             <ul className="divide-y divide-rule">
-              {ops.idle.slice(0, 8).map((r) => (
+              {ops.idle.slice(0, 4).map((r) => (
                 <li key={r.id} className="py-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <a href={`/resources/${r.id}`} className="font-semibold hover:underline">
@@ -95,6 +95,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   </div>
                 </li>
               ))}
+              {ops.idle.length > 4 && <li className="pt-3 text-sm text-subtle">{ops.idle.length - 4} more, all in the table below.</li>}
             </ul>
           ) : (
             <p className="text-sm text-ok">Nothing idle. Every resource was used for at least a tenth of its open hours.</p>
