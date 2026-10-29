@@ -28,6 +28,11 @@ export function ButtonLink({
   return <Link className={cn(buttonBase, buttonStyles[variant], className)} {...props} />;
 }
 
+/** A file download (an .ics, a CSV) styled as a button. A plain <a>, so the router doesn't try to render it as a page. */
+export function DownloadLink({ variant = "secondary", className, ...props }: ComponentProps<"a"> & { variant?: ButtonVariant }) {
+  return <a download className={cn(buttonBase, buttonStyles[variant], className)} {...props} />;
+}
+
 export function Card({ className, ...props }: ComponentProps<"div">) {
   return <div className={cn("rounded-[22px] border border-rule bg-card", className)} {...props} />;
 }

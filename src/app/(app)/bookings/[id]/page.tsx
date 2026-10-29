@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ButtonLink, Card, Pill } from "@/components/ui";
+import { ButtonLink, Card, DownloadLink, Pill } from "@/components/ui";
+import { CalendarPlus } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+import { intlLocale } from "@/i18n/config";
 import { ResourceIcon } from "@/components/resource-icon";
 import { DecisionReceiptCard } from "@/components/decision-receipt";
 import { AuditTimeline } from "@/components/audit-timeline";
@@ -18,7 +21,9 @@ import { BOOKING_STATUS } from "@/lib/status";
 import { formatCampus } from "@/lib/domain/time";
 import type { DecisionReceipt } from "@/lib/domain/receipt";
 
-export const metadata: Metadata = { title: "Booking" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("Booking"))("title") };
+}
 
 const CANCELLABLE = ["requested", "in_draw", "waitlisted", "approved"];
 
@@ -48,13 +53,15 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
     signedHandoverPhotos(id),
   ]);
 
+  const [t, statusLabel, locale] = await Promise.all([getTranslations("Booking"), getTranslations("Status"), getLocale().then(intlLocale)]);
+  const fmt = (d: string, opts: Intl.DateTimeFormatOptions = {}) => formatCampus(d, opts, locale);
   const isRequester = b.user_id === user.id;
   const canManage = STAFF_ROLES.includes(user.role) || (OWNER_ROLES.includes(user.role) && b.resource.owner_id === user.id);
   const checkIn = handovers.find((h) => h.phase === "check_in");
   const returned = handovers.find((h) => h.phase === "return");
   const awaitingAttendant = b.status === "approved" && b.resource.requires_supervision && !!checkIn && !checkIn.attendant_confirmed_at;
   const isAttendant = ["attendant", ...STAFF_ROLES].includes(user.role);
-  const status = BOOKING_STATUS[b.status];
+  const status = { ...BOOKING_STATUS[b.status], label: statusLabel(b.status) };
   const receipt = b.decision_receipt as DecisionReceipt | null;
   const startsSoon = new Date(b.starts_at).getTime() - Date.now() < 24 * 3_600_000;
   const endParts = campusParts(new Date(b.ends_at));
@@ -65,21 +72,21 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
       <div className="space-y-6">
         {isNew && (
           <div role="status" className="rounded-[22px] border border-accent bg-accent-soft p-4 text-sm text-accent">
-            Request recorded. Below is exactly what happened and why. You will be notified of every change.
+            {t("newNotice")}
           </div>
         )}
 
         <div className="flex flex-wrap items-start gap-4">
           <ResourceIcon category={b.resource.category} />
           <div className="flex-1">
-            <p className="text-sm text-subtle">Booking · {b.id.slice(0, 8)}</p>
+            <p className="text-sm text-subtle">{t("id", { id: b.id.slice(0, 8) })}</p>
             <h1 className="type-h2">
               <Link href={`/resources/${b.resource.id}`} className="hover:underline">
                 {b.resource.name}
               </Link>
             </h1>
             <p className="text-sm text-subtle">
-              {formatCampus(b.starts_at, { weekday: "long" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} · {b.resource.location}
+              {fmt(b.starts_at, { weekday: "long" })} – {fmt(b.ends_at, { day: undefined, month: undefined })} · {b.resource.location}
             </p>
           </div>
           <Pill tone={status.tone} className="text-sm">
@@ -92,18 +99,18 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
 
         {!!incidents?.length && (
           <Card className="p-5">
-            <h2 className="mb-3 font-bold">Incidents</h2>
+            <h2 className="mb-3 font-bold">{t("incidents")}</h2>
             <ul className="space-y-3">
               {incidents.map((i) => (
                 <li key={i.id} className="rounded-xl border border-rule p-3 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Pill tone="danger">{i.type}</Pill>
-                    <Pill tone={i.severity === "high" ? "danger" : i.severity === "medium" ? "warn" : "neutral"}>{i.severity}</Pill>
-                    <Pill tone={i.status === "resolved" ? "ok" : "info"}>{i.status === "resolved" ? "Decided" : "Awaiting manager"}</Pill>
+                    <Pill tone="danger">{t(`incidentTypes.${i.type}`)}</Pill>
+                    <Pill tone={i.severity === "high" ? "danger" : i.severity === "medium" ? "warn" : "neutral"}>{t(`severities.${i.severity}`)}</Pill>
+                    <Pill tone={i.status === "resolved" ? "ok" : "info"}>{i.status === "resolved" ? t("decided") : t("awaitingManager")}</Pill>
                   </div>
                   <p className="mt-2 text-ink-2">{i.description}</p>
-                  {i.borrower_response && <p className="mt-1 text-ink-2">Borrower’s response: “{i.borrower_response}”</p>}
-                  {i.decision && <p className="mt-1 text-ink">Decision: {i.decision}</p>}
+                  {i.borrower_response && <p className="mt-1 text-ink-2">{t("borrowerResponse", { text: i.borrower_response })}</p>}
+                  {i.decision && <p className="mt-1 text-ink">{t("decision", { text: i.decision })}</p>}
                   {isRequester && i.status !== "resolved" && !i.borrower_response && <DisputeForm incidentId={i.id} />}
                 </li>
               ))}
@@ -114,12 +121,12 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
         {receipt && <DecisionReceiptCard receipt={receipt} />}
 
         <Card className="p-5">
-          <h2 className="mb-1 font-bold">Purpose</h2>
+          <h2 className="mb-1 font-bold">{t("purpose")}</h2>
           <p className="text-sm text-ink-2">{b.purpose}</p>
-          {b.deadline_note && <p className="mt-2 text-sm text-ink-2">Deadline: {b.deadline_note}</p>}
+          {b.deadline_note && <p className="mt-2 text-sm text-ink-2">{t("deadline", { note: b.deadline_note })}</p>}
           {!isRequester && (
             <p className="mt-2 text-sm text-subtle">
-              Requested by {b.requester?.full_name} {b.requester?.roll_no ? `(${b.requester.roll_no})` : ""}
+              {t("requestedBy", { name: `${b.requester?.full_name ?? ""}${b.requester?.roll_no ? ` (${b.requester.roll_no})` : ""}` })}
             </p>
           )}
         </Card>
@@ -132,28 +139,28 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
           code={`SJ-${b.id.slice(0, 4).toUpperCase()}`}
           tone={["approved", "checked_in", "closed"].includes(b.status) ? "ok" : status.tone === "saffron" || status.tone === "info" ? "draw" : status.tone === "danger" ? "danger" : status.tone === "warn" ? "warn" : "neutral"}
           rows={[
-            ["Borrower", b.requester?.full_name ?? "—"],
-            ["Slot", `${formatCampus(b.starts_at, { weekday: "short", hour12: false })}–${formatCampus(b.ends_at, { day: undefined, month: undefined, hour12: false })}`],
-            ["Where", b.resource.location],
-            ["Decided by", receipt ? (receipt.decidedBy.kind === "person" ? receipt.decidedBy.name : "Published rules") : "Pending"],
+            [t("borrower"), b.requester?.full_name ?? "—"],
+            [t("slot"), `${fmt(b.starts_at, { weekday: "short", hour12: false })}–${fmt(b.ends_at, { day: undefined, month: undefined, hour12: false })}`],
+            [t("where"), b.resource.location],
+            [t("decidedBy"), receipt ? (receipt.decidedBy.kind === "person" ? receipt.decidedBy.name : t("publishedRules")) : t("pending")],
           ]}
-          stub={timeline?.at(-1)?.hash ? { left: <span className="font-mono">record {timeline.at(-1)!.hash.slice(0, 12)}</span>, right: "Show at the desk" } : undefined}
+          stub={timeline?.at(-1)?.hash ? { left: <span className="font-mono">{t("record", { hash: timeline.at(-1)!.hash.slice(0, 12) })}</span>, right: t("showAtDesk") } : undefined}
         />
         <Card className="space-y-3 p-5">
-          <h2 className="font-bold">Next step</h2>
+          <h2 className="font-bold">{t("nextStep")}</h2>
           {awaitingAttendant && (
-            <p className="rounded-xl bg-info-soft p-3 text-sm text-info">Condition recorded. Waiting for a lab attendant to confirm in person.</p>
+            <p className="rounded-xl bg-info-soft p-3 text-sm text-info">{t("awaitingAttendant")}</p>
           )}
           {awaitingAttendant && isAttendant && <ConfirmCheckInForm bookingId={b.id} />}
           {b.status === "returned" && canManage && <VerifyReturnForm bookingId={b.id} flagged={!!returned?.ai_flag} />}
-          {b.status === "returned" && !canManage && <p className="text-sm text-ink-2">Returned. The owner is verifying the condition.</p>}
+          {b.status === "returned" && !canManage && <p className="text-sm text-ink-2">{t("returnedVerifying")}</p>}
           {b.status === "approved" && isRequester && !checkIn && (
             <>
               <p className="text-sm text-ink-2">
-                {startsSoon ? "Your slot is close. Scan the QR tag on the resource, or start check-in here." : "Check-in opens on the day of your slot."}
+                {startsSoon ? t("slotClose") : t("checkInOpens")}
               </p>
               <ButtonLink href={`/bookings/${b.id}/handover?phase=check_in`} className="w-full">
-                Start check-in
+                {t("startCheckIn")}
               </ButtonLink>
             </>
           )}
@@ -162,7 +169,7 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
           )}
           {["checked_in", "overdue"].includes(b.status) && isRequester && (
             <ButtonLink href={`/bookings/${b.id}/handover?phase=return`} className="w-full">
-              Return and record condition
+              {t("returnRecord")}
             </ButtonLink>
           )}
           {["requested", "in_draw"].includes(b.status) && canManage && <DecisionForm bookingId={b.id} />}
@@ -170,17 +177,22 @@ export default async function BookingPage({ params, searchParams }: { params: Pr
           {["approved", "checked_in", "overdue", "returned", "closed"].includes(b.status) && (isRequester || canManage || isAttendant) && (
             <ReportIncidentForm bookingId={b.id} />
           )}
-          {["closed", "cancelled", "rejected"].includes(b.status) && <p className="text-sm text-subtle">This booking is finished. Its record stays in the audit chain.</p>}
+          {["closed", "cancelled", "rejected"].includes(b.status) && <p className="text-sm text-subtle">{t("finished")}</p>}
+          {isRequester && ["approved", "checked_in", "waitlisted"].includes(b.status) && (
+            <DownloadLink href={`/bookings/${b.id}/calendar`} className="w-full">
+              <CalendarPlus className="size-4" aria-hidden /> {t("addToCalendar")}
+            </DownloadLink>
+          )}
           <ButtonLink href={`/bookings/${b.id}/receipt`} variant="ghost" className="w-full">
-            Printable record (PDF)
+            {t("printable")}
           </ButtonLink>
         </Card>
 
         <Card className="p-5">
-          <h2 className="mb-4 font-bold">History</h2>
+          <h2 className="mb-4 font-bold">{t("history")}</h2>
           <AuditTimeline entries={timeline ?? []} />
           <Link href="/audit/verify" className="mt-4 inline-block text-sm text-accent underline">
-            Verify the audit chain
+            {t("verifyChain")}
           </Link>
         </Card>
       </aside>

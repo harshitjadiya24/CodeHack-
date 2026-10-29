@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { cancelBooking, decideBooking, requestExtension, runFairDraw } from "@/lib/services/bookings";
 import { campusInstant } from "@/lib/domain/time";
+import { getTranslations } from "next-intl/server";
 
 export type ActionState = { ok?: boolean; error?: string; message?: string };
 
@@ -15,7 +16,9 @@ export async function cancelAction(_prev: ActionState, formData: FormData): Prom
   const bookingId = id.parse(formData.get("bookingId"));
   const result = await cancelBooking(user, bookingId, String(formData.get("reason") ?? ""));
   revalidatePath(`/bookings/${bookingId}`);
-  return result.ok ? { ok: true, message: result.message } : { error: result.error };
+  if (!result.ok) return { error: result.error };
+  const t = await getTranslations("Booking.toasts");
+  return { ok: true, message: t(result.message.includes("waitlist") ? "cancelledOffered" : "cancelled") };
 }
 
 const decision = z.object({
@@ -48,5 +51,7 @@ export async function extendAction(_prev: ActionState, formData: FormData): Prom
   const to = z.string().regex(/^\d{2}:\d{2}$/).parse(formData.get("to"));
   const result = await requestExtension(user, bookingId, campusInstant(date, to));
   revalidatePath(`/bookings/${bookingId}`);
-  return result.ok ? { ok: true, message: result.message } : { error: [result.error, ...(result.reasons ?? [])].join(" ") };
+  if (!result.ok) return { error: [result.error, ...(result.reasons ?? [])].join(" ") };
+  const t = await getTranslations("Booking.toasts");
+  return { ok: true, message: t("extended", { time: to }) };
 }

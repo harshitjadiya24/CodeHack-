@@ -83,13 +83,14 @@ export function BadgeRequestForm({ badgeId }: { badgeId: string }) {
 
 export function EndorsementRequestForm({ hostOrgId, hostName }: { hostOrgId: string; hostName: string }) {
   const [state, action, pending] = useActionState<GovState, FormData>(requestEndorsementAction, {});
+  const t = useTranslations("Resource.endorse");
   useToast(state);
   if (state.ok) return <p className="text-sm text-ok">{state.message}</p>;
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="hostOrgId" value={hostOrgId} />
       <label className="block text-sm">
-        <span className="font-semibold">What do you need {hostName} for?</span>
+        <span className="font-semibold">{t("purpose", { host: hostName })}</span>
         <textarea
           name="purpose"
           rows={3}
@@ -97,13 +98,13 @@ export function EndorsementRequestForm({ hostOrgId, hostName }: { hostOrgId: str
           minLength={10}
           maxLength={500}
           className={`${inputClass} mt-1.5`}
-          placeholder="Final-year project: testing a motor driver on their oscilloscope, about 4 sessions this month."
+          placeholder={t("placeholder")}
         />
       </label>
       <Button disabled={pending} className="w-full">
-        {pending ? "Sending…" : "Ask my institute to endorse me"}
+        {pending ? t("submitting") : t("submit")}
       </Button>
-      <p className="text-xs text-subtle">Your admin office decides. If they agree, {hostName} sees that your institute vouches for you.</p>
+      <p className="text-xs text-subtle">{t("note", { host: hostName })}</p>
     </form>
   );
 }

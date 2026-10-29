@@ -2,7 +2,8 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { OWNER_ROLES, STAFF_ROLES, type CurrentUser } from "@/lib/auth";
 import { ROLE_LABEL } from "@/lib/demo";
-import { checkUsageRules, creditCost, priorityScore, type Priority } from "@/lib/domain/fairness";
+import { checkUsageRules, creditCost, priorityScore, type Priority, type RuleViolation } from "@/lib/domain/fairness";
+import type { EligibilityCheck } from "@/lib/domain/eligibility";
 import { commitFor, newSeed, runDraw } from "@/lib/domain/draw";
 import { receipt, type DecisionReceipt } from "@/lib/domain/receipt";
 import { promotionOrder, renumber, type Queued } from "@/lib/domain/waitlist";
@@ -14,7 +15,10 @@ import { audit, notify } from "./records";
 type Db = ReturnType<typeof createAdminClient>;
 type Status = Enums<"booking_status">;
 
-export type ServiceResult = { ok: true; bookingId?: string; message: string } | { ok: false; error: string; reasons?: string[] };
+// `checks`/`violations` carry the same reasons as message codes, so the page can show them in the reader's language.
+export type ServiceResult =
+  | { ok: true; bookingId?: string; message: string }
+  | { ok: false; error: string; reasons?: string[]; checks?: EligibilityCheck[]; violations?: RuleViolation[] };
 
 const HOLDS_SLOT: Status[] = ["approved", "checked_in", "overdue"];
 const PENDING: Status[] = ["requested", "in_draw"];
@@ -69,10 +73,12 @@ export async function requestBooking(
 
   const eligibility = await eligibilityFor(db, user, ctx);
   if (!eligibility.eligible) {
+    const blocked = eligibility.checks.filter((c) => c.blocking && !c.passed);
     return {
       ok: false,
       error: "You are not eligible for this resource yet.",
-      reasons: eligibility.checks.filter((c) => c.blocking && !c.passed).map((c) => `${c.reason} ${c.howToFix ?? ""}`.trim()),
+      reasons: blocked.map((c) => `${c.reason} ${c.howToFix ?? ""}`.trim()),
+      checks: blocked,
     };
   }
 
@@ -80,7 +86,7 @@ export async function requestBooking(
   const slot = { resourceId: resource.id, startsAt: input.startsAt, endsAt: input.endsAt };
   const violations = checkUsageRules({ config: ctx.config, resource: ctx.rules, slot, history });
   if (violations.length) {
-    return { ok: false, error: "This request breaks a fair-use rule.", reasons: violations.map((v) => v.reason) };
+    return { ok: false, error: "This request breaks a fair-use rule.", reasons: violations.map((v) => v.reason), violations };
   }
 
   const start = input.startsAt.toISOString();

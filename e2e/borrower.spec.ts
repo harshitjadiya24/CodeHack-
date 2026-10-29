@@ -35,3 +35,22 @@ test("someone with open bookings is told why they can't delete their account yet
   await expect(page.getByText(/still open\. Cancel or return/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Delete my account" })).toHaveCount(0);
 });
+
+test("the missing-training reason reads in Hindi too", async ({ page, context, baseURL }) => {
+  await signInAs(page, /Aarav/);
+  await context.addCookies([{ name: "saajha-locale", value: "hi", url: baseURL! }]);
+  await page.goto("/resources?q=Laser");
+  await openResource(page, /Laser Cutter/);
+  await expect(page.getByText("अभी नहीं। नीचे ठीक-ठीक लिखा है कि क्या बाकी है।")).toBeVisible();
+  await expect(page.getByText("आपके पास “Laser Cutter Certification” नहीं है।")).toBeVisible();
+});
+
+test("upcoming bookings download as a calendar file", async ({ page }) => {
+  await signInAs(page, /Meera/);
+  const res = await page.request.get("/bookings/calendar");
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toContain("text/calendar");
+  const ics = await res.text();
+  expect(ics.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
+  expect(ics.trimEnd().endsWith("END:VCALENDAR")).toBe(true);
+});

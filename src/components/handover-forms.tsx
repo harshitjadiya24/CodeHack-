@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Button, Field, inputClass } from "@/components/ui";
 import {
   confirmCheckInAction,
@@ -19,13 +20,14 @@ function useToast(state: HandoverState) {
 
 export function ConfirmCheckInForm({ bookingId }: { bookingId: string }) {
   const [state, action, pending] = useActionState<HandoverState, FormData>(confirmCheckInAction, {});
+  const t = useTranslations("Booking.forms");
   useToast(state);
   if (state.ok) return <p className="text-sm text-ok">{state.message}</p>;
   return (
     <form action={action}>
       <input type="hidden" name="bookingId" value={bookingId} />
       <Button disabled={pending} className="w-full">
-        {pending ? "Confirming…" : "I am present. Confirm check-in"}
+        {pending ? t("confirming") : t("confirmCheckIn")}
       </Button>
     </form>
   );
@@ -72,40 +74,43 @@ export function VerifyReturnForm({ bookingId, flagged }: { bookingId: string; fl
 export function ReportIncidentForm({ bookingId }: { bookingId: string }) {
   const [state, action, pending] = useActionState<HandoverState, FormData>(reportIncidentAction, {});
   const [open, setOpen] = useState(false);
+  const t = useTranslations("Booking");
   useToast(state);
   if (state.ok) return <p className="text-sm text-ok">{state.message}</p>;
   if (!open)
     return (
       <Button variant="ghost" onClick={() => setOpen(true)} className="w-full text-danger">
-        Report a problem
+        {t("forms.reportProblem")}
       </Button>
     );
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="bookingId" value={bookingId} />
       <div className="grid grid-cols-2 gap-2">
-        <Field label="Type">
+        <Field label={t("forms.type")}>
           <select name="type" className={inputClass}>
-            <option value="damage">Damage</option>
-            <option value="safety">Safety</option>
-            <option value="conflict">Conflict</option>
-            <option value="misuse">Misuse</option>
-            <option value="delay">Delay</option>
+            {(["damage", "safety", "conflict", "misuse", "delay"] as const).map((type) => (
+              <option key={type} value={type}>
+                {t(`incidentTypes.${type}`)}
+              </option>
+            ))}
           </select>
         </Field>
-        <Field label="Severity">
+        <Field label={t("forms.severity")}>
           <select name="severity" defaultValue="medium" className={inputClass}>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            {(["low", "medium", "high"] as const).map((level) => (
+              <option key={level} value={level}>
+                {t(`severities.${level}`)}
+              </option>
+            ))}
           </select>
         </Field>
       </div>
-      <Field label="What happened?">
+      <Field label={t("forms.whatHappened")}>
         <textarea name="description" rows={3} required minLength={10} className={inputClass} />
       </Field>
       <Button disabled={pending} variant="danger" className="w-full">
-        {pending ? "Sending…" : "Send to manager"}
+        {pending ? t("forms.sending") : t("forms.sendToManager")}
       </Button>
     </form>
   );

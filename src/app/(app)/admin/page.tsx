@@ -24,7 +24,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     <>
       <PageHeader eyebrow={`Last ${ins.weeks} weeks · ${org?.name ?? "Your institute"}`} title="Campus insights">
         <ButtonLink href="/admin/report" variant="secondary">
-          Accreditation report
+          NAAC report
         </ButtonLink>
       </PageHeader>
 

@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui";
 
-export function PrintButton() {
+export function PrintButton({ label = "Print tag" }: { label?: string }) {
   return (
     <Button onClick={() => window.print()} className="w-full">
-      Print tag
+      {label}
     </Button>
   );
 }

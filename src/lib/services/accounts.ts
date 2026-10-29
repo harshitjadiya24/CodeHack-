@@ -8,27 +8,28 @@ import { audit, notify } from "@/lib/services/records";
 // Staff roles are assigned by the admin office, never chosen.
 
 export const signupSchema = z.object({
-  fullName: z.string().trim().min(2, "Enter your full name.").max(80, "That name is too long."),
-  email: z.string().trim().toLowerCase().email("Enter a valid email address."),
+  fullName: z.string().trim().min(2, "nameShort").max(80, "nameLong"),
+  email: z.string().trim().toLowerCase().email("email"),
   password: z
     .string()
-    .min(8, "Use at least 8 characters.")
-    .max(72, "Use at most 72 characters.")
-    .regex(/[A-Za-z]/, "Include at least one letter.")
-    .regex(/[0-9]/, "Include at least one number."),
-  orgId: z.guid("Choose your campus."),
-  deptId: z.guid("Choose your department."),
+    .min(8, "passwordShort")
+    .max(72, "passwordLong")
+    .regex(/[A-Za-z]/, "passwordLetter")
+    .regex(/[0-9]/, "passwordNumber"),
+  orgId: z.guid("orgId"),
+  deptId: z.guid("deptId"),
   rollNo: z
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^[A-Z0-9/-]{4,20}$/, "Use the roll number on your college ID: 4–20 letters, numbers, / or -."),
-  role: z.enum(["student", "researcher"], "Choose student or researcher."),
-  consent: z.literal("on", "Agree to the privacy notice to continue."),
+    .regex(/^[A-Z0-9/-]{4,20}$/, "rollNo"),
+  role: z.enum(["student", "researcher"], "role"),
+  consent: z.literal("on", "consent"),
 });
 
 export type SignupInput = z.infer<typeof signupSchema>;
-export type SignupResult = { ok: true; email: string } | { ok: false; error: string; field?: keyof SignupInput };
+// `code` is the message key under Signup.errors; `error` is the same in English.
+export type SignupResult = { ok: true; email: string } | { ok: false; error: string; code: string; field?: keyof SignupInput };
 
 export async function listCampuses() {
   const db = createAdminClient();
@@ -51,10 +52,10 @@ export async function registerAccount(input: SignupInput): Promise<SignupResult>
   const db = createAdminClient();
 
   const { data: dept } = await db.from("departments").select("id, org_id").eq("id", input.deptId).maybeSingle();
-  if (!dept || dept.org_id !== input.orgId) return { ok: false, error: "That department isn’t part of the campus you chose.", field: "deptId" };
+  if (!dept || dept.org_id !== input.orgId) return { ok: false, error: "That department isn’t part of the campus you chose.", code: "deptMismatch", field: "deptId" };
 
   const { data: taken } = await db.from("profiles").select("id").eq("org_id", input.orgId).eq("roll_no", input.rollNo).maybeSingle();
-  if (taken) return { ok: false, error: "An account with this roll number already exists. Sign in, or ask the admin office.", field: "rollNo" };
+  if (taken) return { ok: false, error: "An account with this roll number already exists. Sign in, or ask the admin office.", code: "rollTaken", field: "rollNo" };
 
   const { data: created, error } = await db.auth.admin.createUser({
     email: input.email,
@@ -65,8 +66,8 @@ export async function registerAccount(input: SignupInput): Promise<SignupResult>
   if (error || !created.user) {
     const exists = /already|registered|exists/i.test(error?.message ?? "");
     return exists
-      ? { ok: false, error: "An account with this email already exists. Sign in instead.", field: "email" }
-      : { ok: false, error: "We couldn’t create the account just now. Try again in a minute." };
+      ? { ok: false, error: "An account with this email already exists. Sign in instead.", code: "emailTaken", field: "email" }
+      : { ok: false, error: "We couldn’t create the account just now. Try again in a minute.", code: "failed" };
   }
 
   const userId = created.user.id;
@@ -82,7 +83,7 @@ export async function registerAccount(input: SignupInput): Promise<SignupResult>
   if (profileError) {
     // Don't leave a login with no profile behind.
     await db.auth.admin.deleteUser(userId);
-    return { ok: false, error: "We couldn’t create the account just now. Try again in a minute." };
+    return { ok: false, error: "We couldn’t create the account just now. Try again in a minute.", code: "failed" };
   }
 
   await audit(db, { orgId: input.orgId, actorId: userId, action: "user.registered", entity: "profile", entityId: userId, payload: { role: input.role } });

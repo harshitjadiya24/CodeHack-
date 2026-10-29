@@ -12,8 +12,12 @@ import { campusParts, formatCampus } from "@/lib/domain/time";
 import { inr } from "@/lib/utils";
 import { RequestForm } from "./request-form";
 import { EndorsementRequestForm } from "@/components/governance-forms";
+import { getLocale, getTranslations } from "next-intl/server";
+import { intlLocale } from "@/i18n/config";
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// Short weekday names in the reader's language: 4 Jan 1970 was a Sunday.
+const weekdayNames = (locale: string) =>
+  Array.from({ length: 7 }, (_, i) => new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(Date.UTC(1970, 0, 4 + i))));
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -56,6 +60,8 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
       ])
     : [{ data: null }, { data: null }];
 
+  const [t, te, locale] = await Promise.all([getTranslations("Resource"), getTranslations("Eligibility"), getLocale().then(intlLocale)]);
+  const WEEKDAYS = weekdayNames(locale);
   const used = creditsUsedThisWeek(history, new Date());
   const checklist = (r.checklist as string[]) ?? [];
   const hours = [...new Map(ctx.rules.availability.map((w) => [`${w.startTime}-${w.endTime}`, w])).values()].map((w) => ({
@@ -72,15 +78,17 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         <div className="flex gap-4">
           <ResourceIcon category={r.category} className="size-16" />
           <div>
-            <p className="text-sm text-subtle">{r.category} · {r.kind}</p>
+            <p className="text-sm text-subtle">
+              {r.category} · {t(`kinds.${r.kind}`)}
+            </p>
             <h1 className="font-display text-4xl leading-tight">{r.name}</h1>
             <p className="mt-1 flex items-center gap-1 text-sm text-subtle">
-              <MapPin className="size-4" aria-hidden /> {r.location} · Owner: {owner?.full_name}
+              <MapPin className="size-4" aria-hidden /> {r.location} · {t("owner", { name: owner?.full_name ?? "" })}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {r.demand === "high" && <Pill tone="saffron">High demand · Fair Draw for clashes</Pill>}
-              {r.requires_supervision && <Pill tone="info">Attendant-supervised</Pill>}
-              {r.auto_approve && !r.requires_supervision && <Pill tone="accent">Instant approval</Pill>}
+              {r.demand === "high" && <Pill tone="saffron">{t("highDemand")}</Pill>}
+              {r.requires_supervision && <Pill tone="info">{t("supervised")}</Pill>}
+              {r.auto_approve && !r.requires_supervision && <Pill tone="accent">{t("instant")}</Pill>}
             </div>
           </div>
         </div>
@@ -89,10 +97,10 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
 
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { icon: Coins, label: "Credits / hour", value: String(r.credit_rate) },
-            { icon: Timer, label: "Max per booking", value: `${r.max_hours} h` },
-            { icon: IndianRupee, label: "Deposit", value: r.deposit_inr ? inr(r.deposit_inr) : "None" },
-            { icon: IndianRupee, label: "Market rent", value: `${inr(r.rental_value_inr_per_hour)}/h` },
+            { icon: Coins, label: t("creditsPerHour"), value: String(r.credit_rate) },
+            { icon: Timer, label: t("maxPerBooking"), value: t("hours", { count: r.max_hours }) },
+            { icon: IndianRupee, label: t("deposit"), value: r.deposit_inr ? inr(r.deposit_inr) : t("none") },
+            { icon: IndianRupee, label: t("marketRent"), value: t("perHour", { amount: inr(r.rental_value_inr_per_hour) }) },
           ].map((s) => (
             <Card key={s.label} className="p-3">
               <dt className="flex items-center gap-1 text-xs text-subtle">
@@ -104,11 +112,11 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         </dl>
 
         <Card className="p-5">
-          <h2 className="mb-2 font-bold">Usage rules</h2>
+          <h2 className="mb-2 font-bold">{t("usageRules")}</h2>
           <p className="text-sm text-ink-2">{r.rules}</p>
           {checklist.length > 0 && (
             <>
-              <h3 className="mb-1 mt-4 text-sm font-bold">Condition checked at every handover</h3>
+              <h3 className="mb-1 mt-4 text-sm font-bold">{t("checklist")}</h3>
               <ul className="list-disc space-y-0.5 pl-5 text-sm text-ink-2">
                 {checklist.map((c) => (
                   <li key={c}>{c}</li>
@@ -116,7 +124,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
               </ul>
             </>
           )}
-          <h3 className="mb-1 mt-4 text-sm font-bold">Opening hours (campus time)</h3>
+          <h3 className="mb-1 mt-4 text-sm font-bold">{t("openingHours")}</h3>
           <ul className="text-sm text-ink-2">
             {hours.map((h) => (
               <li key={h.span}>
@@ -128,33 +136,33 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
 
         <Card className="p-5">
           <h2 className="mb-3 flex items-center gap-2 font-bold">
-            <CalendarClock className="size-4" aria-hidden /> Next 7 days
+            <CalendarClock className="size-4" aria-hidden /> {t("next7")}
           </h2>
           {busy?.length ? (
             <ul className="divide-y divide-rule text-sm">
               {busy.map((b, i) => (
                 <li key={i} className="flex items-center justify-between py-2">
                   <span>
-                    {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })}
+                    {formatCampus(b.starts_at, { weekday: "short" }, locale)} – {formatCampus(b.ends_at, { day: undefined, month: undefined }, locale)}
                   </span>
                   <Pill tone={["requested", "in_draw"].includes(b.status) ? "warn" : "neutral"}>
-                    {b.status === "in_draw" ? "Fair Draw pending" : b.status === "requested" ? "Requested" : "Booked"}
+                    {b.status === "in_draw" ? t("drawPending") : b.status === "requested" ? t("requested") : t("booked")}
                   </Pill>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-subtle">Wide open. This resource has no bookings in the next week.</p>
+            <p className="text-sm text-subtle">{t("wideOpen")}</p>
           )}
-          <p className="mt-2 text-xs text-subtle">Only times are shown. Who booked stays private.</p>
+          <p className="mt-2 text-xs text-subtle">{t("private")}</p>
         </Card>
       </div>
 
       <aside className="space-y-4">
         <Card className="p-5">
-          <h2 className="mb-1 font-bold">Can I use it?</h2>
+          <h2 className="mb-1 font-bold">{t("canIUse")}</h2>
           <p className={`mb-4 text-sm ${eligibility.eligible ? "text-ok" : "text-danger"}`}>
-            {eligibility.eligible ? "Yes, every requirement is met." : "Not yet. Here is exactly what is missing."}
+            {eligibility.eligible ? te("yes") : te("no")}
           </p>
           <EligibilityPanel result={eligibility} />
         </Card>
@@ -162,16 +170,15 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         {isBorrower && (
           <Card className="p-5">
             <div className="mb-4 flex items-baseline justify-between">
-              <h2 className="font-bold">Request a slot</h2>
+              <h2 className="font-bold">{t("requestSlot")}</h2>
               <span className="text-xs text-subtle">
-                {Math.max(0, ctx.config.weeklyCredits - used)} / {ctx.config.weeklyCredits} credits left this week
+                {t("creditsLeft", { left: Math.max(0, ctx.config.weeklyCredits - used), total: ctx.config.weeklyCredits })}
               </span>
             </div>
             {needsEndorsement && host ? (
               asked ? (
                 <p className="tone-butter rounded-2xl px-4 py-3 text-sm">
-                  <b>Waiting for your admin office.</b> You asked on {formatCampus(asked.created_at)} to be endorsed for {host.name}. You’ll get a
-                  notification when they decide.
+                  {t.rich("waitingAdmin", { b: (c) => <b>{c}</b>, date: formatCampus(asked.created_at, {}, locale), host: host.name })}
                 </p>
               ) : (
                 <EndorsementRequestForm hostOrgId={host.id} hostName={host.name} />
@@ -180,9 +187,9 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
               <RequestForm resourceId={r.id} maxHours={r.max_hours} minDate={minDate} openWeekdays={[...new Set(ctx.rules.availability.map((w) => w.weekday))]} />
             ) : (
               <div className="space-y-3 text-sm text-ink-2">
-                <p>Requests open once the missing items above are sorted.</p>
+                <p>{t("requestsOpen")}</p>
                 <ButtonLink href="/passport" variant="secondary" className="w-full">
-                  Open my Trust Passport
+                  {t("openPassport")}
                 </ButtonLink>
               </div>
             )}
@@ -191,11 +198,17 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
 
         {canManage && (
           <Card className="p-5">
-            <h2 className="mb-2 font-bold">Owner tools</h2>
+            <h2 className="mb-2 font-bold">{t("ownerTools")}</h2>
             <div className="grid gap-2">
-              <ButtonLink href={`/owner/resources/${r.id}/edit`} variant="secondary">Edit conditions / maintenance</ButtonLink>
-              <ButtonLink href={`/owner/resources/${r.id}/qr`} variant="secondary">Print QR tag</ButtonLink>
-              <ButtonLink href="/owner" variant="secondary">Review requests</ButtonLink>
+              <ButtonLink href={`/owner/resources/${r.id}/edit`} variant="secondary">
+                {t("editConditions")}
+              </ButtonLink>
+              <ButtonLink href={`/owner/resources/${r.id}/qr`} variant="secondary">
+                {t("printQr")}
+              </ButtonLink>
+              <ButtonLink href="/owner" variant="secondary">
+                {t("reviewRequests")}
+              </ButtonLink>
             </div>
           </Card>
         )}

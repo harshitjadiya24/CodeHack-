@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ButtonLink, Card, EmptyState, PageHeader, Pill } from "@/components/ui";
+import { ButtonLink, Card, DownloadLink, EmptyState, PageHeader, Pill } from "@/components/ui";
 import { ResourceIcon } from "@/components/resource-icon";
 import { BookingTabs } from "@/components/booking-tabs";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { BOOKING_STATUS } from "@/lib/status";
 import { formatCampus } from "@/lib/domain/time";
+import { CalendarPlus } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+import { intlLocale } from "@/i18n/config";
 
-export const metadata: Metadata = { title: "My bookings" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("Bookings"))("title") };
+}
 
 const LIVE = ["requested", "in_draw", "waitlisted", "approved", "checked_in", "overdue", "returned"];
 
@@ -22,6 +27,7 @@ export default async function BookingsPage() {
     .order("starts_at", { ascending: false })
     .limit(60);
 
+  const [t, status, locale] = await Promise.all([getTranslations("Bookings"), getTranslations("Status"), getLocale().then(intlLocale)]);
   const live = (bookings ?? []).filter((b) => LIVE.includes(b.status)).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   const past = (bookings ?? []).filter((b) => !LIVE.includes(b.status));
 
@@ -33,10 +39,11 @@ export default async function BookingsPage() {
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium">{b.resource?.name}</p>
             <p className="text-sm text-subtle">
-              {formatCampus(b.starts_at, { weekday: "short" })} – {formatCampus(b.ends_at, { day: undefined, month: undefined })} · {b.credits} credits
+              {formatCampus(b.starts_at, { weekday: "short" }, locale)} – {formatCampus(b.ends_at, { day: undefined, month: undefined }, locale)} ·{" "}
+              {t("credits", { count: b.credits })}
             </p>
           </div>
-          <Pill tone={BOOKING_STATUS[b.status].tone}>{BOOKING_STATUS[b.status].label}</Pill>
+          <Pill tone={BOOKING_STATUS[b.status].tone}>{status(b.status)}</Pill>
         </Card>
       </Link>
     </li>
@@ -44,14 +51,22 @@ export default async function BookingsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Your activity" title="My bookings">
-        <ButtonLink href="/resources">Find a resource</ButtonLink>
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")}>
+        <div className="flex flex-wrap gap-2">
+          {live.some((b) => ["approved", "checked_in", "waitlisted"].includes(b.status)) && (
+            <DownloadLink href="/bookings/calendar">
+              <CalendarPlus className="size-4" aria-hidden /> {t("addAll")}
+            </DownloadLink>
+          )}
+          <ButtonLink href="/resources">{t("find")}</ButtonLink>
+        </div>
       </PageHeader>
 
       <BookingTabs
         counts={[live.length, past.length]}
-        active={live.length ? <ul className="space-y-2">{live.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title="Nothing upcoming">Browse the catalogue to request something.</EmptyState>}
-        history={past.length ? <ul className="space-y-2">{past.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title="No history yet">Finished, cancelled and declined bookings appear here.</EmptyState>}
+        labels={[t("active"), t("history")]}
+        active={live.length ? <ul className="space-y-2">{live.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title={t("emptyActive")}>{t("emptyActiveBody")}</EmptyState>}
+        history={past.length ? <ul className="space-y-2">{past.map((b) => <Row key={b.id} b={b} />)}</ul> : <EmptyState title={t("emptyHistory")}>{t("emptyHistoryBody")}</EmptyState>}
       />
     </>
   );

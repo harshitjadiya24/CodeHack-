@@ -30,3 +30,13 @@ test("the audit chain verifies", async ({ page }) => {
   await page.goto("/audit/verify");
   await expect(page.getByText(/intact|verified|unbroken/i).first()).toBeVisible();
 });
+
+test("the NAAC report covers an academic year and exports CSV", async ({ page }) => {
+  await signInAs(page, /IQAC/);
+  await page.goto("/admin/report");
+  await expect(page.getByText(/NAAC Criterion IV/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Systems and procedures for maintaining and using facilities/ })).toBeVisible();
+  const csv = await page.request.get("/admin/report/csv");
+  expect(csv.status()).toBe(200);
+  expect(await csv.text()).toContain('"Academic year","Facility"');
+});

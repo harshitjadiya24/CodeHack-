@@ -32,8 +32,9 @@ export function campusWeekStart(d: Date): Date {
   return new Date(Date.UTC(p.year, p.month, p.day - daysSinceMonday) - CAMPUS_OFFSET_MIN * MIN);
 }
 
-export function formatCampus(d: Date | string, opts: Intl.DateTimeFormatOptions = {}): string {
-  return new Intl.DateTimeFormat("en-IN", {
+/** `locale` is an Intl locale such as "hi-IN" (see intlLocale in src/i18n/config.ts). */
+export function formatCampus(d: Date | string, opts: Intl.DateTimeFormatOptions = {}, locale = "en-IN"): string {
+  return new Intl.DateTimeFormat(locale, {
     timeZone: CAMPUS_TZ,
     day: "numeric",
     month: "short",
@@ -41,4 +42,22 @@ export function formatCampus(d: Date | string, opts: Intl.DateTimeFormatOptions 
     minute: "2-digit",
     ...opts,
   }).format(typeof d === "string" ? new Date(d) : d);
+}
+
+/**
+ * The Indian academic year containing `d`: 1 July to 30 June on the campus clock, the period NAAC and AISHE report on.
+ * `start` is the calendar year it begins in, so 2026 is "2026–27".
+ */
+export function academicYear(d: Date): { start: number; label: string; from: Date; to: Date } {
+  const p = campusParts(d);
+  return academicYearStarting(p.month >= 6 ? p.year : p.year - 1);
+}
+
+export function academicYearStarting(start: number): { start: number; label: string; from: Date; to: Date } {
+  return {
+    start,
+    label: `${start}–${String((start + 1) % 100).padStart(2, "0")}`,
+    from: campusInstant(`${start}-07-01`, "00:00"),
+    to: campusInstant(`${start + 1}-07-01`, "00:00"),
+  };
 }

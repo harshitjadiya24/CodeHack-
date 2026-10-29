@@ -21,6 +21,14 @@ test("sign-up explains every missing field without creating anything", async ({ 
   await expect(page).toHaveURL(/\/signup/);
 });
 
+test("sign-up errors come back in Hindi when Hindi is chosen", async ({ page, context, baseURL }) => {
+  await context.addCookies([{ name: "saajha-locale", value: "hi", url: baseURL! }]);
+  await page.goto("/signup");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("अपना खाता बनाएँ");
+  await page.getByRole("button", { name: "खाता बनाएँ" }).click();
+  await expect(page.getByText("अपना पूरा नाम लिखें।", { exact: true })).toBeVisible();
+});
+
 test("institute registration says new institutes start pending", async ({ page }) => {
   await page.goto("/institutions/new");
   await expect(page.getByText("Every new institute starts as pending review")).toBeVisible();

@@ -11,6 +11,11 @@ export type EligibilityCheck = {
   howToFix?: string;
   /** Informational checks never block a request (e.g. "an attendant will supervise"). */
   blocking: boolean;
+  /** Message keys, so the UI can say the same thing in any language (messages/*.json, Eligibility). `label`/`reason`/`howToFix` stay as the English text. */
+  labelKey?: string;
+  code: string;
+  fixCode?: string;
+  values?: Record<string, string | number>;
 };
 
 export type EligibilityResult = {
@@ -43,6 +48,9 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
     blocking: true,
     reason: input.user.verified ? "Your identity is verified by the institution." : "Your account is not verified yet.",
     howToFix: input.user.verified ? undefined : "Ask the admin office to verify your roll number.",
+    labelKey: "verified",
+    code: input.user.verified ? "verified_yes" : "verified_no",
+    fixCode: input.user.verified ? undefined : "verified",
   });
 
   const sameOrg = input.user.orgId === input.resource.orgId;
@@ -62,6 +70,10 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
           ? `Your endorsement for this campus ended on ${until}.`
           : "This resource belongs to a partner institution.",
     howToFix: sameOrg || endorsed ? undefined : "Request a cross-campus endorsement from your home institution.",
+    labelKey: sameOrg ? "orgSame" : "orgGuest",
+    code: sameOrg ? "org_same" : endorsed ? "org_endorsed" : until ? "org_ended" : "org_partner",
+    fixCode: sameOrg || endorsed ? undefined : "org",
+    values: until ? { until } : undefined,
   });
 
   const active = input.resource.status === "active";
@@ -72,6 +84,9 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
     blocking: true,
     reason: active ? "The resource is available for booking." : `The resource is currently ${input.resource.status}.`,
     howToFix: active ? undefined : "Try a similar resource or check back after maintenance.",
+    labelKey: "status",
+    code: `status_${input.resource.status}`,
+    fixCode: active ? undefined : "status",
   });
 
   for (const badge of input.requiredBadges) {
@@ -80,25 +95,31 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
     let passed = false;
     let reason: string;
     let howToFix: string | undefined;
+    let code: string;
 
     if (!held) {
+      code = "badge_missing";
       reason = `You do not hold "${badge.name}".`;
       howToFix = "Upload your certificate or attend the next induction; a manager verifies it.";
     } else if (held.status === "pending") {
+      code = "badge_pending";
       reason = `"${badge.name}" is awaiting manager verification.`;
       howToFix = "No action needed. You will be notified once it is reviewed.";
     } else if (held.status === "rejected") {
+      code = "badge_rejected";
       reason = `Your "${badge.name}" evidence was rejected.`;
       howToFix = "Re-attend the induction and upload fresh evidence.";
     } else if (held.status === "expired" || expired) {
+      code = "badge_expired";
       reason = `Your "${badge.name}" has expired.`;
       howToFix = "Book a refresher induction to renew it.";
     } else {
+      code = "badge_valid";
       passed = true;
       reason = `You hold a valid "${badge.name}".`;
     }
 
-    checks.push({ id: `badge:${badge.id}`, label: badge.name, passed, blocking: true, reason, howToFix });
+    checks.push({ id: `badge:${badge.id}`, label: badge.name, passed, blocking: true, reason, howToFix, code, fixCode: howToFix ? code : undefined, values: { badge: badge.name } });
   }
 
   const strikesOk = input.user.strikes < MAX_STRIKES;
@@ -111,6 +132,10 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
       ? `${input.user.strikes} of ${MAX_STRIKES} strikes used.`
       : `Booking is paused after ${MAX_STRIKES} strikes.`,
     howToFix: strikesOk ? undefined : "Speak to the lab manager to review your strikes.",
+    labelKey: "strikes",
+    code: strikesOk ? "strikes_ok" : "strikes_over",
+    fixCode: strikesOk ? undefined : "strikes",
+    values: { count: input.user.strikes, max: MAX_STRIKES },
   });
 
   if (input.resource.requiresSupervision) {
@@ -120,6 +145,8 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
       passed: true,
       blocking: false,
       reason: "A lab attendant must confirm your check-in in person.",
+      labelKey: "supervision",
+      code: "supervision",
     });
   }
 
@@ -130,6 +157,9 @@ export function checkEligibility(input: EligibilityInput): EligibilityResult {
       passed: true,
       blocking: false,
       reason: `₹${input.resource.depositInr.toLocaleString("en-IN")} deposit is collected at check-in and refunded after a clean return.`,
+      labelKey: "deposit",
+      code: "deposit",
+      values: { amount: `₹${input.resource.depositInr.toLocaleString("en-IN")}` },
     });
   }
 

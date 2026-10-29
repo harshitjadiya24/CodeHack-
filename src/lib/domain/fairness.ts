@@ -35,7 +35,8 @@ export type ResourceRules = {
   availability: { weekday: number; startTime: string; endTime: string }[];
 };
 
-export type RuleViolation = { rule: string; reason: string };
+/** `rule` doubles as the message key (messages/*.json, Rules); `values` fill its placeholders. */
+export type RuleViolation = { rule: string; reason: string; values?: Record<string, number> };
 
 const HOUR = 3_600_000;
 const COUNTS_TOWARDS_USAGE = new Set(["requested", "in_draw", "approved", "checked_in", "overdue", "returned", "closed"]);
@@ -99,6 +100,7 @@ export function checkUsageRules(args: {
     violations.push({
       rule: "max_hours",
       reason: `This resource can be booked for at most ${resource.maxHours} h at a time (you asked for ${hours} h).`,
+      values: { max: resource.maxHours, asked: hours },
     });
   }
   if (!withinAvailability(slot, resource)) {
@@ -111,6 +113,7 @@ export function checkUsageRules(args: {
     violations.push({
       rule: "credits",
       reason: `This needs ${cost} credits but only ${Math.max(0, config.weeklyCredits - used)} of your ${config.weeklyCredits} weekly credits are left.`,
+      values: { cost, left: Math.max(0, config.weeklyCredits - used), weekly: config.weeklyCredits },
     });
   }
 
@@ -122,6 +125,7 @@ export function checkUsageRules(args: {
       violations.push({
         rule: "max_active",
         reason: `High-demand resource: you already hold ${active.length} upcoming booking(s); the limit is ${config.maxActiveHighDemand}.`,
+        values: { count: active.length, limit: config.maxActiveHighDemand },
       });
     }
 
@@ -136,6 +140,7 @@ export function checkUsageRules(args: {
       violations.push({
         rule: "cooldown",
         reason: `High-demand resource: bookings by the same person must be ${config.cooldownHours} h apart so others get a turn.`,
+        values: { hours: config.cooldownHours },
       });
     }
   }

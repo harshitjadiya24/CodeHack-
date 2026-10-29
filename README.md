@@ -28,10 +28,14 @@ Open `/login` and use any demo account (password for all: `Saajha@2026`), or cli
 2. **Aarav** (student, missing a badge): the same resource tells him exactly which training he lacks.
 3. **Dr. Priya Nair** (lab owner): decide requests with the priority score shown, or run a Fair Draw on a contested slot.
 4. **Ravi** (attendant): confirm a supervised pick-up with photos.
-5. **IQAC Office** (admin): campus insights, fairness, the accreditation report, and a check that the audit chain is intact. This account is also on the Saajha review team, so it sees **Institutes** (`/ops`), where new institutes are approved or suspended.
+5. **IQAC Office** (admin): campus insights, fairness, the NAAC report for any academic year (with a CSV), and a check that the audit chain is intact. This account is also on the Saajha review team, so it sees **Institutes** (`/ops`), where new institutes are approved or suspended.
 6. **Zoya** (student at the partner campus, Riverside) and **Riverside Admin Office**: borrowing across campuses. Zoya asks her own institute to endorse her for Northfield. Riverside's admin office endorses her for 30, 90 or 180 days, with a reason. She can then request Northfield's equipment, and Northfield's owners see "Guest from Riverside, endorsed until …" on her requests.
 
-Every demo account is at the fictional *Northfield Institute of Technology, Pune*. Zoya is at the partner campus, Riverside.
+The one-click demo accounts are at the fictional *Northfield Institute of Technology, Pune*, apart from Zoya and the Riverside admin office at the partner campus, Riverside College of Engineering.
+
+Six more fictional institutes fill the map: Lakeview (Pune), Harbourside Polytechnic (Mumbai), Banyan School of Design (Ahmedabad), Silverline (Bengaluru) and Pearl City (Hyderabad), each with real-looking equipment and opening hours. Tea Garden (Guwahati) is waiting in the review console, so there's something to approve. Their lab in-charges sign in as `owner@<slug>.demo` and their admin offices as `admin@<slug>.demo` (for example `owner@lakeview.demo`), with the same password. Riverside's lab in-charge is `owner@riverside.demo`.
+
+Switch Discover to **My city** as Meera to see Lakeview and Riverside next to Northfield, or **My state** to add Mumbai.
 
 | | |
 |---|---|
@@ -48,11 +52,18 @@ Any college can register at `/institutions/new` in a few minutes:
 - A suspended institute's people can't sign in, and see why.
 - **Cross-campus endorsements:** a student borrows from a partner campus only when their home institute vouches for them, for a purpose and a set period. Their training carries over wherever the host has a badge of the same name. Both campuses' audit logs record it.
 - Students sign up at `/signup`, pick their institute and roll number, and can browse at once. The admin office verifies them before they can borrow.
+- Lab in-charges drop a pin on the map for each resource (or tap **I'm standing at it**), so Discover measures the distance to the right building.
 - **Discover** can widen from *My campus* to *My city* or *My state*, and shows verified institutes nearby on the map.
 
 ## In Hindi
 
-Tap **हिन्दी** in the header or on the sign-in page. The app shell, sign-in, Discover (with the map) and the Trust Passport switch to Hindi, and the choice is remembered on that device. Hindi text uses Noto Sans Devanagari with looser line spacing, so the matras aren't clipped. Strings live in `messages/en.json` and `messages/hi.json`, and a unit test fails if a key or a `{placeholder}` is missing from either file.
+Tap **हिन्दी** in the header or on the sign-in page. The app shell, sign-in, sign-up, Discover (with the map), each resource page with its eligibility reasons, your bookings and the Trust Passport switch to Hindi, and the choice is remembered on that device. Hindi text uses Noto Sans Devanagari with looser line spacing, so the matras aren't clipped. Strings live in `messages/en.json` and `messages/hi.json`, and a unit test fails if a key or a `{placeholder}` is missing from either file.
+
+## Bookings that look after themselves
+
+- **Waitlist:** when someone cancels a held slot, the next person in line is moved in automatically, but only after the same eligibility and fair-use checks as a new request. Anyone passed over is told why. Everyone behind moves up a place and gets a notification. Entries whose slot has passed are closed by the database's own sweep job.
+- **Calendar:** every booking has **Add to calendar** (an `.ics` file with a 30-minute reminder), and **My bookings** exports them all at once. Waitlisted slots come in as tentative, so they don't block your day.
+- **NAAC report:** admin offices get a printable report for any academic year (July to June), arranged around NAAC Criterion IV (Infrastructure and Learning Resources). It covers the facilities and how much each is used, the procedures for maintaining and using them (counted from records), month-by-month use, equitable access and sharing with partner institutes. A CSV of the facility table is included for IQAC's data templates.
 
 ## On phones
 
@@ -69,7 +80,13 @@ Saajha installs as an app ("Add to Home screen"). Once you've opened your Trust 
   - condition comparison
   - utilisation and Gini
   - next open slot and distance
+  - waitlist order
+  - calendar files (`.ics`)
+  - academic years on the campus clock
 - **Maps:** Leaflet with OpenStreetMap tiles, and geocoding from Nominatim. All free, no API keys.
+- **Languages:** next-intl, with the language kept in a cookie, so URLs are the same in English and Hindi. The rules explain themselves with message codes, so the same reason can be shown in either language.
+- **Installable app:** a web manifest and a hand-written service worker. No extra libraries.
+- **Background jobs** run inside Postgres with `pg_cron` every 10 minutes: overdue returns, reminders an hour before a slot, and closing stale waitlist entries.
 - **AI (optional):** Gemini matches a free-text task ("I need to test a 12V motor driver") to resources. Without a key it falls back to keyword matching, and AI output is never a decision.
 - **Design:** "Common Room". Mona Sans plus four pastel tags with fixed meaning: sage means cleared, butter means popular, rose means a problem, sky means information. Light and dark themes, reduced motion respected, built mobile-first.
 - **Motion:** Motion (Framer), GSAP SplitText, and Lenis smooth scroll.
@@ -81,9 +98,12 @@ Saajha installs as an app ("Add to Home screen"). Once you've opened your Trust 
 ```
 src/app/            routes: landing, auth, sign-up, institutes, (app) for signed-in pages
 src/lib/domain/     pure rules and their tests
-src/lib/services/   server-side use cases (bookings, handovers, governance, insights…)
+src/lib/services/   server-side use cases (bookings, handovers, governance, insights, privacy…)
 src/components/     UI: ui.tsx primitives, common-room/, motion/, ui-kit/
-supabase/           migrations (schema, RLS, state machine, audit chain…) and seed.sql
+src/i18n/           language config, the cookie switch, and rule-reason translation
+messages/           en.json and hi.json
+supabase/           migrations (schema, RLS, state machine, audit chain…), seed.sql and seed-institutes.sql
+e2e/                Playwright smoke tests (desktop and phone)
 ```
 
 ## Run it locally
@@ -102,9 +122,9 @@ npm run dev                  # http://localhost:3000
 | `GEMINI_API_KEY` | no | Turns on AI matching in Discover |
 | `NEXT_PUBLIC_DEMO_MODE` | no | `1` lets check-in happen at any time, for demos |
 
-**Database:** apply `supabase/migrations/*` in order, then run `supabase/seed.sql` for the demo campus (with the Supabase CLI: `supabase db reset`).
+**Database:** apply `supabase/migrations/*` in order, then run `supabase/seed.sql` for the demo campus (with the Supabase CLI: `supabase db reset`), and `supabase/seed-institutes.sql` for six more fictional institutes across Pune, Mumbai, Ahmedabad, Bengaluru, Hyderabad and Guwahati (one waits in the review console). Their lab in-charges sign in as `owner@<slug>.demo` and their admin offices as `admin@<slug>.demo`, all with the same password.
 
-**Checks** (the same ones CI runs on every push):
+**Checks** (the same ones CI runs on every push). Node 24 is pinned in `.nvmrc`.
 
 ```bash
 npm run typecheck && npm run lint && npm test && npm run build
@@ -125,12 +145,13 @@ CI runs them too, once the repository has the three Supabase secrets.
 - **New institutes:** start pending and are hidden from other campuses until checked.
 - **Students:** can't borrow until the admin office has checked their roll number.
 - **Public pages** (the landing page and the share image) show counts and initials only, never names.
-- **Your data:** people can download everything Saajha holds about them from their profile.
+- **Your data (DPDP Act 2023):** people can download everything Saajha holds about them from their profile, and delete their account there. Deletion removes their name, roll number, certificates, notifications and pending requests, and stops sign-in. Past bookings and the audit chain stay without their name, because the institution must keep them. It's refused, with the reason, while they still have open bookings or incidents, own resources, or are the institute's only admin.
+- **Offline copy:** the Trust Passport saved on a phone is wiped on sign-out.
 - **The audit log** can only be appended to, and anyone can check that it hasn't been tampered with.
 
 ## What's next
 
-- Hindi for every remaining screen (the landing page, owner and admin pages, and the reasons in decision receipts), then other Indian languages.
+- Hindi for every remaining screen (the landing page, owner and admin pages, the check-in flow, and the reasons stored in decision receipts), then other Indian languages.
 - WhatsApp and email reminders.
-- Calendar export.
+- A calendar feed you subscribe to once, instead of downloading files.
 - Deposits over UPI.
