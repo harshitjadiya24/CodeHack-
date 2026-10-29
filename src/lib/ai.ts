@@ -5,7 +5,9 @@ import { allow, clientIp } from "@/lib/rate-limit";
 // Gemini (free tier) behind a small advisory interface. Every caller has a rule-based
 // fallback, so the product works with no key, and AI output is never a decision.
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+// The larger model is often busy at peak hours (503); the lite one usually still answers.
+const MODELS = [MODEL, "gemini-3.5-flash-lite"];
 
 export function aiEnabled(): boolean {
   return !!process.env.GEMINI_API_KEY;
@@ -21,22 +23,24 @@ function gemini() {
 export async function askJson<T>(prompt: string, image?: { data: string; mimeType: string }): Promise<T | null> {
   if (!aiEnabled()) return null;
   if (!(await allow("ai", await clientIp()))) return null;
-  try {
-    const parts: ({ text: string } | { inlineData: { data: string; mimeType: string } })[] = [{ text: prompt }];
-    if (image) parts.push({ inlineData: image });
-    const res = await Promise.race([
-      gemini().models.generateContent({
-        model: MODEL,
-        contents: [{ role: "user", parts }],
-        config: { responseMimeType: "application/json", temperature: 0.2 },
-      }),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("AI timeout")), 15_000)),
-    ]);
-    return JSON.parse(res.text ?? "null") as T;
-  } catch (e) {
-    console.error("[ai] falling back:", e instanceof Error ? e.message : e);
-    return null;
+  const parts: ({ text: string } | { inlineData: { data: string; mimeType: string } })[] = [{ text: prompt }];
+  if (image) parts.push({ inlineData: image });
+  for (const model of new Set(MODELS)) {
+    try {
+      const res = await Promise.race([
+        gemini().models.generateContent({
+          model,
+          contents: [{ role: "user", parts }],
+          config: { responseMimeType: "application/json", temperature: 0.2 },
+        }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("AI timeout")), 8_000)),
+      ]);
+      return JSON.parse(res.text ?? "null") as T;
+    } catch (e) {
+      console.error(`[ai] ${model} failed:`, e instanceof Error ? e.message : e);
+    }
   }
+  return null;
 }
 
 // ── Smart match ───────────────────────────────────────────────────────────────

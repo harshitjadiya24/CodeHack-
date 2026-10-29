@@ -13,7 +13,7 @@ export function CopilotResults({ ask, result, info }: { ask: string; result: Mat
           <Sparkles className="size-4 text-accent" aria-hidden /> Best matches for “{ask}”
         </h2>
         <Pill tone={result.source === "ai" ? "accent" : "neutral"}>
-          {result.source === "ai" ? "AI suggestion · you decide" : "Keyword match (AI not configured)"}
+          {result.source === "ai" ? "AI suggestion · you decide" : "Keyword match (AI unavailable)"}
         </Pill>
       </div>
       {result.matches.length === 0 ? (
