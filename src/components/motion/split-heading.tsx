@@ -30,7 +30,7 @@ export function SplitHeading({ as: Tag = "h2", id, className, children, immediat
             stagger: 0.08,
             ease: "expo.out",
             delay: immediate ? 0.35 : 0,
-            scrollTrigger: immediate ? undefined : { trigger: ref.current, start: "top 85%", once: true },
+            scrollTrigger: immediate ? undefined : { trigger: ref.current, start: "top 95%", once: true },
           });
         });
         return () => split?.revert();

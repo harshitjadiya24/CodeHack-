@@ -135,6 +135,14 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
         </dl>
 
         <Card className="p-5">
+          <h2 className="mb-1 font-bold">{t("canIUse")}</h2>
+          <p className={`mb-4 text-sm ${eligibility.eligible ? "text-ok" : "text-danger"}`}>
+            {eligibility.eligible ? te("yes") : te("no")}
+          </p>
+          <EligibilityPanel result={eligibility} />
+        </Card>
+
+        <Card className="p-5">
           <h2 className="mb-2 font-bold">{t("usageRules")}</h2>
           <p className="text-sm text-ink-2">{r.rules}</p>
           {checklist.length > 0 && (
@@ -195,14 +203,6 @@ export default async function ResourcePage({ params }: { params: Promise<{ id: s
       </div>
 
       <aside className="space-y-4">
-        <Card className="p-5">
-          <h2 className="mb-1 font-bold">{t("canIUse")}</h2>
-          <p className={`mb-4 text-sm ${eligibility.eligible ? "text-ok" : "text-danger"}`}>
-            {eligibility.eligible ? te("yes") : te("no")}
-          </p>
-          <EligibilityPanel result={eligibility} />
-        </Card>
-
         {isBorrower && (
           <Card className="p-5">
             <div className="mb-4 flex items-baseline justify-between">

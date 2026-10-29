@@ -135,7 +135,7 @@ export function NearbyMap({ home, homeLabel, places }: { home: Point; homeLabel:
           ref={el}
           role="region"
           aria-label={t("mapLabel")}
-          className="nearby-map relative z-0 h-[300px] overflow-hidden rounded-[22px] border border-rule bg-paper-2 sm:h-[400px]"
+          className="nearby-map relative z-0 h-[300px] overflow-hidden rounded-[22px] border border-rule bg-paper-2 sm:h-[400px] lg:h-auto lg:min-h-[400px]"
         />
 
         <div>

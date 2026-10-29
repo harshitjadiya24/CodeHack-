@@ -123,7 +123,7 @@ export default async function Landing() {
           </div>
         </div>
 
-        <section aria-labelledby="figures-note" className="mt-16 border-t border-rule md:mt-[72px]">
+        <section aria-labelledby="figures-note" className="mt-12 border-t border-rule md:mt-14">
           <p id="figures-note" className="pt-4 text-sm text-subtle">
             Figures from the demo campus, a fictional college you can try below.
           </p>
@@ -139,14 +139,14 @@ export default async function Landing() {
           </dl>
         </section>
 
-        <section id="shelf" aria-labelledby="shelf-title" className="scroll-mt-24 pt-24 md:pt-32">
+        <section id="shelf" aria-labelledby="shelf-title" className="scroll-mt-24 pt-16 md:pt-20">
           <SplitHeading id="shelf-title" className="type-h2 max-w-[16ch]">
             {`${depts.length} departments, one shelf.`}
           </SplitHeading>
           <p className="mt-4 max-w-[52ch] text-lg text-subtle">Each department keeps its own rules. You only see what your year and training already unlock.</p>
-          <Reveal className="mt-11 grid gap-3.5 md:auto-rows-[200px] md:grid-cols-[1.3fr_1fr_1fr]">
+          <Reveal className="mt-8 grid gap-3.5 md:auto-rows-[minmax(150px,auto)] md:grid-cols-[1.3fr_1fr_1fr]">
             {lead && (
-              <div className="tone-sky flex min-h-[220px] flex-col justify-between rounded-[26px] p-6 md:row-span-2">
+              <div className="tone-sky flex min-h-[200px] flex-col justify-between gap-6 rounded-[26px] p-6 md:row-span-2">
                 <h3 className="type-h3">{lead.name}</h3>
                 <ul className="grid gap-1.5 text-[15px]">
                   {lead.items.slice(0, 5).map((i) => (
@@ -159,7 +159,7 @@ export default async function Landing() {
             {rest.slice(0, 4).map((d, i) => (
               <div
                 key={d.name}
-                className={cn("flex min-h-[160px] flex-col justify-between rounded-[26px] p-6", i === 3 ? "border border-rule bg-card" : DEPT_TONES[(i + 1) % 4])}
+                className={cn("flex min-h-[140px] flex-col justify-between gap-4 rounded-[26px] p-6", i === 3 ? "border border-rule bg-card" : DEPT_TONES[(i + 1) % 4])}
               >
                 <h3 className="type-h3">{d.name}</h3>
                 <p className={cn("text-sm", i === 3 && "text-subtle")}>
@@ -171,11 +171,11 @@ export default async function Landing() {
           </Reveal>
         </section>
 
-        <section id="how" aria-labelledby="how-title" className="scroll-mt-24 pt-24 md:pt-32">
+        <section id="how" aria-labelledby="how-title" className="scroll-mt-24 pt-16 md:pt-20">
           <SplitHeading id="how-title" className="type-h2 max-w-[16ch]">
             From “can I?” to “all yours”.
           </SplitHeading>
-          <ol className="mt-11 grid grid-cols-2 gap-2.5 md:grid-cols-4 lg:grid-cols-7">
+          <ol className="mt-8 grid grid-cols-2 gap-2.5 md:grid-cols-4 lg:grid-cols-7">
             {STEPS.map((s, i) => (
               <li key={s.name} className={cn("list-none", i % 2 === 1 && "lg:mt-9")}>
                 <Reveal delay={i * 0.06} className="h-full rounded-[20px] border border-rule bg-card p-4 sm:min-h-[190px]">
@@ -190,11 +190,11 @@ export default async function Landing() {
           </ol>
         </section>
 
-        <section id="draw" aria-labelledby="draw-title" className="scroll-mt-24 pt-24 md:pt-32">
+        <section id="draw" aria-labelledby="draw-title" className="scroll-mt-24 pt-16 md:pt-20">
           <SplitHeading id="draw-title" className="type-h2 max-w-[16ch]">
             Popular slot? Names go in the hat.
           </SplitHeading>
-          <div className="mt-11 grid gap-5 lg:grid-cols-2">
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
             <div className="band-ink min-h-[360px] rounded-[32px] p-6 sm:p-8">
               <DrawHat slot="Sony A7 IV kit, Thursday 9 am" />
             </div>
@@ -216,11 +216,11 @@ export default async function Landing() {
           </div>
         </section>
 
-        <section aria-labelledby="app-title" className="pt-24 md:pt-32">
+        <section aria-labelledby="app-title" className="pt-16 md:pt-20">
           <SplitHeading id="app-title" className="type-h2 max-w-[16ch]">
             The app, from your side.
           </SplitHeading>
-          <Reveal className="mt-11 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+          <Reveal className="mt-8 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="rounded-[28px] border border-rule bg-card p-6 sm:p-7">
               <p className="text-sm text-subtle">Media Lab M-03, Prof. Iyer</p>
               <h3 className="mt-1.5 text-[28px] font-[850] leading-none tracking-[-0.035em] [font-stretch:115%]">Sony A7 IV camera kit</h3>
@@ -266,7 +266,7 @@ export default async function Landing() {
           </Reveal>
         </section>
 
-        <section id="institutes" aria-labelledby="institutes-title" className="scroll-mt-24 pt-24 md:pt-32">
+        <section id="institutes" aria-labelledby="institutes-title" className="scroll-mt-24 pt-16 md:pt-20">
           <div className="grid gap-10 rounded-[32px] border border-rule bg-card p-6 sm:p-10 lg:grid-cols-2 lg:gap-16">
             <div>
               <SplitHeading id="institutes-title" className="type-h2 max-w-[14ch]">
@@ -309,7 +309,7 @@ export default async function Landing() {
           </div>
         </section>
 
-        <section aria-labelledby="roles-title" className="pt-24 md:pt-32">
+        <section aria-labelledby="roles-title" className="pt-16 md:pt-20">
           <SplitHeading id="roles-title" className="type-h2 max-w-[18ch]">
             Everyone who touches the equipment.
           </SplitHeading>
@@ -336,7 +336,7 @@ export default async function Landing() {
         </section>
       </main>
 
-      <footer className="mt-32 border-t border-rule">
+      <footer className="mt-20 border-t border-rule">
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-4 pb-12 pt-8 text-sm text-subtle md:px-8">
           <span>
             <Wordmark className="mr-2 text-base text-ink" /> lets colleges share the equipment and spaces they already own. The demo campus is fictional.

@@ -101,80 +101,80 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           )}
         </Card>
 
-        <Card className="p-5">
-          <h2 className="font-bold">Next week</h2>
-          <p className="mb-4 text-sm text-subtle">What is already booked, or recent weeks’ trend if that is higher. Full for weeks running is the case for buying a second one.</p>
-          {ops.forecast.length ? (
-            <ul className="space-y-3">
-              {ops.forecast.slice(0, 6).map((f) => (
-                <li key={f.id}>
-                  <div className="flex items-baseline justify-between gap-2 text-sm">
-                    <span className="font-semibold">{f.name}</span>
-                    <Pill tone={f.level === "full" ? "danger" : "warn"}>{f.level === "full" ? "Likely full" : "Busy"}</Pill>
-                  </div>
-                  <UtilisationBar value={f.utilisation} />
-                  <p className="text-xs text-subtle">
-                    ~{f.hours} h of 45 · {f.booked ? `${Math.round(f.booked)} h already booked` : "from recent weeks"}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-subtle">Nothing looks busy next week.</p>
-          )}
-        </Card>
+        <div className="space-y-6">
+          <Card className="p-5">
+            <h2 className="font-bold">Next week</h2>
+            <p className="mb-4 text-sm text-subtle">What is already booked, or recent weeks’ trend if that is higher. Full for weeks running is the case for buying a second one.</p>
+            {ops.forecast.length ? (
+              <ul className="space-y-3">
+                {ops.forecast.slice(0, 6).map((f) => (
+                  <li key={f.id}>
+                    <div className="flex items-baseline justify-between gap-2 text-sm">
+                      <span className="font-semibold">{f.name}</span>
+                      <Pill tone={f.level === "full" ? "danger" : "warn"}>{f.level === "full" ? "Likely full" : "Busy"}</Pill>
+                    </div>
+                    <UtilisationBar value={f.utilisation} />
+                    <p className="text-xs text-subtle">
+                      ~{f.hours} h of 45 · {f.booked ? `${Math.round(f.booked)} h already booked` : "from recent weeks"}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-subtle">Nothing looks busy next week.</p>
+            )}
+          </Card>
+
+          <Card className="p-5">
+            <h2 className="mb-4 font-bold">Is access fair?</h2>
+            <dl className="space-y-4 text-sm">
+              <div className="flex items-start justify-between gap-4">
+                <dt>
+                  Usage concentration (Gini)
+                  <span className="block text-xs text-subtle">0 = everyone gets equal time, 1 = one person takes all</span>
+                </dt>
+                <dd>
+                  <Pill tone={giniTone} className="font-mono text-sm">
+                    {ins.fairness.gini.toFixed(2)}
+                  </Pill>
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt>
+                  Share used by heaviest 20%
+                  <span className="block text-xs text-subtle">Watch for monopolisation</span>
+                </dt>
+                <dd className="font-mono">{pct(ins.fairness.top20Share)}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt>
+                  Requests from first-time users
+                  <span className="block text-xs text-subtle">New people getting a turn</span>
+                </dt>
+                <dd className="font-mono">{pct(ins.fairness.firstTimeShare)}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt>Fair Draws run · waitlist promotions</dt>
+                <dd className="font-mono">
+                  {ins.fairness.drawsRun} · {ins.fairness.promoted}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt>Incidents per 100 bookings · strikes</dt>
+                <dd className="font-mono">
+                  {ins.safety.per100.toFixed(1)} · {ins.safety.strikes}
+                </dd>
+              </div>
+            </dl>
+          </Card>
+        </div>
       </div>
 
-      <div className="mb-8 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <Card className="p-5">
-          <h2 className="font-bold">When is equipment actually used?</h2>
-          <p className="mb-4 text-sm text-subtle">Booked hours by weekday and hour, campus time. Pale cells are idle capacity you could lend.</p>
-          <Heatmap heat={ins.heat} />
-        </Card>
-
-        <Card className="p-5">
-          <h2 className="mb-4 font-bold">Is access fair?</h2>
-          <dl className="space-y-4 text-sm">
-            <div className="flex items-start justify-between gap-4">
-              <dt>
-                Usage concentration (Gini)
-                <span className="block text-xs text-subtle">0 = everyone gets equal time, 1 = one person takes all</span>
-              </dt>
-              <dd>
-                <Pill tone={giniTone} className="font-mono text-sm">
-                  {ins.fairness.gini.toFixed(2)}
-                </Pill>
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <dt>
-                Share used by heaviest 20%
-                <span className="block text-xs text-subtle">Watch for monopolisation</span>
-              </dt>
-              <dd className="font-mono">{pct(ins.fairness.top20Share)}</dd>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <dt>
-                Requests from first-time users
-                <span className="block text-xs text-subtle">New people getting a turn</span>
-              </dt>
-              <dd className="font-mono">{pct(ins.fairness.firstTimeShare)}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt>Fair Draws run · waitlist promotions</dt>
-              <dd className="font-mono">
-                {ins.fairness.drawsRun} · {ins.fairness.promoted}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt>Incidents per 100 bookings · strikes</dt>
-              <dd className="font-mono">
-                {ins.safety.per100.toFixed(1)} · {ins.safety.strikes}
-              </dd>
-            </div>
-          </dl>
-        </Card>
-      </div>
+      <Card className="mb-8 p-5">
+        <h2 className="font-bold">When is equipment actually used?</h2>
+        <p className="mb-4 text-sm text-subtle">Booked hours by weekday and hour, campus time. Pale cells are idle capacity you could lend.</p>
+        <Heatmap heat={ins.heat} />
+      </Card>
 
       <Card className="mb-8 overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm">

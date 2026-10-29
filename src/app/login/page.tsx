@@ -85,12 +85,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
         <ul className="grid gap-2 sm:grid-cols-2">
           {DEMO_ACCOUNTS.map((a) => (
-            <li key={a.email}>
-              <form action={loginAsDemo}>
+            <li key={a.email} className="sm:[&:last-child:nth-child(odd)]:col-span-2">
+              <form action={loginAsDemo} className="h-full">
                 <input type="hidden" name="email" value={a.email} />
                 <button
                   type="submit"
-                  className="w-full rounded-[22px] border border-rule bg-card p-4 text-left transition-[border-color,transform] duration-150 hover:border-subtle active:scale-[0.99]"
+                  className="h-full w-full rounded-[22px] border border-rule bg-card p-4 text-left transition-[border-color,transform] duration-150 hover:border-subtle active:scale-[0.99]"
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span className="font-bold text-ink">{a.name}</span>

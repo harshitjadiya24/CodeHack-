@@ -44,15 +44,15 @@ export default async function PassportPage({ searchParams }: { searchParams: Pro
       )}
 
       <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="gap-4 sm:columns-2">
           {(badges ?? []).map((badge) => {
             const held = mine?.find((m) => m.badge_id === badge.id);
             const expired = held?.expires_at ? new Date(held.expires_at) <= now : false;
             const state = !held ? "none" : held.status === "verified" && !expired ? "verified" : expired ? "expired" : held.status;
             const opens = (unlocks ?? []).filter((u) => u.badge_id === badge.id).map((u) => u.resource?.name).filter(Boolean);
             return (
-              <li key={badge.id}>
-                <Card className={`h-full p-5 ${state === "verified" ? "border-ok/40" : ""}`}>
+              <li key={badge.id} className="mb-4 break-inside-avoid">
+                <Card className={`p-5 ${state === "verified" ? "border-ok/40" : ""}`}>
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="font-bold">{badge.name}</h2>
                     {state === "verified" && (

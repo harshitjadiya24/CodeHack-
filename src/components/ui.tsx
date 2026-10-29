@@ -75,7 +75,7 @@ export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; tit
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="rounded-[28px] bg-card px-6 py-14 text-center">
+    <div className="rounded-[28px] bg-card px-6 py-8 text-center">
       <p className="type-h3 text-ink">{title}</p>
       {children && <div className="mx-auto mt-2 max-w-md text-[15px] text-subtle">{children}</div>}
     </div>
